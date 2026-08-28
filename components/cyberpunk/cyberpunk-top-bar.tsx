@@ -54,43 +54,43 @@ export function CyberpunkTopBar({
   }
 
   return (
-    <header className="sticky top-0 z-30 rounded-xl border border-slate-800 bg-[#0d0d1a]/95 backdrop-blur-md p-3 shadow-xl font-sans transition-colors">
+    <header className="sticky top-0 z-30 rounded-xl border border-[#6C00FF]/40 bg-[#0B0320]/95 backdrop-blur-md p-3 shadow-[0_4px_20px_rgba(11,3,32,0.8)] font-sans transition-colors">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* 左侧：角色身份、存档与位阶 */}
         <div className="flex items-center gap-3">
           {/* 角色与存档 */}
           <div className="flex items-center gap-2">
-            <span className="rounded bg-[#00F0FF]/15 px-2 py-0.5 text-xs font-bold text-[#00F0FF] border border-[#00F0FF]/30">
+            <span className="rounded bg-[#6C00FF] px-2 py-0.5 text-xs font-bold text-white shadow-[0_0_8px_rgba(108,0,255,0.6)]">
               渊边行者
             </span>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-sm text-white">{characterName || '未命名角色'}</span>
-                <span className="text-xs text-slate-400 font-mono">({saveName} · LV.{level})</span>
+                <span className="text-xs text-[#F5F500] font-mono font-bold">({saveName} · LV.{level})</span>
               </div>
             </div>
             {/* 存档管理按钮 */}
             <button
               type="button"
               onClick={onOpenCharacterManagement}
-              className="flex items-center gap-1 rounded border border-slate-700 bg-slate-800/80 px-2 py-1 text-xs text-slate-300 hover:border-[#00F0FF] hover:text-white transition-colors ml-1"
+              className="flex items-center gap-1 rounded border border-[#6C00FF]/40 bg-[#12072B] px-2 py-1 text-xs text-slate-300 hover:border-[#00FFA3] hover:text-[#00FFA3] transition-colors ml-1"
               title="切换/管理角色存档"
             >
-              <FolderOpen className="h-3.5 w-3.5 text-[#00F0FF]" />
+              <FolderOpen className="h-3.5 w-3.5 text-[#00FFA3]" />
               <span>存档</span>
             </button>
           </div>
 
           {/* 位阶选择 (T1 ~ T4) */}
-          <div className="flex items-center rounded-lg border border-slate-800 bg-[#070710] p-0.5 text-xs font-mono">
+          <div className="flex items-center rounded-lg border border-[#6C00FF]/40 bg-[#12072B] p-0.5 text-xs font-mono">
             {(['T1', 'T2', 'T3', 'T4'] as const).map((tierKey) => (
               <button
                 key={tierKey}
                 type="button"
                 onClick={() => handleTierChange(tierKey)}
-                className={`rounded px-2 py-0.5 font-bold transition-all ${
+                className={`rounded px-2.5 py-0.5 font-bold transition-all ${
                   currentTier === tierKey
-                    ? 'bg-[#00F0FF] text-black shadow-[0_0_8px_rgba(0,240,255,0.4)]'
+                    ? 'bg-[#F5F500] text-black shadow-[0_0_10px_#F5F500]'
                     : 'text-slate-400 hover:text-white'
                 }`}
                 title={`位阶 ${tierKey}: 各区容量 ${CYBERPUNK_TIER_SLOTS[tierKey]} 格`}
@@ -101,67 +101,65 @@ export function CyberpunkTopBar({
           </div>
         </div>
 
-        {/* 右侧：经济点数、街头声望、浅色打印预览与 A4 打印 */}
+        {/* 右侧：经济点数 (信用点 / 街头声望)、浅色打印切换与操作按钮 */}
         <div className="flex items-center gap-3">
           {/* 信用点 (Credits) */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#070710] px-2.5 py-1 text-xs">
-            <Coins className="h-3.5 w-3.5 text-[#FCEE0A]" />
-            <span className="text-slate-400 font-medium">信用点:</span>
+          <div className="flex items-center gap-1.5 rounded-lg border border-[#F5F500]/40 bg-[#12072B] px-2.5 py-1 text-xs shadow-[0_0_10px_rgba(245,245,0,0.1)]">
+            <Coins className="h-3.5 w-3.5 text-[#F5F500]" />
+            <span className="text-slate-400">信用点:</span>
             <input
               type="number"
               value={credits}
               onChange={(e) => handleCreditsChange(parseInt(e.target.value, 10) || 0)}
-              className="w-16 bg-transparent font-bold text-[#FCEE0A] font-mono focus:outline-none text-right"
+              className="w-16 bg-transparent text-right font-mono font-bold text-[#F5F500] focus:outline-none"
             />
-            <span className="text-[10px] text-slate-500 font-mono">CR</span>
+            <span className="text-[10px] text-slate-400 font-mono">信用点</span>
           </div>
 
           {/* 街头声望 (Street Cred) */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-[#070710] px-2.5 py-1 text-xs">
-            <Award className="h-3.5 w-3.5 text-purple-400" />
-            <span className="text-slate-400 font-medium">声望:</span>
+          <div className="flex items-center gap-1.5 rounded-lg border border-[#00FFA3]/40 bg-[#12072B] px-2.5 py-1 text-xs shadow-[0_0_10px_rgba(0,255,163,0.1)]">
+            <Award className="h-3.5 w-3.5 text-[#00FFA3]" />
+            <span className="text-slate-400">声望:</span>
             <input
               type="number"
               value={streetCred}
               onChange={(e) => handleStreetCredChange(parseInt(e.target.value, 10) || 0)}
-              className="w-10 bg-transparent font-bold text-purple-300 font-mono focus:outline-none text-center"
+              className="w-10 bg-transparent text-right font-mono font-bold text-[#00FFA3] focus:outline-none"
             />
           </div>
 
-          {/* 浅色/极简黑白打印预览切换 */}
-          {onToggleLightPreview && (
-            <button
-              type="button"
-              onClick={onToggleLightPreview}
-              className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all ${
-                isLightPreview
-                  ? 'bg-white text-slate-900 border-white shadow-md font-bold'
-                  : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white hover:border-slate-500'
-              }`}
-              title="切换浅色模式以预览 A4 打印版面"
-            >
-              {isLightPreview ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5 text-slate-400" />}
-              <span>{isLightPreview ? '极简黑白预览' : '🌓 浅色打印预览'}</span>
-            </button>
-          )}
+          {/* 浅色打印预览切换 (极简黑白灰) */}
+          <button
+            type="button"
+            onClick={onToggleLightPreview}
+            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold transition-all ${
+              isLightPreview
+                ? 'border-slate-400 bg-slate-200 text-slate-900 shadow-sm'
+                : 'border-[#6C00FF]/40 bg-[#12072B] text-slate-300 hover:border-[#F5F500] hover:text-[#F5F500]'
+            }`}
+            title="切换极简黑白打印预览模式"
+          >
+            {isLightPreview ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5 text-[#F5F500]" />}
+            <span>{isLightPreview ? '极简浅色 (ON)' : '浅色打印预览'}</span>
+          </button>
 
           {/* A4 打印按钮 */}
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white hover:border-[#00F0FF] transition-all"
-            title="A4 竖版打印 (0 墨水线框化)"
+            className="flex items-center gap-1 rounded-lg border border-[#00FFA3]/50 bg-[#00FFA3]/15 px-2.5 py-1 text-xs font-bold text-[#00FFA3] hover:bg-[#00FFA3] hover:text-black transition-all shadow-[0_0_10px_rgba(0,255,163,0.2)]"
+            title="调用系统打印，适配 A4 纸张排版"
           >
-            <Printer className="h-3.5 w-3.5 text-cyan-400" />
+            <Printer className="h-3.5 w-3.5" />
             <span>A4 打印</span>
           </button>
 
-          {/* 快速保存 */}
+          {/* 保存按钮 */}
           {onSave && (
             <button
               type="button"
               onClick={onSave}
-              className="flex items-center gap-1 rounded bg-[#00F0FF] px-3 py-1 text-xs font-bold text-black hover:bg-[#00F0FF]/90 transition-all shadow-[0_0_10px_rgba(0,240,255,0.3)]"
+              className="flex items-center gap-1 rounded-lg bg-[#FF007F] px-3 py-1 text-xs font-bold text-white hover:bg-[#FF007F]/90 shadow-[0_0_12px_rgba(255,0,127,0.5)] transition-all"
             >
               <Save className="h-3.5 w-3.5" />
               <span>保存</span>

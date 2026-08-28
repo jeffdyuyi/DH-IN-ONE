@@ -262,7 +262,7 @@ export function CyberpunkCharacterSheet() {
       className={`min-h-screen transition-colors duration-200 ${
         isLightPreview
           ? 'cyberpunk-light-mode bg-white text-slate-900'
-          : 'bg-[#070710] text-slate-100'
+          : 'bg-[#0B0320] text-slate-100'
       } p-3 sm:p-5 font-sans pb-36`}
     >
       <div className="mx-auto max-w-7xl space-y-4">
@@ -281,30 +281,22 @@ export function CyberpunkCharacterSheet() {
 
         {/* 保存成功提示 */}
         {saveToast && (
-          <div className="fixed top-20 right-6 z-50 flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xl animate-fade-in">
+          <div className="fixed top-20 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#00FFA3] px-4 py-2 text-xs font-bold text-black shadow-[0_0_20px_rgba(0,255,163,0.5)] animate-fade-in">
             <CheckCircle2 className="h-4 w-4" />
             <span>角色卡数据已即时保存！</span>
           </div>
         )}
 
-        {/* 2. 伤害阈值 HUD (含巨额伤害可选房规开关) */}
-        <CyberpunkThresholdDisplay
-          cyberpunkData={cyberpunkData}
-          armorMinor={formData?.equipment?.armorSlot?.baseThresholds?.minor || 0}
-          armorMajor={formData?.equipment?.armorSlot?.baseThresholds?.major || 0}
-          equippedArmorName={formData?.equipment?.armorSlot?.name}
-        />
-
-        {/* 3. 角色基础身份信息矩阵 */}
-        <div className="rounded-xl border border-slate-800 bg-[#0d0d1a] p-4 shadow-md">
-          <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3">
-            <User className="h-4 w-4 text-[#00F0FF]" />
-            <h2 className="text-sm font-bold text-white">基础信息</h2>
+        {/* 2. 角色基础身份信息矩阵 */}
+        <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-[0_4px_20px_rgba(11,3,32,0.6)]">
+          <div className="flex items-center gap-2 border-b border-[#6C00FF]/20 pb-2 mb-3">
+            <User className="h-4 w-4 text-[#F5F500]" />
+            <h2 className="text-sm font-bold text-white tracking-wide">基础信息 (Identity)</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
             {/* 角色姓名 */}
-            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5">
+            <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5">
               <label className="text-[11px] text-slate-400 font-bold block">角色姓名 / 代号</label>
               <input
                 type="text"
@@ -313,12 +305,12 @@ export function CyberpunkCharacterSheet() {
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
                 placeholder="输入姓名..."
-                className="mt-1 w-full rounded border border-slate-700 bg-black/60 px-2 py-1 text-xs font-bold text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono"
+                className="mt-1 w-full rounded border border-[#6C00FF]/40 bg-[#12072B] px-2 py-1 text-xs font-bold text-[#F5F500] focus:border-[#00FFA3] focus:outline-none font-mono"
               />
             </div>
 
             {/* 种族特性一 (限定特性一 levelFilter: 1) */}
-            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+            <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] text-slate-400 font-bold">种族特性一</label>
@@ -332,7 +324,7 @@ export function CyberpunkCharacterSheet() {
                         levelFilter: 1,
                       })
                     }
-                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                    className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
                   >
                     选择 ⇄
                   </button>
@@ -344,7 +336,7 @@ export function CyberpunkCharacterSheet() {
             </div>
 
             {/* 种族特性二 (限定特性二 levelFilter: 2) */}
-            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+            <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] text-slate-400 font-bold">种族特性二</label>
@@ -358,7 +350,7 @@ export function CyberpunkCharacterSheet() {
                         levelFilter: 2,
                       })
                     }
-                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                    className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
                   >
                     选择 ⇄
                   </button>
@@ -370,7 +362,7 @@ export function CyberpunkCharacterSheet() {
             </div>
 
             {/* 职业与子职业 */}
-            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+            <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] text-slate-400 font-bold">职业 / 子职业</label>
@@ -383,7 +375,7 @@ export function CyberpunkCharacterSheet() {
                           type: 'profession',
                         })
                       }
-                      className="text-[10px] font-bold text-[#FCEE0A] bg-[#FCEE0A]/15 hover:bg-[#FCEE0A]/25 px-1.5 py-0.5 rounded border border-[#FCEE0A]/30 transition-colors"
+                      className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/15 hover:bg-[#F5F500]/25 px-1.5 py-0.5 rounded border border-[#F5F500]/30 transition-colors"
                     >
                       职业 ⇄
                     </button>
@@ -396,7 +388,7 @@ export function CyberpunkCharacterSheet() {
                           levelFilter: 1,
                         })
                       }
-                      className="text-[10px] font-bold text-purple-400 bg-purple-950/50 hover:bg-purple-900/60 px-1.5 py-0.5 rounded border border-purple-700/40 transition-colors"
+                      className="text-[10px] font-bold text-[#6C00FF] bg-[#6C00FF]/20 hover:bg-[#6C00FF]/35 px-1.5 py-0.5 rounded border border-[#6C00FF]/50 transition-colors"
                     >
                       子职 ⇄
                     </button>
@@ -410,7 +402,7 @@ export function CyberpunkCharacterSheet() {
             </div>
 
             {/* 社群 */}
-            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+            <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] text-slate-400 font-bold">社群</label>
@@ -422,7 +414,7 @@ export function CyberpunkCharacterSheet() {
                         type: 'community',
                       })
                     }
-                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                    className="text-[10px] font-bold text-[#FF007F] bg-[#FF007F]/15 hover:bg-[#FF007F]/25 px-1.5 py-0.5 rounded border border-[#FF007F]/30 transition-colors"
                   >
                     选择 ⇄
                   </button>
@@ -435,8 +427,8 @@ export function CyberpunkCharacterSheet() {
           </div>
         </div>
 
-        {/* 4. 角色六维属性、生命 HP、压力 Stress、经历与希望点 Hope Panel */}
-        <CyberpunkAttributesHopePanel />
+        {/* 3. 角色六维属性、生命 HP、压力 Stress、伤害阈值、经历与希望点 Hope Panel */}
+        <CyberpunkAttributesHopePanel cyberpunkData={cyberpunkData} />
 
         {/* 5. 身份特性与能力详情展示面板（职业专精、子职、种族一/二、社群全文阅读） */}
         <CyberpunkFeaturesDetailPanel />

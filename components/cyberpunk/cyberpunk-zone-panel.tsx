@@ -56,17 +56,17 @@ export function CyberpunkZonePanel({ cyberpunkData, onChange }: CyberpunkZonePan
   const selectedZoneMeta = CYBERPUNK_BODY_ZONES.find(z => z.id === selectedZone)
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Cpu className="w-5 h-5 text-[#00FFA3]" />
-          <h2 className="text-base font-bold text-white tracking-wider">
-            身体 5 大区改造插槽 (当前位阶 {currentTier} · 各区容量 {maxSlotsPerZone} 格)
+    <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 text-slate-100 font-sans shadow-[0_4px_20px_rgba(11,3,32,0.6)] space-y-3.5">
+      <div className="flex items-center justify-between border-b border-[#6C00FF]/20 pb-2">
+        <div className="flex items-center gap-2">
+          <Cpu className="w-4 h-4 text-[#00FFA3]" />
+          <h2 className="text-sm font-bold text-white tracking-wide">
+            身体 4 大区改造插槽 (当前位阶 {currentTier} · 各区容量 {maxSlotsPerZone} 格)
           </h2>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {CYBERPUNK_BODY_ZONES.map((zone) => {
           const zoneKey = zone.id as CyberpunkBodyZoneKey
           const zoneState = cyberpunkData.zones?.[zoneKey] || { augmentations: [] }
@@ -77,26 +77,28 @@ export function CyberpunkZonePanel({ cyberpunkData, onChange }: CyberpunkZonePan
           return (
             <div
               key={zone.id}
-              className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md flex flex-col justify-between"
+              className="p-3.5 rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] flex flex-col justify-between hover:border-[#6C00FF]/60 transition-all shadow-sm"
             >
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-3">
+                <div className="flex items-center justify-between pb-2 border-b border-[#6C00FF]/20 mb-2.5">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-sm text-white">{zone.name}</span>
-                    <span className="text-[10px] text-slate-500">{(zone as any).english || zone.suggestedTraits}</span>
+                    <span className="font-bold text-xs text-white">{zone.name}</span>
+                    <span className="text-[10px] text-[#F5F500] font-mono">
+                      {(zone as any).english || zone.suggestedTraits}
+                    </span>
                   </div>
-                  <div className="text-xs">
-                    <span className={usedSlots > maxSlotsPerZone ? 'text-rose-400 font-bold' : 'text-[#00FFA3] font-bold'}>
+                  <div className="text-xs font-mono">
+                    <span className={usedSlots > maxSlotsPerZone ? 'text-[#FF007F] font-bold' : 'text-[#00FFA3] font-bold'}>
                       {usedSlots}
                     </span>
-                    <span className="text-slate-500"> / {maxSlotsPerZone} 槽</span>
+                    <span className="text-slate-400"> / {maxSlotsPerZone} 槽</span>
                   </div>
                 </div>
 
                 {installedAugs.length === 0 ? (
-                  <p className="text-xs text-slate-500 py-4 text-center">暂未安装任何义体或战利品</p>
+                  <p className="text-xs text-slate-500 py-3 text-center">暂未安装任何义体或元件</p>
                 ) : (
-                  <div className="space-y-2 mb-3">
+                  <div className="space-y-2 mb-2.5">
                     {installedAugs.map((aug) => (
                       <CyberpunkSlotItem
                         key={aug.id}
@@ -108,34 +110,36 @@ export function CyberpunkZonePanel({ cyberpunkData, onChange }: CyberpunkZonePan
                 )}
               </div>
 
-              <button
-                onClick={() => handleOpenInstall(zoneKey)}
-                disabled={availableSlots <= 0}
-                className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 mt-2 ${
-                  availableSlots > 0
-                    ? 'bg-[#00FFA3]/10 hover:bg-[#00FFA3] text-[#00FFA3] hover:text-black border border-[#00FFA3]/30 shadow-[0_0_12px_rgba(0,255,163,0.1)]'
-                    : 'bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed'
-                }`}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{availableSlots > 0 ? `+ 安装义体 / 战利品 (${availableSlots}空闲)` : '插槽已满'}</span>
-              </button>
+              <div className="pt-2 border-t border-[#6C00FF]/20 flex items-center justify-between gap-2">
+                <span className="text-[10px] text-slate-400 font-mono">剩余 {availableSlots} 槽可用</span>
+                <button
+                  type="button"
+                  onClick={() => handleOpenInstall(zoneKey)}
+                  className="flex items-center gap-1 text-[11px] font-bold text-[#00FFA3] bg-[#00FFA3]/10 hover:bg-[#00FFA3]/20 px-2 py-1 rounded border border-[#00FFA3]/30 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>安装义体</span>
+                </button>
+              </div>
             </div>
           )
         })}
       </div>
 
-      {/* 安装选择弹窗 */}
-      {selectedZone && (
+      {isInstallModalOpen && selectedZone && (
         <InstallAugmentationModal
           isOpen={isInstallModalOpen}
           zone={selectedZone}
           zoneName={selectedZoneMeta?.name || '未知部位'}
-          availableSlots={maxSlotsPerZone - ((cyberpunkData.zones?.[selectedZone]?.augmentations || []).reduce((s, a) => s + (Number(a.slots || a.slotCost) || 1), 0))}
-          onClose={() => {
-            setIsInstallModalOpen(false)
-            setSelectedZone(null)
-          }}
+          availableSlots={Math.max(
+            0,
+            maxSlotsPerZone -
+              ((cyberpunkData.zones?.[selectedZone]?.augmentations || []).reduce(
+                (sum, a) => sum + (Number(a.slots || a.slotCost) || 1),
+                0
+              ))
+          )}
+          onClose={() => setIsInstallModalOpen(false)}
           onInstall={(aug) => handleInstall(selectedZone, aug)}
           onOpenCustomModal={() => {
             setIsInstallModalOpen(false)
@@ -144,15 +148,11 @@ export function CyberpunkZonePanel({ cyberpunkData, onChange }: CyberpunkZonePan
         />
       )}
 
-      {/* 手动创建弹窗 */}
-      {selectedZone && (
+      {isCustomModalOpen && selectedZone && (
         <CustomAugmentationModal
           isOpen={isCustomModalOpen}
           defaultZone={selectedZone}
-          onClose={() => {
-            setIsCustomModalOpen(false)
-            setSelectedZone(null)
-          }}
+          onClose={() => setIsCustomModalOpen(false)}
           onSave={(aug) => handleInstall(selectedZone, aug)}
         />
       )}

@@ -259,6 +259,9 @@ export interface SheetData {
   // ===== 护甲模板数据 =====
   armorTemplate?: ArmorTemplateData
 
+  // ===== 爽博朋克特化数据 =====
+  cyberpunk?: import('@/types/cyberpunk').CyberpunkSheetExtension
+
   // ===== 冒险笔记数据 =====
   adventureNotes?: AdventureNotesData
 
