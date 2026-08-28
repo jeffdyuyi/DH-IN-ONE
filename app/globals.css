@@ -1,0 +1,563 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-serif: Georgia, serif;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+/* 全局固定字体大小，防止浏览器字体设置影响 */
+* {
+  /* 禁用浏览器的最小字体大小限制 */
+  -webkit-text-size-adjust: none !important;
+  -moz-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  /* 固定字体大小，防止浏览器设置影响 */
+  font-size: 16px !important;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  /* 固定根元素字体大小，防止浏览器字体设置影响布局 */
+  font-size: 16px !important;
+  /* 禁用文本大小调整 - 使用none而不是100% */
+  -webkit-text-size-adjust: none !important;
+  -moz-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+}
+
+/* 自动调整字体的打印样式 */
+@media print {
+  .auto-resize-font {
+    font-size: var(--print-font-size, 14px) !important;
+  }
+
+  /* 确保所有有 data-min-font 属性的元素在打印时使用计算的字体大小 */
+  input[data-min-font] {
+    font-size: var(--print-font-size, 14px) !important;
+  }
+
+  textarea[data-min-font] {
+    font-size: var(--print-font-size, 14px) !important;
+  }
+}
+
+/* 打印所有页面的特殊样式 - 默认都有分页符 */
+.print-all-pages .page-one,
+.print-all-pages .page-two,
+.print-all-pages .page-three,
+.print-all-pages .page-adventure-notes,
+.print-all-pages .page-four,
+.print-all-pages .page-five,
+.print-all-pages .page-iknis {
+  page-break-after: always;
+}
+
+/* 最后渲染的页面不需要分页符，通过 JS 动态添加类来控制 */
+.print-all-pages .last-printed-page {
+  page-break-after: avoid !important;
+}
+
+/* 在打印预览模式下确保每个页面居中 */
+.print-all-pages .page-one,
+.print-all-pages .page-two,
+.print-all-pages .page-three,
+.print-all-pages .page-adventure-notes,
+.print-all-pages .page-four,
+.print-all-pages .page-five,
+.print-all-pages .page-iknis {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: auto;
+  padding: 20px 0;
+}
+
+/* 在打印预览中隐藏主界面的固定位置按钮，但保留打印预览控制按钮 */
+.print-all-pages .fixed.bottom-4.right-4:not(.print-control-buttons) {
+  display: none;
+}
+
+@media print {
+  .card-description {
+    font-size: 9pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 打印卡牌专用样式 */
+  .print-card {
+    border: 1.5px solid #666 !important;
+    box-shadow: none !important;
+    height: 95mm;
+  }
+
+  .print-card-header {
+    background-color: #f9f9f9 !important;
+    border-bottom: 1px solid #ccc !important;
+    padding: 4px 8px !important;
+  }
+
+  .print-card-header h3 {
+    font-size: 10pt !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-card-header span {
+    font-size: 7pt !important;
+    background-color: #e0e0e0 !important;
+    padding: 1px 6px !important;
+    border-radius: 3px !important;
+  }
+
+  .print-card-tags {
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+    color: #666 !important;
+  }
+
+  .print-card-description {
+    font-size: 8pt !important;
+    line-height: 1.3 !important;
+  }
+
+  .print-card-description p {
+    margin-bottom: 4px !important;
+  }
+
+  .print-card-hint {
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+  }
+}
+/* 在实际打印时移除居中样式，保持原始布局 */
+@media print {
+  .print-all-pages .page-one,
+  .print-all-pages .page-two,
+  .print-all-pages .page-three,
+  .print-all-pages .page-adventure-notes,
+  .print-all-pages .page-four,
+  .print-all-pages .page-five,
+  .print-all-pages .page-iknis {
+    display: block;
+    padding: 0;
+    min-height: auto;
+  }
+    /* 移除a4-page的内边距 */
+    .a4-page {
+      padding: 0 !important;
+    }
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 5mm 5mm 0mm 5mm;
+  }
+
+  .a4-page {
+    width: 210mm;
+    margin: 0;
+    padding: 0mm;
+    font-size: 13.6px; /* 0.85em * 16px = 13.6px */
+    /* 移除通用的 page-break-after，由具体页面控制 */
+  }
+
+  /* 在打印时隐藏所有固定位置的按钮 */
+  .fixed {
+    display: none !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  input,
+  textarea,
+  select {
+    border-color: #999 !important;
+  }
+
+  /* 确保预设值在打印时保留 */
+  input::placeholder,
+  textarea::placeholder {
+    color: transparent !important;
+  }
+
+  /* 隐藏Max输入框的值 */
+  input[type="number"] {
+    color: transparent !important;
+  }
+
+  /* 隐藏所有包含"选择"文本的按钮内容 */
+  .print-empty-button {
+    color: transparent !important;
+  }
+
+  /* 确保下拉框在打印时保持白色背景 */
+  .bg-white {
+    background-color: white !important;
+  }
+
+  .text-gray-800 {
+    color: #333333 !important;
+  }
+
+  /* 确保黑色背景区域中的下拉框在打印时显示为白色背景 */
+  .bg-gray-800 .bg-white,
+  .bg-gray-800 [class*="bg-white"] {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .bg-gray-800 select,
+  .bg-gray-800 .select-trigger,
+  .bg-gray-800 .select-content {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* 确保下拉框的文本在打印时是黑色的 */
+  .bg-gray-800 .select-trigger {
+    background-color: white !important;
+    color: black !important;
+    border-color: #999 !important;
+  }
+
+  .bg-gray-800 .select-value {
+    color: black !important;
+  }
+
+  /* .header-selection-button { */
+  /* color: transparent !important; */
+  /* Intentionally commented out */
+  /* } */
+
+  /* New general rules for printable selection buttons */
+  .printable-selection-button.print-placeholder-text-hidden {
+    color: transparent !important;
+    /* Hide placeholder text */
+  }
+
+  .printable-selection-button.print-selected-text-visible {
+    color: black !important;
+    /* Ensure selected text is black and visible */
+  }
+
+  .card-item {
+    break-inside: avoid;
+    height: 100%;
+    /* 移除固定高度限制，使用aspect-ratio保持比例 */
+    min-height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 文字模式下的卡片样式 - 允许分页且自适应高度 */
+  .card-item-text {
+    break-inside: avoid;
+    /* 允许卡片内分页 */
+    height: auto;
+    /* 自适应高度 */
+    min-height: auto;
+    max-height: none;
+    /* 移除高度限制 */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 卡牌行样式 - 同行高度对齐 */
+  .card-row {
+    page-break-inside: avoid;
+    /* 防止行被页面切断 */
+    align-items: stretch;
+    /* 同一行卡牌高度对齐 */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.2rem;
+  }
+
+  /* 文字模式下的卡牌行样式 - 允许分页 */
+  .card-row-text {
+    page-break-inside: avoid;
+    /* 允许行内分页 */
+    align-items: stretch;
+    /* 同一行卡牌高度对齐 */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.2rem;
+  }
+  .print-page {
+    page-break-after: always;
+  }
+  .card-placeholder {
+    /* 空白占位符，保持布局对齐 */
+    visibility: hidden;
+    min-height: 120px;
+  }
+
+  /* 卡牌描述区域 - 完全自适应 */
+  .card-item .card-description {
+    flex: 1;
+    /* 描述区域自动扩展 */
+    overflow: visible;
+    /* 显示完整内容，不截断 */
+    font-size: 9pt;
+    line-height: 1.4;
+    height: auto;
+    /* 自适应内容高度 */
+    color: #333;
+  }
+
+  .print-deck-header {
+    page-break-after: avoid;
+    /* 标题不单独分页 */
+    margin-bottom: 0.3rem;
+    padding: 0 1rem;
+    height: 6mm;
+  }
+
+  .print-deck-header h2 {
+    font-size: 11pt !important;
+    font-weight: 500 !important;
+    color: #555 !important;
+    white-space: nowrap;
+  }
+
+  .print-deck-header > div {
+    /* 分隔线样式 */
+    background-color: #999 !important;
+    height: 0.5px !important;
+  }
+
+  .shield-shape {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 75%);
+  }
+
+  .attribute-shield {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%);
+    border: 2px solid #333;
+  }
+
+  .section-header::before,
+  .section-header::after {
+    content: "";
+    flex-grow: 1;
+    height: 2px;
+    background-color: #333;
+    margin: 0 10px;
+  }
+
+  @layer utilities {
+    .text-balance {
+      text-wrap: balance;
+    }
+  }
+
+  @layer base {
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 0 0% 3.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 0 0% 3.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 0 0% 3.9%;
+      --primary: 0 0% 9%;
+      --primary-foreground: 0 0% 98%;
+      --secondary: 0 0% 96.1%;
+      --secondary-foreground: 0 0% 9%;
+      --muted: 0 0% 96.1%;
+      --muted-foreground: 0 0% 45.1%;
+      --accent: 0 0% 96.1%;
+      --accent-foreground: 0 0% 9%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 89.8%;
+      --input: 0 0% 89.8%;
+      --ring: 0 0% 3.9%;
+      --chart-1: 12 76% 61%;
+      --chart-2: 173 58% 39%;
+      --chart-3: 197 37% 24%;
+      --chart-4: 43 74% 66%;
+      --chart-5: 27 87% 67%;
+      --radius: 8px;
+      --sidebar-background: 0 0% 98%;
+      --sidebar-foreground: 240 5.3% 26.1%;
+      --sidebar-primary: 240 5.9% 10%;
+      --sidebar-primary-foreground: 0 0% 98%;
+      --sidebar-accent: 240 4.8% 95.9%;
+      --sidebar-accent-foreground: 240 5.9% 10%;
+      --sidebar-border: 220 13% 91%;
+      --sidebar-ring: 217.2 91.2% 59.8%;
+    }
+
+    .dark {
+      --background: 0 0% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 3.9%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 3.9%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 0 0% 9%;
+      --secondary: 0 0% 14.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 14.9%;
+      --muted-foreground: 0 0% 63.9%;
+      --accent: 0 0% 14.9%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 14.9%;
+      --input: 0 0% 14.9%;
+      --ring: 0 0% 83.1%;
+      --chart-1: 220 70% 50%;
+      --chart-2: 160 60% 45%;
+      --chart-3: 30 80% 55%;
+      --chart-4: 280 65% 60%;
+      --chart-5: 340 75% 55%;
+      --sidebar-background: 240 5.9% 10%;
+      --sidebar-foreground: 240 4.8% 95.9%;
+      --sidebar-primary: 224.3 76.3% 48%;
+      --sidebar-primary-foreground: 0 0% 100%;
+      --sidebar-accent: 240 3.7% 15.9%;
+      --sidebar-accent-foreground: 240 4.8% 95.9%;
+      --sidebar-border: 240 3.7% 15.9%;
+      --sidebar-ring: 217.2 91.2% 59.8%;
+    }
+  }
+}
+
+/* Tab容器移动端滚动样式 */
+.tabs-container {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .tabs-container {
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+/* 双页模式样式 */
+.dual-page-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  max-width: 425mm;
+  margin: 0 auto;
+}
+
+/* 确保双页模式在移动端禁用 */
+@media (max-width: 768px) {
+  .dual-page-container {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    max-width: 210mm !important;
+  }
+}
+
+/* 打印时双页模式自动恢复为单页布局 */
+@media print {
+  .dual-page-container {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    max-width: 210mm !important;
+  }
+  
+  .dual-page-container > div {
+    width: 210mm !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* 隐藏双页模式控件 */
+  .dual-page-controls {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   爽博朋克专属 A4 竖版 0 墨水线框化与色彩印刷级重映射规则
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  /* 强制背景纯白，彻底杜绝黑色墨水浪费与纸张软化 */
+  body, html, main, div[class*="bg-[#0B0320]"], div[class*="bg-black"] {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+  }
+
+  /* 科技卡片容器自动 1px 线框化 */
+  div[class*="border-white/10"], div[class*="backdrop-blur"], div[class*="rounded-2xl"] {
+    background: #ffffff !important;
+    border: 1px solid #1a1a2e !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* 荧光色彩高对比度印刷级重映射 */
+  .text-\[\#00FFA3\], [class*="text-[#00FFA3]"] {
+    color: #008751 !important;
+    font-weight: bold !important;
+  }
+  .text-\[\#FF007F\], [class*="text-[#FF007F]"] {
+    color: #B20059 !important;
+    font-weight: bold !important;
+  }
+  .text-\[\#F5F500\], [class*="text-[#F5F500]"] {
+    color: #B38600 !important;
+    font-weight: bold !important;
+  }
+  .text-\[\#6C00FF\], [class*="text-[#6C00FF]"] {
+    color: #4B00B5 !important;
+    font-weight: bold !important;
+  }
+
+  /* 移除不必要的发光和投影 */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* 打印分页断点 */
+  .cyberpunk-page-break {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+}

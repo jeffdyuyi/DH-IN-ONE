@@ -1,0 +1,579 @@
+"use client"
+import { useState } from "react"
+import { Edit } from "lucide-react"
+import type { SheetData } from "@/lib/sheet-data"
+import { useSheetStore } from "@/lib/sheet-store"
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from "@/components/ui/popover"
+import { HPMaxEditor } from "@/components/upgrade-popover/hp-max-editor"
+import { StressMaxEditor } from "@/components/upgrade-popover/stress-max-editor"
+import { ExperienceValuesEditor } from "@/components/upgrade-popover/experience-values-editor"
+import { AttributeUpgradeEditor } from "@/components/upgrade-popover/attribute-upgrade-editor"
+import { DomainCardSelector } from "@/components/upgrade-popover/domain-card-selector"
+import { ProficiencyEditor } from "@/components/upgrade-popover/proficiency-editor"
+import { SubclassCardSelector } from "@/components/upgrade-popover/subclass-card-selector"
+import { NewExperienceEditor } from "@/components/upgrade-popover/new-experience-editor"
+import type { StandardCard } from "@/card/card-types"
+import {
+  getUpgradeBandLevelRange,
+  getUpgradeBandTitle,
+  getUpgradeDomainCardLevelFilter,
+  getUpgradeOptions,
+  type UpgradeBandKey,
+  type UpgradeOptionData,
+} from "@/data/list/upgrade"
+
+interface UpgradeSectionProps {
+  upgradeBandKey: UpgradeBandKey
+  description: string
+  formData: SheetData
+  isUpgradeChecked: (tier: string, index: number) => boolean
+  handleUpgradeCheck: (tier: string, index: number) => void
+  toggleUpgradeCheckbox: (checkKey: string, index: number, checked: boolean) => void  // 新增：纯粹的状态切换函数
+  onCardChange?: (index: number, card: StandardCard) => void
+  onOpenCardModal?: (index: number, levels?: string[]) => void
+  onOpenSubclassModal?: (index: number, profession?: string) => void
+}
+
+const ATTRIBUTE_NAMES: Record<string, string> = {
+  agility: "敏捷",
+  strength: "力量",
+  finesse: "灵巧",
+  instinct: "本能",
+  presence: "风度",
+  knowledge: "知识",
+}
+
+export function UpgradeSection({
+  upgradeBandKey,
+  description,
+  formData,
+  isUpgradeChecked,
+  handleUpgradeCheck,
+  toggleUpgradeCheckbox,
+  onCardChange,
+  onOpenCardModal,
+  onOpenSubclassModal,
+}: UpgradeSectionProps) {
+  const tierKey = upgradeBandKey
+  const title = getUpgradeBandTitle(upgradeBandKey)
+  const { maxLevel } = getUpgradeBandLevelRange(upgradeBandKey)
+  const upgradeOptions = getUpgradeOptions(upgradeBandKey)
+  const updateLevel = useSheetStore(state => state.updateLevel)
+  const [openPopoverIndex, setOpenPopoverIndex] = useState<string | null>(null)
+  const [isLevelExpanded, setIsLevelExpanded] = useState(false)
+  const [openNewExperiencePopover, setOpenNewExperiencePopover] = useState(false)
+
+  // Helper functions to detect upgrade option types
+  const isAttributeUpgradeOption = (label: string) => label.includes("角色属性+1")
+  const isHPUpgradeOption = (label: string) => label.includes("生命槽")
+  const isStressUpgradeOption = (label: string) => label.includes("压力槽")
+  const isExperienceUpgradeOption = (label: string) => label.includes("经历获得额外")
+  const isDomainCardOption = (label: string) => label.includes("领域卡加入卡组")
+  const isDodgeUpgradeOption = (label: string) => label.includes("闪避值")
+  const isProficiencyUpgradeOption = (label: string) => label.includes("熟练度+1")
+  const isSubclassUpgradeOption = (label: string) => label.includes("升级你的子职业")
+
+  // Helper function to determine if an option needs an edit button
+  const needsEditButton = (label: string) => {
+    return (
+      // isAttributeUpgradeOption(label) ||    // 属性升级现在通过点击复选框打开气泡
+      // isHPUpgradeOption(label) ||           // 直接勾选/取消勾选即可 +1/-1
+      // isStressUpgradeOption(label) ||       // 直接勾选/取消勾选即可 +1/-1
+      // isExperienceUpgradeOption(label) ||   // 经历升级现在通过点击复选框打开气泡
+      isDomainCardOption(label) ||             // 点击按钮直接打开 modal
+      // isDodgeUpgradeOption(label) ||        // 闪避值直接点击记录升级
+      // isProficiencyUpgradeOption(label) ||  // 直接勾选/取消勾选即可 +1/-1
+      isSubclassUpgradeOption(label)           // 点击按钮直接打开 modal
+    )
+  }
+
+  // Helper function to determine if button should directly open modal (no popover)
+  const shouldDirectlyOpenModal = (label: string) => {
+    return isDomainCardOption(label) || isSubclassUpgradeOption(label)
+  }
+
+  const getSelectedAttributeNames = (checkKey: string) => {
+    const params = formData.upgradeStates?.[checkKey]?.params
+    const attributes = params && "attributes" in params ? params.attributes : undefined
+    if (!Array.isArray(attributes)) return "未记录属性"
+
+    const names = attributes
+      .map(attribute => ATTRIBUTE_NAMES[attribute] ?? attribute)
+
+    return names.length > 0 ? names.join("、") : "未记录属性"
+  }
+
+  const getAttributeCancelMarkText = (checkKey: string) => {
+    return formData.upgradeStates?.[checkKey]?.attributeMarksApplied === true
+      ? "将回退属性升级标记"
+      : "属性升级标记将不会被修改"
+  }
+
+  const getSelectedExperienceTexts = (checkKey: string) => {
+    const params = formData.upgradeStates?.[checkKey]?.params
+    const experienceIndexes = params && "experienceIndexes" in params ? params.experienceIndexes : undefined
+    if (!Array.isArray(experienceIndexes)) return ["未记录经历"]
+
+    const texts = experienceIndexes
+      .filter((index): index is number => typeof index === "number")
+      .map(index => {
+        const text = formData.experience?.[index]
+        return text && text.trim() ? text : `第 ${index + 1} 项经历`
+      })
+
+    return texts.length > 0 ? texts : ["未记录经历"]
+  }
+
+  const renderAttributeCancelConfirmation = (checkKey: string, index: number) => (
+    <div className="w-48">
+      <div className="mb-2 text-xs font-semibold text-gray-700">确定要取消升级吗？</div>
+      <div className="mb-3 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-600">
+        {getSelectedAttributeNames(checkKey)}
+      </div>
+      <div className="mb-3 text-[11px] leading-snug text-gray-500">
+        {getAttributeCancelMarkText(checkKey)}
+      </div>
+      <button
+        type="button"
+        className="w-full rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+        onClick={() => {
+          handleUpgradeCheck(checkKey, index)
+          setOpenPopoverIndex(null)
+        }}
+      >
+        确定取消
+      </button>
+    </div>
+  )
+
+  const renderExperienceCancelConfirmation = (checkKey: string, index: number) => (
+    <div className="w-48">
+      <div className="mb-2 text-xs font-semibold text-gray-700">确定要取消升级吗？</div>
+      <div className="mb-3 space-y-1 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-600">
+        {getSelectedExperienceTexts(checkKey).map((text, textIndex) => (
+          <div key={`${textIndex}-${text}`} className="truncate" title={text}>
+            {text}
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="w-full rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+        onClick={() => {
+          handleUpgradeCheck(checkKey, index)
+          setOpenPopoverIndex(null)
+        }}
+      >
+        确定取消
+      </button>
+    </div>
+  )
+
+  // Handle direct modal opening for domain/subclass cards
+  const handleDirectModalOpen = (option: Pick<UpgradeOptionData, "label">) => {
+    const label = option.label
+
+    if (isDomainCardOption(label)) {
+      // Domain card logic - same as in DomainCardSelector
+      const cards = formData.cards || []
+      let emptySlotIndex = -1
+
+      for (let i = 5; i < 20; i++) {
+        const card = cards[i]
+        if (!card || (!card.name && (!card.type || card.type === "unknown"))) {
+          emptySlotIndex = i
+          break
+        }
+      }
+
+      if (emptySlotIndex === -1) {
+        // Use showFadeNotification - need to import it
+        alert("没有空余卡位") // Temporary, will be replaced
+        return
+      }
+
+      const levelFilter = getUpgradeDomainCardLevelFilter(upgradeBandKey, formData.level)
+
+      onOpenCardModal?.(emptySlotIndex, levelFilter)
+    }
+
+    if (isSubclassUpgradeOption(label)) {
+      // Subclass card logic - same as in SubclassCardSelector
+      const cards = formData.cards || []
+      let emptySlotIndex = -1
+
+      for (let i = 5; i < 20; i++) {
+        const card = cards[i]
+        if (!card || (!card.name && (!card.type || card.type === "unknown"))) {
+          emptySlotIndex = i
+          break
+        }
+      }
+
+      if (emptySlotIndex === -1) {
+        alert("没有空余卡位") // Temporary
+        return
+      }
+
+      // Get current profession from profession card at index 0
+      let currentProfession: string | undefined = undefined
+      const professionCard = cards[0]
+      const isCardEmpty = !professionCard || (!professionCard.name && (!professionCard.type || professionCard.type === "unknown"))
+
+      if (!isCardEmpty && professionCard.type === "profession") {
+        currentProfession = professionCard.class
+      }
+
+      onOpenSubclassModal?.(emptySlotIndex, currentProfession)
+    }
+  }
+
+  // Render the appropriate editor based on option type
+  const renderEditor = (option: any, index: number, checkKeyOrBoxIndex: number | string) => {
+    if (isAttributeUpgradeOption(option.label)) {
+      // 如果传入的是字符串，就是完整的 checkKey；否则是 boxIndex，需要构造
+      const rawCheckKey = typeof checkKeyOrBoxIndex === 'string'
+        ? checkKeyOrBoxIndex
+        : `${tierKey}-${index}-${checkKeyOrBoxIndex}`
+      const isCancelConfirmation = rawCheckKey.endsWith(":cancel")
+      const checkKey = isCancelConfirmation
+        ? rawCheckKey.slice(0, -":cancel".length)
+        : rawCheckKey
+
+      if (isCancelConfirmation) {
+        return renderAttributeCancelConfirmation(checkKey, index)
+      }
+
+      return (
+        <AttributeUpgradeEditor
+          checkKey={checkKey}
+          optionIndex={index}
+          toggleUpgradeCheckbox={toggleUpgradeCheckbox}
+          onClose={() => setOpenPopoverIndex(null)}
+        />
+      )
+    }
+
+    if (isHPUpgradeOption(option.label)) {
+      return <HPMaxEditor onClose={() => setOpenPopoverIndex(null)} />
+    }
+
+    if (isStressUpgradeOption(option.label)) {
+      return <StressMaxEditor onClose={() => setOpenPopoverIndex(null)} />
+    }
+
+    if (isExperienceUpgradeOption(option.label)) {
+      const rawCheckKey = typeof checkKeyOrBoxIndex === 'string'
+        ? checkKeyOrBoxIndex
+        : `${tierKey}-${index}-${checkKeyOrBoxIndex}`
+      const isCancelConfirmation = rawCheckKey.endsWith(":cancel")
+      const checkKey = isCancelConfirmation
+        ? rawCheckKey.slice(0, -":cancel".length)
+        : rawCheckKey
+
+      if (isCancelConfirmation) {
+        return renderExperienceCancelConfirmation(checkKey, index)
+      }
+
+      return (
+        <ExperienceValuesEditor
+          checkKey={checkKey}
+          optionIndex={index}
+          toggleUpgradeCheckbox={toggleUpgradeCheckbox}
+          onClose={() => setOpenPopoverIndex(null)}
+        />
+      )
+    }
+
+    if (isDomainCardOption(option.label)) {
+      return (
+        <DomainCardSelector
+          formData={formData}
+          maxLevel={maxLevel}
+          onClose={() => setOpenPopoverIndex(null)}
+          onOpenModal={(slotIndex, levels) => {
+            setOpenPopoverIndex(null)
+            onOpenCardModal?.(slotIndex, levels)
+          }}
+        />
+      )
+    }
+
+    if (isProficiencyUpgradeOption(option.label)) {
+      return <ProficiencyEditor onClose={() => setOpenPopoverIndex(null)} />
+    }
+
+    if (isSubclassUpgradeOption(option.label)) {
+      return (
+        <SubclassCardSelector
+          formData={formData}
+          onCardChange={onCardChange!}
+          onClose={() => setOpenPopoverIndex(null)}
+          onOpenModal={(slotIndex, profession) => {
+            setOpenPopoverIndex(null)
+            onOpenSubclassModal?.(slotIndex, profession)
+          }}
+        />
+      )
+    }
+
+    return null
+  }
+
+  // 检测 description 是否包含"获得一项额外+2经历"
+  const hasNewExperienceText = description.includes("获得一项额外+2经历")
+
+  return (
+    <div className="border border-gray-300 rounded-md shadow-sm">
+      <div className="bg-gray-800 text-white p-1 text-center font-bold !text-sm rounded-t-md">{title}</div>
+      <div className="bg-gray-600 text-white p-1 !text-xs flex items-center justify-between">
+        <span>{description}</span>
+        {hasNewExperienceText && (
+          <Popover
+            open={openNewExperiencePopover}
+            onOpenChange={setOpenNewExperiencePopover}
+          >
+            <PopoverTrigger asChild>
+              <button
+                className="inline-flex items-center justify-center p-0.5 hover:bg-gray-500 rounded transition-colors print:hidden ml-1 flex-shrink-0"
+                title="添加新经历"
+              >
+                <Edit className="w-2.5 h-2.5 text-white" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-1.5 bg-white border border-gray-300 rounded shadow-lg"
+              side="right"
+              align="start"
+              sideOffset={5}
+            >
+              <NewExperienceEditor onClose={() => setOpenNewExperiencePopover(false)} />
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+      <div className="p-1">
+        <p className="!text-xs mb-2">
+          {upgradeBandKey === "tier1"
+            ? <>更新你的等级，从下方的升级列表中选择并标记<strong>两个</strong>选项。</>
+            : <>更新你的等级，从下方的升级列表或更低级的列表中选择并标记<strong>两个</strong>选项。</>}
+        </p>
+
+        <div className="space-y-1">
+          {upgradeOptions.map((option, index) => {
+            const isAttrUpgrade = isAttributeUpgradeOption(option.label)
+            const isExpUpgrade = isExperienceUpgradeOption(option.label)
+            const needsPopover = isAttrUpgrade || isExpUpgrade
+            return (
+              <div key={`${tierKey}-${index}`} className="flex items-start !text-[10px] leading-[1.6]">
+              {/* 属性升级 / 经历升级：包裹 Popover 以便定位 */}
+              {needsPopover ? (
+                <Popover
+                  open={openPopoverIndex !== null && openPopoverIndex.startsWith(`${tierKey}-${index}-`)}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setOpenPopoverIndex(null)
+                    }
+                  }}
+                >
+                  <PopoverAnchor asChild>
+                    <span className={`flex flex-shrink-0 items-center justify-end mt-px ${option.doubleBox && option.boxCount === 2 ? '' : 'gap-px'}`} style={{ minWidth: '3.2em' }}>
+                      {Array(option.boxCount).fill(null).map((_, i) => {
+                  const checkKey = option.doubleBox ? `${tierKey}-${index}` : `${tierKey}-${index}-${i}`
+                  return (
+                    <div
+                      key={i}
+                      data-testid={`checkbox-${checkKey}`}
+                      className={`w-3 h-3 cursor-pointer ${option.doubleBox && option.boxCount === 2
+                        ? `${i === 0
+                          ? 'border-l-2 border-t-2 border-b-2 border-r border-gray-800'
+                          : 'border-r-2 border-t-2 border-b-2 border-l border-gray-800'
+                        } ${isUpgradeChecked(checkKey, index)
+                            ? "bg-gray-800"
+                            : "bg-white"
+                        }`
+                        : option.doubleBox
+                          ? `border-2 border-gray-800 ${isUpgradeChecked(checkKey, index)
+                            ? "bg-gray-800"
+                            : "bg-white"
+                          }`
+                          : `border border-gray-800 ${isUpgradeChecked(checkKey, index)
+                            ? "bg-gray-800"
+                            : "bg-white"
+                          }`
+                      }`}
+                      onClick={() => {
+                        // 属性升级 / 经历升级：空白框打开气泡；反选需要确认
+                        if (isAttributeUpgradeOption(option.label) || isExperienceUpgradeOption(option.label)) {
+                          const isChecked = isUpgradeChecked(checkKey, index)
+                          if (!isChecked) {
+                            // 空白复选框 → 打开气泡编辑器
+                            setOpenPopoverIndex(checkKey)
+                          } else if (isAttributeUpgradeOption(option.label)) {
+                            // 已选择的属性升级 → 打开取消确认
+                            setOpenPopoverIndex(`${checkKey}:cancel`)
+                          } else {
+                            // 已选择的经历升级 → 打开取消确认
+                            setOpenPopoverIndex(`${checkKey}:cancel`)
+                          }
+                        } else {
+                          // 其他选项：保持原有逻辑
+                          handleUpgradeCheck(checkKey, index)
+                        }
+                      }}
+                    ></div>
+                  )
+                })}
+                    </span>
+                  </PopoverAnchor>
+                  <PopoverContent
+                    className="w-auto p-1.5 bg-white border border-gray-300 rounded shadow-lg"
+                    side="top"
+                    align="start"
+                    sideOffset={5}
+                  >
+                    {openPopoverIndex && renderEditor(option, index, openPopoverIndex)}
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <span className={`flex flex-shrink-0 items-center justify-end mt-px ${option.doubleBox && option.boxCount === 2 ? '' : 'gap-px'}`} style={{ minWidth: '3.2em' }}>
+                  {Array(option.boxCount).fill(null).map((_, i) => {
+                    const checkKey = option.doubleBox ? `${tierKey}-${index}` : `${tierKey}-${index}-${i}`
+                    return (
+                      <div
+                        key={i}
+                        data-testid={`checkbox-${checkKey}`}
+                        className={`w-3 h-3 cursor-pointer ${option.doubleBox && option.boxCount === 2
+                          ? `${i === 0
+                            ? 'border-l-2 border-t-2 border-b-2 border-r border-gray-800'
+                            : 'border-r-2 border-t-2 border-b-2 border-l border-gray-800'
+                          } ${isUpgradeChecked(checkKey, index)
+                              ? "bg-gray-800"
+                              : "bg-white"
+                          }`
+                          : option.doubleBox
+                            ? `border-2 border-gray-800 ${isUpgradeChecked(checkKey, index)
+                              ? "bg-gray-800"
+                              : "bg-white"
+                            }`
+                            : `border border-gray-800 ${isUpgradeChecked(checkKey, index)
+                              ? "bg-gray-800"
+                              : "bg-white"
+                            }`
+                        }`}
+                        onClick={() => {
+                          // 其他选项：保持原有逻辑
+                          handleUpgradeCheck(checkKey, index)
+                        }}
+                      ></div>
+                    )
+                  })}
+                </span>
+              )}
+              <div className="flex-1 ml-2">
+                <span className="text-gray-800 dark:text-gray-200 mr-1">{option.label}</span>
+                {/* 其他需要编辑按钮的选项 */}
+                {needsEditButton(option.label) && (
+                  shouldDirectlyOpenModal(option.label) ? (
+                    // Direct modal open button (no popover)
+                    <button
+                      onClick={() => handleDirectModalOpen(option)}
+                      className="inline-flex items-center justify-center p-0.5 hover:bg-gray-100 rounded transition-colors print:hidden"
+                      title="选择卡牌"
+                    >
+                      <Edit className="w-2.5 h-2.5 text-gray-600" />
+                    </button>
+                  ) : (
+                    // Popover button for other options
+                    <Popover
+                      open={openPopoverIndex === `${tierKey}-${index}`}
+                      onOpenChange={(open) => {
+                        if (open) {
+                          setOpenPopoverIndex(`${tierKey}-${index}`)
+                        } else {
+                          setOpenPopoverIndex(null)
+                        }
+                      }}
+                    >
+                      <PopoverTrigger asChild>
+                        <button
+                          className="inline-flex items-center justify-center p-0.5 hover:bg-gray-100 rounded transition-colors print:hidden"
+                          title="编辑"
+                        >
+                          <Edit className="w-2.5 h-2.5 text-gray-600" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto p-1.5 bg-white border border-gray-300 rounded shadow-lg"
+                        side="right"
+                        align="start"
+                        sideOffset={5}
+                      >
+                        {renderEditor(option, index, 0)}
+                      </PopoverContent>
+                    </Popover>
+                  )
+                )}
+              </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="mt-3 !text-xs">
+          <span className="text-gray-800 dark:text-gray-200 mr-1">
+            将伤害阈值+1，选择一张不高于你当前等级(上限{maxLevel}级)的领域卡加入卡组。
+          </span>
+          <button
+            onClick={() => handleDirectModalOpen({ label: "领域卡加入卡组" })}
+            className="inline-flex items-center justify-center p-0.5 hover:bg-gray-100 rounded transition-colors print:hidden"
+            title="选择领域卡"
+          >
+            <Edit className="w-2.5 h-2.5 text-gray-600" />
+          </button>
+        </div>
+
+        {upgradeBandKey === "tier1" && (
+          <div
+            className="group mt-8 -ml-1 inline-flex flex-row items-stretch rounded-r-md border border-l-0 border-gray-300 overflow-hidden print:hidden cursor-pointer"
+            onClick={() => setIsLevelExpanded(prev => !prev)}
+          >
+            {/* 收起标签 - 竖排文字，展开后隐藏 */}
+            <div className={`bg-gray-100 px-0.5 py-1 flex items-center justify-center transition-all duration-300 ease-out ${isLevelExpanded ? "max-w-0 px-0 overflow-hidden opacity-0" : ""} group-hover:max-w-0 group-hover:px-0 group-hover:overflow-hidden group-hover:opacity-0`} style={{ writingMode: "vertical-rl" }}>
+              <span className="text-sm font-bold text-gray-400 tracking-tight whitespace-nowrap">
+                {`Lv. ${formData.level || "1"}`}
+              </span>
+            </div>
+            {/* 展开面板 - 横向滑出 */}
+            <div className={`flex flex-col transition-all duration-300 ease-out overflow-hidden max-w-0 opacity-0 ${isLevelExpanded ? "max-w-24 opacity-100" : ""} group-hover:max-w-24 group-hover:opacity-100`}>
+              <div className="bg-gray-100 px-2 py-0.5 text-center whitespace-nowrap">
+                <span className="!text-xs text-gray-500">LEVEL</span>
+                <div className="text-sm font-bold text-gray-500">
+                  {formData.level || "1"}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (!formData.level || formData.level.trim() === "") {
+                    updateLevel("1")
+                    return
+                  }
+                  const currentLevel = parseInt(formData.level)
+                  if (currentLevel >= 10) return
+                  const newLevel = Math.min(currentLevel + 1, 10)
+                  updateLevel(String(newLevel))
+                }}
+                className="px-2 py-0.5 bg-gray-600 hover:bg-gray-500 text-white text-xs font-bold transition-colors whitespace-nowrap disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={parseInt(formData.level) >= 10}
+              >
+                Level Up!
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

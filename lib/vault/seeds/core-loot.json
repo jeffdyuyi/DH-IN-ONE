@@ -1,0 +1,850 @@
+﻿[
+  {
+    "id": "builtin_loot_01",
+    "name": "高级床单",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "在任何休息期间，你总是会自动清除 1 压力点。",
+    "data": {
+      "rollIndex": 1,
+      "effect": "在任何休息期间，你总是会自动清除 1 压力点。"
+    }
+  },
+  {
+    "id": "builtin_loot_02",
+    "name": "风笛哨",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "手工制作的哨子。每只哨子都有独特的声音，刺耳的声音在半径一英里的地方都能听到。",
+    "data": {
+      "rollIndex": 2,
+      "effect": "手工制作的哨子。每只哨子都有独特的声音，刺耳的声音在半径一英里的地方都能听到。"
+    }
+  },
+  {
+    "id": "builtin_loot_03",
+    "name": "充能箭袋",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "当你使用此箭袋中的箭矢攻击并成功命中时，伤害掷骰获得等同于你当前位阶的加值。",
+    "data": {
+      "rollIndex": 3,
+      "effect": "当你使用此箭袋中的箭矢攻击并成功命中时，伤害掷骰获得等同于你当前位阶的加值。"
+    }
+  },
+  {
+    "id": "builtin_loot_04",
+    "name": "阿利斯泰尔的火炬",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一把可以随心所欲点亮的魔法火炬，它发出的光比看起来要远得多。它可以让洞穴充满光亮，让人感觉就像白天一样。",
+    "data": {
+      "rollIndex": 4,
+      "effect": "一把可以随心所欲点亮的魔法火炬，它发出的光比看起来要远得多。它可以让洞穴充满光亮，让人感觉就像白天一样。"
+    }
+  },
+  {
+    "id": "builtin_loot_05",
+    "name": "通话法球",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一对球体，任何持有它们的生物都可以在任意距离内相互交流。",
+    "data": {
+      "rollIndex": 5,
+      "effect": "一对球体，任何持有它们的生物都可以在任意距离内相互交流。"
+    }
+  },
+  {
+    "id": "builtin_loot_06",
+    "name": "手铐",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一副带有钥匙的可锁手铐。",
+    "data": {
+      "rollIndex": 6,
+      "effect": "一副带有钥匙的可锁手铐。"
+    }
+  },
+  {
+    "id": "builtin_loot_07",
+    "name": "奥术斗篷",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "任何拥有施法能力的使用者穿着它时都可以随意调整其颜色、纹理和尺寸的斗篷。",
+    "data": {
+      "rollIndex": 7,
+      "effect": "任何拥有施法能力的使用者穿着它时都可以随意调整其颜色、纹理和尺寸的斗篷。"
+    }
+  },
+  {
+    "id": "builtin_loot_08",
+    "name": "编织网",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "你可以用这张网进行灵巧检定来捕捉小型生物。被网住的目标可通过成功的攻击检定（DC16）挣脱。",
+    "data": {
+      "rollIndex": 8,
+      "effect": "你可以用这张网进行灵巧检定来捕捉小型生物。被网住的目标可通过成功的攻击检定（DC16）挣脱。"
+    }
+  },
+  {
+    "id": "builtin_loot_09",
+    "name": "生火罐",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "你可以倾倒此罐中奇异的液体来立即产生火焰。液体将在你完成长休后重新生成。",
+    "data": {
+      "rollIndex": 9,
+      "effect": "你可以倾倒此罐中奇异的液体来立即产生火焰。液体将在你完成长休后重新生成。"
+    }
+  },
+  {
+    "id": "builtin_loot_10",
+    "name": "悬空之杖",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "这根刻有符文的扁平短棒被激活时会立即悬停在原地。在解除激活前，短棒将不受重力影响且无法移动，始终固定在原位。",
+    "data": {
+      "rollIndex": 10,
+      "effect": "这根刻有符文的扁平短棒被激活时会立即悬停在原地。在解除激活前，短棒将不受重力影响且无法移动，始终固定在原位。"
+    }
+  },
+  {
+    "id": "builtin_loot_11",
+    "name": "魅力石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "激活这颗卵石大小的宝石，可记录你所见之人的外貌。花费 1 希望点，便能以幻象形式将这副伪装神奇地复现在自己身上。",
+    "data": {
+      "rollIndex": 11,
+      "effect": "激活这颗卵石大小的宝石，可记录你所见之人的外貌。花费 1 希望点，便能以幻象形式将这副伪装神奇地复现在自己身上。"
+    }
+  },
+  {
+    "id": "builtin_loot_12",
+    "name": "空箱子",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一个魔法箱子，即使里面有物品，看起来也是空的。主人可以在打开箱子时使用特定的单词、短语或其他触发条件来显示这些物品。",
+    "data": {
+      "rollIndex": 12,
+      "effect": "一个魔法箱子，即使里面有物品，看起来也是空的。主人可以在打开箱子时使用特定的单词、短语或其他触发条件来显示这些物品。"
+    }
+  },
+  {
+    "id": "builtin_loot_13",
+    "name": "伙伴箱",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "用于携带小型动物伙伴的箱子。当它们在里面时，箱子和里面的生物动物都不会受到任何伤害和负面魔法效果。",
+    "data": {
+      "rollIndex": 13,
+      "effect": "用于携带小型动物伙伴的箱子。当它们在里面时，箱子和里面的生物动物都不会受到任何伤害和负面魔法效果。"
+    }
+  },
+  {
+    "id": "builtin_loot_14",
+    "name": "穿刺箭",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "使用弓进行攻击时，你可以使用穿刺箭将你的熟练值添加到伤害掷骰中。每短休可使用 3 次。",
+    "data": {
+      "rollIndex": 14,
+      "effect": "使用弓进行攻击时，你可以使用穿刺箭将你的熟练值添加到伤害掷骰中。每短休可使用 3 次。"
+    }
+  },
+  {
+    "id": "builtin_loot_15",
+    "name": "勇气石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在盔甲上。为尚未具备以下功能的盔甲添加以下特性：坚韧：在标记最后一个护甲槽之前，掷一个 d6。如果掷出6，则可以降低伤害一个等级而无需标记槽位。",
+    "data": {
+      "rollIndex": 15,
+      "effect": "附在盔甲上。为尚未具备以下功能的盔甲添加以下特性：坚韧：在标记最后一个护甲槽之前，掷一个 d6。如果掷出6，则可以降低伤害一个等级而无需标记槽位。"
+    }
+  },
+  {
+    "id": "builtin_loot_16",
+    "name": "万能钥匙",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "使尝试打开锁着的门时的灵巧掷骰具有优势。",
+    "data": {
+      "rollIndex": 16,
+      "effect": "使尝试打开锁着的门时的灵巧掷骰具有优势。"
+    }
+  },
+  {
+    "id": "builtin_loot_17",
+    "name": "奥术棱镜",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "将此棱镜置于指定位置并激活。其近距离范围内的所有盟友在施法检定上获得+1加值。激活期间棱镜不可移动。解除激活后，需完成一次长休才能再次启用。",
+    "data": {
+      "rollIndex": 17,
+      "effect": "将此棱镜置于指定位置并激活。其近距离范围内的所有盟友在施法检定上获得+1加值。激活期间棱镜不可移动。解除激活后，需完成一次长休才能再次启用。"
+    }
+  },
+  {
+    "id": "builtin_loot_18",
+    "name": "小型耐力药水配方",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "花费一项修整行动和动物骨骼来制作一瓶小型耐力药水。",
+    "data": {
+      "rollIndex": 18,
+      "effect": "花费一项修整行动和动物骨骼来制作一瓶小型耐力药水。"
+    }
+  },
+  {
+    "id": "builtin_loot_19",
+    "name": "小型生命药水配方",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "花费一项修整行动和一瓶血液来制作一瓶小型生命药水。",
+    "data": {
+      "rollIndex": 19,
+      "effect": "花费一项修整行动和一瓶血液来制作一瓶小型生命药水。"
+    }
+  },
+  {
+    "id": "builtin_loot_20",
+    "name": "归航罗盘",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "两个罗盘无论相距多远，都只能指向对方。",
+    "data": {
+      "rollIndex": 20,
+      "effect": "两个罗盘无论相距多远，都只能指向对方。"
+    }
+  },
+  {
+    "id": "builtin_loot_21",
+    "name": "修正者精魂",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一只坐在你耳道弯曲处的小精魂，在战斗中低声说着有用的建议。每短休一次，你可以在攻击检定中获得一次优势。不要告诉精魂你的真名。",
+    "data": {
+      "rollIndex": 21,
+      "effect": "一只坐在你耳道弯曲处的小精魂，在战斗中低声说着有用的建议。每短休一次，你可以在攻击检定中获得一次优势。不要告诉精魂你的真名。"
+    }
+  },
+  {
+    "id": "builtin_loot_22",
+    "name": "壁虎手套",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "你可以爬上垂直表面并穿过天花板。",
+    "data": {
+      "rollIndex": 22,
+      "effect": "你可以爬上垂直表面并穿过天花板。",
+      "suggestedZone": "arms"
+    }
+  },
+  {
+    "id": "builtin_loot_23",
+    "name": "博学守护者",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "存储最多三个敌对生物的名字。下次面对它们时，在针对它们的任何动作掷骰上获得 +1。",
+    "data": {
+      "rollIndex": 23,
+      "effect": "存储最多三个敌对生物的名字。下次面对它们时，在针对它们的任何动作掷骰上获得 +1。"
+    }
+  },
+  {
+    "id": "builtin_loot_24",
+    "name": "黑烟瓶配方",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "在休息时间，花费一次休息动作并标记 1 压力点来制作一个黑烟瓶。",
+    "data": {
+      "rollIndex": 24,
+      "effect": "在休息时间，花费一次休息动作并标记 1 压力点来制作一个黑烟瓶。"
+    }
+  },
+  {
+    "id": "builtin_loot_25",
+    "name": "血石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上。为尚未具备以下功能的武器添加以下特性：残暴：伤害骰每掷出一次最大值，就额外掷出一个伤害骰。",
+    "data": {
+      "rollIndex": 25,
+      "effect": "附在武器上。为尚未具备以下功能的武器添加以下特性：残暴：伤害骰每掷出一次最大值，就额外掷出一个伤害骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_26",
+    "name": "巨石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上。为尚未具备以下功能的武器添加以下特性：强力：额外掷一个伤害骰并去掉其中最小的一个。",
+    "data": {
+      "rollIndex": 26,
+      "effect": "附在武器上。为尚未具备以下功能的武器添加以下特性：强力：额外掷一个伤害骰并去掉其中最小的一个。"
+    }
+  },
+  {
+    "id": "builtin_loot_27",
+    "name": "滑翔机",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "可以通过标记 1 压力点来展开的小型降落伞。它可以让使用者从高处安全地滑翔到下面的地面。",
+    "data": {
+      "rollIndex": 27,
+      "effect": "可以通过标记 1 压力点来展开的小型降落伞。它可以让使用者从高处安全地滑翔到下面的地面。"
+    }
+  },
+  {
+    "id": "builtin_loot_28",
+    "name": "寂静戒指",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "花费 1 希望点激活此戒指，直到你的下一次短休，你的脚步声是无声的。",
+    "data": {
+      "rollIndex": 28,
+      "effect": "花费 1 希望点激活此戒指，直到你的下一次短休，你的脚步声是无声的。"
+    }
+  },
+  {
+    "id": "builtin_loot_29",
+    "name": "镇静吊坠",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "如果你必须标记最后一个压力槽，请掷一个 d6。如果掷出 5+，则无需标记。",
+    "data": {
+      "rollIndex": 29,
+      "effect": "如果你必须标记最后一个压力槽，请掷一个 d6。如果掷出 5+，则无需标记。"
+    }
+  },
+  {
+    "id": "builtin_loot_30",
+    "name": "双用瓶",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "可容纳两种不同液体的瓶子。侧面的小按钮可让饮用者在两种液体之间切换。",
+    "data": {
+      "rollIndex": 30,
+      "effect": "可容纳两种不同液体的瓶子。侧面的小按钮可让饮用者在两种液体之间切换。"
+    }
+  },
+  {
+    "id": "builtin_loot_31",
+    "name": "幻沙袋",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "这是一小袋沙子，可以通过风度掷骰（DC10）将其调整为比实际重量重得多或轻得多。你还可以通过灵巧掷骰（DC10）将沙子吹到对手的脸上，使对手暂时处于脆弱状态。",
+    "data": {
+      "rollIndex": 31,
+      "effect": "这是一小袋沙子，可以通过风度掷骰（DC10）将其调整为比实际重量重得多或轻得多。你还可以通过灵巧掷骰（DC10）将沙子吹到对手的脸上，使对手暂时处于脆弱状态。"
+    }
+  },
+  {
+    "id": "builtin_loot_32",
+    "name": "抵抗戒指",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每长休一次，激活这枚戒指使将受到的伤害减少一半。",
+    "data": {
+      "rollIndex": 32,
+      "effect": "每长休一次，激活这枚戒指使将受到的伤害减少一半。"
+    }
+  },
+  {
+    "id": "builtin_loot_33",
+    "name": "凤凰羽毛",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "只要你拥有任意数量的凤凰羽毛，当你失去知觉并掷骰查看是否选择留下伤痕时，骰子结果总是 +1。",
+    "data": {
+      "rollIndex": 33,
+      "effect": "只要你拥有任意数量的凤凰羽毛，当你失去知觉并掷骰查看是否选择留下伤痕时，骰子结果总是 +1。"
+    }
+  },
+  {
+    "id": "builtin_loot_34",
+    "name": "百宝箱",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "一个只能每长休打开一次的小盒子。打开时，骰一个 d12，如果你掷出 1-6，盒子是空的；如果你掷出 7-10，盒子里会随机出现一个常见消耗品；如果你掷出 11-12，盒子里会随机出现两个常见消耗品。",
+    "data": {
+      "rollIndex": 34,
+      "effect": "一个只能每长休打开一次的小盒子。打开时，骰一个 d12，如果你掷出 1-6，盒子是空的；如果你掷出 7-10，盒子里会随机出现一个常见消耗品；如果你掷出 11-12，盒子里会随机出现两个常见消耗品。"
+    }
+  },
+  {
+    "id": "builtin_loot_35",
+    "name": "空刃护符",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在近战武器上，使其能够在近距离范围内攻击。每短休三次。",
+    "data": {
+      "rollIndex": 35,
+      "effect": "附在近战武器上，使其能够在近距离范围内攻击。每短休三次。"
+    }
+  },
+  {
+    "id": "builtin_loot_36",
+    "name": "传送点种子",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "将此种子埋入土中可在该处培育传送门。24小时后传送门即可使用。通过此传送门可抵达任何其他已种植传送门种子的地点。对传送门造成任意魔法伤害即可将其摧毁。",
+    "data": {
+      "rollIndex": 36,
+      "effect": "将此种子埋入土中可在该处培育传送门。24小时后传送门即可使用。通过此传送门可抵达任何其他已种植传送门种子的地点。对传送门造成任意魔法伤害即可将其摧毁。"
+    }
+  },
+  {
+    "id": "builtin_loot_37",
+    "name": "典范之链",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每次长休时，你可以使用休息行动来冥想你所珍视的理想或原则，并将你的意志集中到链条中。在下一次长休之前，你可以花费 1 希望点，使用 d20 作为希望骰，进行与该原则一致的掷骰。",
+    "data": {
+      "rollIndex": 37,
+      "effect": "每次长休时，你可以使用休息行动来冥想你所珍视的理想或原则，并将你的意志集中到链条中。在下一次长休之前，你可以花费 1 希望点，使用 d20 作为希望骰，进行与该原则一致的掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_38",
+    "name": "匿踪护身符",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每长休一次，激活此护符进入隐匿状态直至移动。以此法隐匿期间，即使敌人移动至通常能看见你的位置，你仍保持不可见状态。",
+    "data": {
+      "rollIndex": 38,
+      "effect": "每长休一次，激活此护符进入隐匿状态直至移动。以此法隐匿期间，即使敌人移动至通常能看见你的位置，你仍保持不可见状态。"
+    }
+  },
+  {
+    "id": "builtin_loot_39",
+    "name": "希望守护者的小盒",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "在长休期间，若你拥有 6 希望点，可花费 1 希望点将丰沛的决心灌注于此挂坠中。当希望点归零时，可使用该挂坠立即获得 1 希望点。挂坠必须重新灌注后才能再次以此法使用。",
+    "data": {
+      "rollIndex": 39,
+      "effect": "在长休期间，若你拥有 6 希望点，可花费 1 希望点将丰沛的决心灌注于此挂坠中。当希望点归零时，可使用该挂坠立即获得 1 希望点。挂坠必须重新灌注后才能再次以此法使用。"
+    }
+  },
+  {
+    "id": "builtin_loot_40",
+    "name": "无限袋",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "放入此袋中的物品将存储在一个独立的次元中且可以随时取出。",
+    "data": {
+      "rollIndex": 40,
+      "effect": "放入此袋中的物品将存储在一个独立的次元中且可以随时取出。"
+    }
+  },
+  {
+    "id": "builtin_loot_41",
+    "name": "神行遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "敏捷+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 41,
+      "effect": "敏捷+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "agility", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_42",
+    "name": "强力遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "力量+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 42,
+      "effect": "力量+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "strength", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_43",
+    "name": "控制遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "灵巧+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 43,
+      "effect": "灵巧+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "finesse", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_44",
+    "name": "调和遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "本能+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 44,
+      "effect": "本能+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "instinct", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_45",
+    "name": "魅力遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "风度+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 45,
+      "effect": "风度+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "presence", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_46",
+    "name": "启迪遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "知识+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 46,
+      "effect": "知识+1，你不能同时持有其他遗宝。",
+      "statBonus": { "target": "knowledge", "value": 1 }
+    }
+  },
+  {
+    "id": "builtin_loot_47",
+    "name": "珩磨遗宝",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "你的一项经历+1，你不能同时持有其他遗宝。",
+    "data": {
+      "rollIndex": 47,
+      "effect": "你的一项经历+1，你不能同时持有其他遗宝。"
+    }
+  },
+  {
+    "id": "builtin_loot_48",
+    "name": "闪烁飞虫吊坠",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "佩戴时，你的物理近战武器会像薄纱一样延伸，使你可以攻击邻近范围内的生物。",
+    "data": {
+      "rollIndex": 48,
+      "effect": "佩戴时，你的物理近战武器会像薄纱一样延伸，使你可以攻击邻近范围内的生物。"
+    }
+  },
+  {
+    "id": "builtin_loot_49",
+    "name": "湖行者长靴",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "你可以如同在柔软地面一般行走在水面上。",
+    "data": {
+      "rollIndex": 49,
+      "effect": "你可以如同在柔软地面一般行走在水面上。",
+      "suggestedZone": "legs"
+    }
+  },
+  {
+    "id": "builtin_loot_50",
+    "name": "粘土伙伴",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "当你将这块黏土塑造成黏土动物伙伴时，它会表现出相应动物的特性。例如黏土蜘蛛能编织黏土蛛网，黏土飞鸟则可翱翔天际。黏土伙伴在不同形态间会保留记忆与身份认同，但每次变形都可能习得新的习性。",
+    "data": {
+      "rollIndex": 50,
+      "effect": "当你将这块黏土塑造成黏土动物伙伴时，它会表现出相应动物的特性。例如黏土蜘蛛能编织黏土蛛网，黏土飞鸟则可翱翔天际。黏土伙伴在不同形态间会保留记忆与身份认同，但每次变形都可能习得新的习性。"
+    }
+  },
+  {
+    "id": "builtin_loot_51",
+    "name": "秘尘配方",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "在休息时，花费一项修整行动和一包金币来制作一份秘尘。",
+    "data": {
+      "rollIndex": 51,
+      "effect": "在休息时，花费一项修整行动和一包金币来制作一份秘尘。"
+    }
+  },
+  {
+    "id": "builtin_loot_52",
+    "name": "记忆碎片",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每次长休一次，花费 2 希望点以回想一张宝库内的领域卡，而不是支付其回想费用。",
+    "data": {
+      "rollIndex": 52,
+      "effect": "每次长休一次，花费 2 希望点以回想一张宝库内的领域卡，而不是支付其回想费用。"
+    }
+  },
+  {
+    "id": "builtin_loot_53",
+    "name": "欢欣宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用敏捷进行攻击掷骰。",
+    "data": {
+      "rollIndex": 53,
+      "effect": "附在武器上，允许你使用敏捷进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_54",
+    "name": "威力宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用力量进行攻击掷骰。",
+    "data": {
+      "rollIndex": 54,
+      "effect": "附在武器上，允许你使用力量进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_55",
+    "name": "精准宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用灵巧进行攻击掷骰。",
+    "data": {
+      "rollIndex": 55,
+      "effect": "附在武器上，允许你使用灵巧进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_56",
+    "name": "洞察宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用本能进行攻击掷骰。",
+    "data": {
+      "rollIndex": 56,
+      "effect": "附在武器上，允许你使用本能进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_57",
+    "name": "无畏宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用风度进行攻击掷骰。",
+    "data": {
+      "rollIndex": 57,
+      "effect": "附在武器上，允许你使用风度进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_58",
+    "name": "睿智宝石",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "附在武器上，允许你使用知识进行攻击掷骰。",
+    "data": {
+      "rollIndex": 58,
+      "effect": "附在武器上，允许你使用知识进行攻击掷骰。"
+    }
+  },
+  {
+    "id": "builtin_loot_59",
+    "name": "坚毅之戒",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每场游戏一次，当游戏主持人花费 1 恐惧点时，你可以花费 4 希望点以取消因为使用恐惧而产生的效应。",
+    "data": {
+      "rollIndex": 59,
+      "effect": "每场游戏一次，当游戏主持人花费 1 恐惧点时，你可以花费 4 希望点以取消因为使用恐惧而产生的效应。"
+    }
+  },
+  {
+    "id": "builtin_loot_60",
+    "name": "团结腰带",
+    "category": "loot",
+    "sourceApp": "builtin",
+    "isBuiltin": true,
+    "author": "Daggerheart Core Rulebook",
+    "schemaVersion": 1,
+    "description": "每场游戏一次，你可以花费 5 希望点进行一次三名角色的接力掷骰，而不是两名。",
+    "data": {
+      "rollIndex": 60,
+      "effect": "每场游戏一次，你可以花费 5 希望点进行一次三名角色的接力掷骰，而不是两名。"
+    }
+  }
+]

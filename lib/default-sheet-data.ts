@@ -1,0 +1,149 @@
+import { createEmptyCard, type StandardCard } from "@/card/card-types";
+import { createEmptyEquipmentData } from "@/automation/equipment/defaults";
+import type { SheetData } from "./sheet-data";
+import { CURRENT_SCHEMA_VERSION } from "./sheet-schema-version";
+
+export const defaultSheetData: SheetData = {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    name: "",
+    characterImage: "",
+    imageAssets: {},
+    level: "1",
+    proficiency: [true, false, false, false, false, false], // Default as boolean array, first one lit
+    ancestry1: "",
+    ancestry2: "",
+    profession: "",
+    community: "",
+    subclass: "",
+    // Initialize new Ref fields
+    professionRef: { id: "", name: "" },
+    ancestry1Ref: { id: "", name: "" },
+    ancestry2Ref: { id: "", name: "" },
+    communityRef: { id: "", name: "" },
+    subclassRef: { id: "", name: "" },
+
+    evasion: "",
+
+    agility: { checked: false, value: "", spellcasting: false },
+    strength: { checked: false, value: "", spellcasting: false },
+    finesse: { checked: false, value: "", spellcasting: false },
+    instinct: { checked: false, value: "", spellcasting: false },
+    presence: { checked: false, value: "", spellcasting: false },
+    knowledge: { checked: false, value: "", spellcasting: false },
+
+    gold: Array(20).fill(false),
+    experience: ["", "", "", "", ""],
+    experienceValues: ["", "", "", "", ""],
+    hope: 0,      // 默认0点希望
+    hopeMax: 6,   // 默认最大6点
+
+    hp: Array(18).fill(false),
+    stress: Array(18).fill(false),
+    hpMax: "",
+    stressMax: "",
+
+    armorBoxes: Array(12).fill(false),
+    armorMax: 0,
+
+    minorThreshold: "",
+    majorThreshold: "",
+
+    inventory: ["", "", "", "", ""],
+    characterBackground: "",
+    characterAppearance: "",
+    characterMotivation: "",
+
+    cards: Array(20).fill(0).map(() => createEmptyCard()),          // 聚焦卡组（20张）
+    inventory_cards: Array(20).fill(0).map(() => createEmptyCard()), // 库存卡组（20张）
+
+    modifierState: {
+        targetStates: {},
+        entryStates: {},
+    },
+    userModifierContributions: [],
+    otherAdjustments: [],
+    upgradeStates: {},
+    equipment: createEmptyEquipmentData(),
+
+    // Companion fields
+    companionImage: "",
+    companionName: "",
+    companionDescription: "",
+    companionRange: "",
+    companionStress: Array(18).fill(false),
+    companionEvasion: "",
+    companionStressMax: 0,
+    companionWeapon: "",
+    companionExperience: ["", "", "", "", ""],
+    companionExperienceValue: ["", "", "", "", ""],
+
+    // Training options
+    trainingOptions: {
+        intelligent: Array(3).fill(false),
+        radiantInDarkness: [false],
+        creatureComfort: [false],
+        armored: [false],
+        vicious: Array(3).fill(false),
+        resilient: Array(3).fill(false),
+        bonded: [false],
+        aware: Array(3).fill(false),
+    },
+
+    // 注释：移除了 focused_card_ids 字段，聚焦功能由双卡组系统取代
+
+    // 第三页导出控制
+    includePageThreeInExport: true, // @deprecated 向后兼容
+    pageVisibility: {
+        rangerCompanion: false,  // 默认隐藏游侠伙伴页
+        armorTemplate: false,    // 默认隐藏护甲模板页
+        adventureNotes: false    // 默认隐藏冒险笔记页
+    },
+
+    // 护甲模板默认数据
+    armorTemplate: {
+        weaponName: '',
+        description: '',
+        upgradeSlots: Array(5).fill(0).map(() => ({ checked: false, text: '' })),
+        upgrades: {
+            basic: {},
+            tier2: {},
+            tier3: {},
+            tier4: {}
+        },
+        scrapMaterials: {
+            fragments: Array(6).fill(0), // gear, coil, wire, trigger, lens, crystal
+            metals: Array(6).fill(0),    // aluminum, copper, cobalt, silver, platinum, gold
+            components: Array(6).fill(0), // fuse, circuit, disc, relay, capacitor, battery
+            relics: Array(5).fill('')
+        },
+        electronicCoins: 0
+    },
+
+    // 冒险笔记默认数据
+    adventureNotes: {
+        characterProfile: {},
+        playerInfo: {},
+        backstory: '',
+        milestones: '',
+        adventureLog: Array(8).fill(null).map(() => ({
+            name: '',
+            levelRange: '',
+            trauma: '',
+            date: ''
+        }))
+    },
+
+    // 悬浮笔记本默认数据
+    notebook: {
+        pages: [{
+            id: 'page-1',
+            lines: []
+        }],
+        currentPageIndex: 0,
+        isOpen: false
+    },
+
+    // 战役模式
+    campaignMode: 'standard',
+};
+

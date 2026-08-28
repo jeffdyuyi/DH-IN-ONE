@@ -1,0 +1,381 @@
+/**
+ * Image Service Actions for UnifiedCardStore
+ * Manages image loading, caching, and cleanup for real card batches
+ */
+
+import { db, isIndexedDBAvailable } from './database';
+import type { UnifiedCardState } from '../store-types';
+import type { StateCreator } from 'zustand';
+
+// LRU Cache management
+function updateLRUCache(state: UnifiedCardState, cacheKey: string, blobUrl: string) {
+  const { cache, cacheOrder, maxCacheSize } = state.imageService;
+
+  // Add to cache
+  cache.set(cacheKey, blobUrl);
+
+  // Update LRU order (remove if exists, then add to end)
+  const existingIndex = cacheOrder.indexOf(cacheKey);
+  if (existingIndex > -1) {
+    cacheOrder.splice(existingIndex, 1);
+  }
+  cacheOrder.push(cacheKey);
+
+  // Evict oldest entries if cache is full
+  // Note: We intentionally do NOT call URL.revokeObjectURL() here because
+  // Image components may still be using the evicted URLs. The browser will
+  // garbage collect the Blob when there are no more references to it.
+  while (cacheOrder.length > maxCacheSize) {
+    const evictedId = cacheOrder.shift();
+    if (evictedId) {
+      cache.delete(evictedId);
+    }
+  }
+}
+
+export function createImageServiceActions<T extends UnifiedCardState>(
+  set: any,
+  get: any
+) {
+  return {
+    /**
+     * Initialize image service
+     */
+    initializeImageService: async () => {
+      if (!isIndexedDBAvailable()) {
+        console.warn('[ImageService] IndexedDB not available');
+        return;
+      }
+
+      set((state: any) => ({
+        imageService: {
+          ...state.imageService,
+          initialized: true
+        }
+      }));
+    },
+
+    /**
+     * Get image URL for a card (with LRU caching and deduplication)
+     * @param templateId - Card template identifier
+     * @param packId - Optional owning pack identifier
+     * @returns Promise<string | null> - Blob URL or null
+     */
+    getImageUrl: async (templateId: string, packId?: string): Promise<string | null> => {
+      const cacheKey = packId ? `${packId}/${templateId}` : templateId;
+      const state = get() as any;
+      const { cache, loadingImages, failedImages } = state.imageService;
+
+      // Check cache first
+      if (cache.has(cacheKey)) {
+        const url = cache.get(cacheKey);
+        // Update LRU order
+        const { cacheOrder } = state.imageService;
+        const index = cacheOrder.indexOf(cacheKey);
+        if (index > -1) {
+          cacheOrder.splice(index, 1);
+          cacheOrder.push(cacheKey);
+        }
+        return url;
+      }
+
+      // Check if already failed
+      if (failedImages.has(cacheKey)) {
+        return null;
+      }
+
+      // Check if already loading (deduplication)
+      if (loadingImages.has(cacheKey)) {
+        // Wait for existing load to complete
+        return new Promise((resolve) => {
+          const checkInterval = setInterval(() => {
+            const currentState = get() as any;
+            if (currentState.imageService.cache.has(cacheKey)) {
+              clearInterval(checkInterval);
+              resolve(currentState.imageService.cache.get(cacheKey));
+            } else if (currentState.imageService.failedImages.has(cacheKey)) {
+              clearInterval(checkInterval);
+              resolve(null);
+            }
+          }, 50);
+
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(null);
+          }, 5000);
+        });
+      }
+
+      // Mark as loading
+      set((state: any) => ({
+        imageService: {
+          ...state.imageService,
+          loadingImages: new Set([...state.imageService.loadingImages, cacheKey])
+        }
+      }));
+
+      try {
+        // Load from IndexedDB (images table for real batches)
+        const record = packId
+          ? (await db.images.get(cacheKey)) ?? (await db.images.get(templateId))
+          : await db.images.get(templateId);
+
+        if (!record) {
+          // Mark as failed
+          set((state: any) => ({
+            imageService: {
+              ...state.imageService,
+              loadingImages: new Set([...state.imageService.loadingImages].filter(id => id !== cacheKey)),
+              failedImages: new Set([...state.imageService.failedImages, cacheKey])
+            }
+          }));
+          return null;
+        }
+
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(record.blob);
+
+        // Update cache with LRU
+        set((state: any) => {
+          const newState = { ...state };
+          updateLRUCache(newState, cacheKey, blobUrl);
+
+          return {
+            imageService: {
+              ...newState.imageService,
+              loadingImages: new Set([...newState.imageService.loadingImages].filter(id => id !== cacheKey))
+            }
+          };
+        });
+
+        return blobUrl;
+      } catch (error) {
+        console.error(`[ImageService] Failed to load image for ${cacheKey}:`, error);
+
+        // Mark as failed
+        set((state: any) => ({
+          imageService: {
+            ...state.imageService,
+            loadingImages: new Set([...state.imageService.loadingImages].filter(id => id !== cacheKey)),
+            failedImages: new Set([...state.imageService.failedImages, cacheKey])
+          }
+        }));
+
+        return null;
+      }
+    },
+
+    /**
+     * Import batch images to IndexedDB (images table)
+     * @param batchId - Batch identifier
+     * @param images - Map of cardId -> Blob
+     */
+    importBatchImages: async (batchId: string, images: Map<string, Blob>) => {
+      if (!isIndexedDBAvailable()) {
+        throw new Error('IndexedDB not available');
+      }
+
+      try {
+        // Use transaction for atomic batch import
+        await db.transaction('rw', db.images, async () => {
+          for (const [cardId, blob] of images.entries()) {
+            await db.images.put({
+              key: cardId,
+              blob,
+              mimeType: blob.type,
+              size: blob.size,
+              createdAt: Date.now()
+            });
+          }
+        });
+
+        console.log(`[ImageService] Imported ${images.size} images for batch ${batchId}`);
+
+        // ✅ 关键修改: 更新批次元信息中的 imageCardIds
+        set((state: any) => {
+          const batch = state.batches.get(batchId);
+          if (!batch) {
+            console.warn(`[ImageService] Batch ${batchId} not found when updating imageCardIds`);
+            return state;
+          }
+
+          const imageCardIds = Array.from(images.keys());
+          const totalImageSize = Array.from(images.values()).reduce((sum, b) => sum + b.size, 0);
+
+          const updatedBatch = {
+            ...batch,
+            imageCardIds,           // ← 保存图片ID列表
+            imageCount: images.size,
+            totalImageSize
+          };
+
+          const newBatches = new Map(state.batches);
+          newBatches.set(batchId, updatedBatch);
+
+          console.log(`[ImageService] Updated batch ${batchId} with ${imageCardIds.length} imageCardIds`);
+
+          return { batches: newBatches };
+        });
+
+        // ✅ 同步到 localStorage
+        const currentState = get() as any;
+        currentState._syncToLocalStorage();
+
+      } catch (error) {
+        console.error(`[ImageService] Failed to import batch images:`, error);
+        throw error;
+      }
+    },
+
+    /**
+     * Delete batch images from IndexedDB (images table)
+     * @param imageCardIds - Array of card IDs with images
+     */
+    deleteBatchImages: async (imageCardIds: string[]) => {
+      if (!isIndexedDBAvailable()) {
+        return;
+      }
+
+      try {
+        // Use transaction for atomic batch delete
+        await db.transaction('rw', db.images, async () => {
+          for (const cardId of imageCardIds) {
+            await db.images.delete(cardId);
+          }
+        });
+
+        // Clear cache entries and revoke URLs
+        set((state: any) => {
+          const newCache = new Map<string, string>(state.imageService.cache);
+          const newCacheOrder = [...state.imageService.cacheOrder];
+          const newFailedImages = new Set(state.imageService.failedImages);
+
+          for (const cardId of imageCardIds) {
+            // Revoke blob URL
+            const url = newCache.get(cardId);
+            if (url) {
+              URL.revokeObjectURL(url);
+              newCache.delete(cardId);
+            }
+
+            // Remove from order
+            const index = newCacheOrder.indexOf(cardId);
+            if (index > -1) {
+              newCacheOrder.splice(index, 1);
+            }
+
+            // Remove from failed set
+            newFailedImages.delete(cardId);
+          }
+
+          return {
+            imageService: {
+              ...state.imageService,
+              cache: newCache,
+              cacheOrder: newCacheOrder,
+              failedImages: newFailedImages
+            }
+          };
+        });
+
+        console.log(`[ImageService] Deleted ${imageCardIds.length} images`);
+      } catch (error) {
+        console.error(`[ImageService] Failed to delete batch images:`, error);
+      }
+    },
+
+    /**
+     * Clear all batch images from IndexedDB (images table)
+     * This clears the entire images table used for custom card batches
+     */
+    clearAllBatchImages: async () => {
+      if (!isIndexedDBAvailable()) {
+        return;
+      }
+
+      try {
+        // Clear the entire images table
+        await db.images.clear();
+        console.log('[ImageService] Cleared all batch images from IndexedDB');
+
+        // Clear image cache
+        const state = get() as any;
+        const { cache } = state.imageService;
+
+        // Revoke all blob URLs
+        for (const url of cache.values()) {
+          URL.revokeObjectURL(url);
+        }
+
+        set((state: any) => ({
+          imageService: {
+            ...state.imageService,
+            cache: new Map(),
+            cacheOrder: [],
+            failedImages: new Set()
+          }
+        }));
+
+        console.log('[ImageService] Cleared image cache');
+      } catch (error) {
+        console.error('[ImageService] Failed to clear all batch images:', error);
+        throw error;
+      }
+    },
+
+    /**
+     * Clear all image cache and revoke blob URLs
+     */
+    clearImageCache: () => {
+      const state = get() as any;
+      const { cache } = state.imageService;
+
+      // Revoke all blob URLs
+      for (const url of cache.values()) {
+        URL.revokeObjectURL(url);
+      }
+
+      set((state: any) => ({
+        imageService: {
+          ...state.imageService,
+          cache: new Map(),
+          cacheOrder: [],
+          failedImages: new Set()
+        }
+      }));
+    },
+
+    /**
+     * Revoke a specific image URL and remove from cache
+     * @param cardId - Card identifier
+     */
+    revokeImageUrl: (cardId: string) => {
+      const state = get() as any;
+      const url = state.imageService.cache.get(cardId);
+
+      if (url) {
+        URL.revokeObjectURL(url);
+
+        set((state: any) => {
+          const newCache = new Map(state.imageService.cache);
+          const newCacheOrder = [...state.imageService.cacheOrder];
+
+          newCache.delete(cardId);
+          const index = newCacheOrder.indexOf(cardId);
+          if (index > -1) {
+            newCacheOrder.splice(index, 1);
+          }
+
+          return {
+            imageService: {
+              ...state.imageService,
+              cache: newCache,
+              cacheOrder: newCacheOrder
+            }
+          };
+        });
+      }
+    }
+  };
+}
