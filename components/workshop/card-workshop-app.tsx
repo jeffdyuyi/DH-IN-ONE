@@ -45,9 +45,14 @@ export function CardWorkshopApp() {
   // Initialization
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view') || params.get('mode');
+    if (viewParam === 'library') {
+      setMode('library');
+    }
     const toolParam = params.get('tool');
     if (toolParam && Object.values(CardType).includes(toolParam as CardType)) {
       selectTool(toolParam as CardType);
+      setMode('editor');
     }
     setLibrary(getLibrary());
     

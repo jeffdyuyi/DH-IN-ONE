@@ -22,8 +22,12 @@ import {
   Globe,
   Compass,
   ArrowUpRight,
-  ChevronDown
+  ChevronDown,
+  Dice5,
+  Copy,
+  Check
 } from 'lucide-react'
+import { BUILTIN_LOOT_SEEDS, BUILTIN_CONSUMABLE_SEEDS } from '../../lib/vault/seeds'
 
 // --- Hero 海报数据（纯中文） ---
 interface ToolShowcase {
@@ -111,13 +115,13 @@ const SHOWCASE_LIST: ToolShowcase[] = [
   },
   {
     id: 'vault',
-    name: '公共卡库',
+    name: '本地卡库',
     tag: '数据中枢',
-    title: '公共卡牌库 (Vault)',
+    title: '本地卡牌库',
     slogan: '120 官方种子物品 · 本地储存 · 跨功能双向连携',
     desc: '本地数据中枢。内置 60 战利品与 60 消耗品，打通工坊制作、角色卡直装与战役引用，支持打包导出卡包。',
-    ctaText: '浏览卡牌库',
-    ctaLink: '/vault',
+    ctaText: '进入工坊卡库',
+    ctaLink: '/workshop?view=library',
     badgeText: '双向连携',
     themeColor: 'indigo',
     glowClass: 'from-indigo-500/20 via-violet-500/10 to-transparent',
@@ -156,7 +160,41 @@ export function PortalHub() {
   const [activeIdx, setActiveIdx] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
 
+  // --- d60 随机掷骰抽取器状态 ---
+  const [rollCategory, setRollCategory] = useState<'loot' | 'consumable'>('loot')
+  const [rollIndex, setRollIndex] = useState<number>(24) // 默认 #24
+  const [isRolling, setIsRolling] = useState<boolean>(false)
+  const [hasCopied, setHasCopied] = useState<boolean>(false)
+
   const activeTool = SHOWCASE_LIST[activeIdx]
+
+  // 当前抽中的物品
+  const activeSeedList = rollCategory === 'loot' ? BUILTIN_LOOT_SEEDS : BUILTIN_CONSUMABLE_SEEDS
+  const currentSeed = activeSeedList.find(item => (item.data as any)?.rollIndex === rollIndex) || activeSeedList[0]
+
+  const handleRollD60 = () => {
+    if (isRolling) return
+    setIsRolling(true)
+    let rolls = 0
+    const maxRolls = 14
+    const interval = setInterval(() => {
+      const rand = Math.floor(Math.random() * 60) + 1
+      setRollIndex(rand)
+      rolls++
+      if (rolls >= maxRolls) {
+        clearInterval(interval)
+        setIsRolling(false)
+      }
+    }, 60)
+  }
+
+  const handleCopyEffect = () => {
+    if (!currentSeed) return
+    const text = `【d60 #${rollIndex} ${currentSeed.name}】\n${currentSeed.description}`
+    navigator.clipboard.writeText(text)
+    setHasCopied(true)
+    setTimeout(() => setHasCopied(false), 2000)
+  }
 
   useEffect(() => {
     if (!isAutoPlay) return
@@ -266,7 +304,7 @@ export function PortalHub() {
               }`}
             >
               <Database className="w-4 h-4" />
-              <span>公共卡库</span>
+              <span>本地卡库</span>
             </button>
 
             <button
@@ -414,13 +452,141 @@ export function PortalHub() {
               className="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-amber-400 transition-colors animate-bounce cursor-pointer"
               title="向下探索全生态双向连携流程"
             >
-              <span>向下探索数据互通流程</span>
+              <span>向下探索数据互通与 d60 灵感抽取</span>
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </div>
         </section>
 
-        {/* 2. 官方与自制双向连携链路展示 */}
+        {/* 2. 官方 d60 战利品 & 消耗品 实时掷骰灵感抽取台 */}
+        <section className="p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-b from-stone-900/90 via-stone-950/90 to-[#0d0f17] shadow-xl space-y-6">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800 pb-4">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Dice5 className="w-5 h-5 text-amber-400 animate-spin-slow" />
+                <span>官方 d60 随机表抽取台</span>
+              </h3>
+              <p className="text-xs text-stone-400">
+                内置官方《核心规则书》全部 60 种战利品与 60 种消耗品，支持即时 1d60 掷骰与工坊制卡联动
+              </p>
+            </div>
+
+            {/* 类别切换标签 */}
+            <div className="flex items-center gap-2 bg-stone-950 p-1 rounded-xl border border-stone-800 shrink-0">
+              <button
+                onClick={() => setRollCategory('loot')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  rollCategory === 'loot'
+                    ? 'bg-amber-500 text-stone-950 shadow-md'
+                    : 'text-stone-400 hover:text-white'
+                }`}
+              >
+                💎 官方战利品表 (60)
+              </button>
+              <button
+                onClick={() => setRollCategory('consumable')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  rollCategory === 'consumable'
+                    ? 'bg-cyan-500 text-stone-950 shadow-md'
+                    : 'text-stone-400 hover:text-white'
+                }`}
+              >
+                🧪 官方消耗品表 (60)
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            {/* 左侧：掷骰交互控制区 (4列) */}
+            <div className="lg:col-span-4 space-y-4">
+              <div className="p-5 rounded-2xl bg-stone-950/80 border border-stone-800 space-y-4 text-center">
+                <div className="space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider">
+                    D60 掷骰点数
+                  </span>
+                  <div className={`text-5xl font-black font-mono tracking-tight transition-transform ${
+                    isRolling ? 'scale-110 text-amber-400 animate-pulse' : 'text-white'
+                  }`}>
+                    #{rollIndex.toString().padStart(2, '0')}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleRollD60}
+                  disabled={isRolling}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-stone-950 font-black text-sm shadow-lg shadow-amber-500/25 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Dice5 className={`w-4 h-4 ${isRolling ? 'animate-spin' : ''}`} />
+                  <span>{isRolling ? '正在投掷 1d60...' : '🎲 立即投掷 1d60 抽取'}</span>
+                </button>
+
+                <div className="flex items-center gap-2 pt-1 text-xs text-stone-400">
+                  <span className="text-[11px] shrink-0">指定编号:</span>
+                  <input
+                    type="range"
+                    min={1}
+                    max={60}
+                    value={rollIndex}
+                    onChange={(e) => setRollIndex(Number(e.target.value))}
+                    className="w-full accent-amber-500 cursor-pointer"
+                  />
+                  <span className="font-mono text-amber-400 text-xs w-6">{rollIndex}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 右侧：抽取结果详细信息卡片 (8列) */}
+            <div className="lg:col-span-8">
+              {currentSeed && (
+                <div className="p-6 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-4 relative overflow-hidden">
+                  
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                          {rollCategory === 'loot' ? '💎 官方战利品' : '🧪 官方消耗品'} · 编号 #{rollIndex}
+                        </span>
+                        <span className="text-xs text-stone-500 font-mono">Daggerheart 官方种子</span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-white mt-1.5">
+                        {currentSeed.name}
+                      </h4>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleCopyEffect}
+                        className="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95"
+                      >
+                        {hasCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{hasCopied ? '已复制' : '复制效果'}</span>
+                      </button>
+
+                      <Link
+                        href={`/workshop?tool=${rollCategory === 'loot' ? 'item' : 'consumable'}`}
+                        className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold shadow-md transition-all flex items-center gap-1.5 active:scale-95"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>在工坊中制卡</span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-stone-900/80 border border-stone-800 text-sm text-stone-300 leading-relaxed">
+                    {currentSeed.description}
+                  </div>
+
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* 3. 官方与自制双向连携链路展示 */}
         <section id="workflow-section" className="p-6 sm:p-8 rounded-3xl border border-stone-800 bg-stone-900/40 backdrop-blur-md space-y-5">
           <div className="text-center max-w-2xl mx-auto space-y-1.5">
             <h3 className="text-base sm:text-lg font-bold text-white flex items-center justify-center gap-2">
@@ -428,7 +594,7 @@ export function PortalHub() {
               <span>数据互通流程</span>
             </h3>
             <p className="text-xs text-stone-400">
-              通过本地卡牌库（Vault）实现自制与官方数据的无缝流通
+              通过本地卡牌库实现自制与官方数据的无缝流通
             </p>
           </div>
 
@@ -477,7 +643,7 @@ export function PortalHub() {
           </div>
         </section>
 
-        {/* 3. 辅助指南与协议文档区 */}
+        {/* 4. 辅助指南与协议文档区 */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-stone-300 flex items-center gap-2">
@@ -522,7 +688,7 @@ export function PortalHub() {
           </div>
         </section>
 
-        {/* 4. 创作者社区、联系方式与开源致谢 Footer */}
+        {/* 5. 创作者社区、联系方式与开源致谢 Footer */}
         <section className="pt-6 border-t border-stone-800 space-y-6">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
