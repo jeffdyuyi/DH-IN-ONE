@@ -2,151 +2,148 @@
    爽博朋克：黑白灰极简打印与浅色模式样式表 (Cyberpunk Minimal Mono Theme)
    ========================================================================== */
 
+/* 强制基础背景与文字颜色 */
 .cyberpunk-light-mode,
-@media print {
-  /* 强制基础背景与文字颜色 */
-  .cyberpunk-light-mode,
-  body.print-preview {
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-  }
+body.print-preview {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
 
-  /* 顶部导航栏在浅色下纯白黑边 */
-  .cyberpunk-light-mode header {
-    background-color: #FFFFFF !important;
-    border-bottom: 1px solid #000000 !important;
-  }
+/* 顶部导航栏在浅色下纯白黑边 */
+.cyberpunk-light-mode header {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #000000 !important;
+}
 
-  /* 所有卡片和面板统一为白底、纯黑或深黑灰清晰边框 */
-  .cyberpunk-light-mode .backdrop-blur-md,
-  .cyberpunk-light-mode [class*="bg-white/["],
-  .cyberpunk-light-mode [class*="bg-black/"],
-  .cyberpunk-light-mode .rounded-2xl,
-  .cyberpunk-light-mode .rounded-xl {
-    background-color: #FFFFFF !important;
-    border-color: #CBD5E1 !important;
-    border-width: 1px !important;
-    box-shadow: none !important;
-  }
+/* 所有卡片和面板统一为白底、纯黑或深黑灰清晰边框 */
+.cyberpunk-light-mode .backdrop-blur-md,
+.cyberpunk-light-mode [class*="bg-white/["],
+.cyberpunk-light-mode [class*="bg-black/"],
+.cyberpunk-light-mode .rounded-2xl,
+.cyberpunk-light-mode .rounded-xl {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  border-width: 1px !important;
+  box-shadow: none !important;
+}
 
-  /* 面板高亮边框 */
-  .cyberpunk-light-mode .border-white\/10 {
-    border-color: #CBD5E1 !important;
-  }
+/* 面板高亮边框 */
+.cyberpunk-light-mode .border-white\/10 {
+  border-color: #CBD5E1 !important;
+}
 
-  .cyberpunk-light-mode .border-b {
-    border-bottom-color: #E2E8F0 !important;
-  }
+.cyberpunk-light-mode .border-b {
+  border-bottom-color: #E2E8F0 !important;
+}
 
-  /* 所有文字全部强制深色/纯黑，彻底解决看不清的问题 */
-  .cyberpunk-light-mode h1,
-  .cyberpunk-light-mode h2,
-  .cyberpunk-light-mode h3,
-  .cyberpunk-light-mode h4,
-  .cyberpunk-light-mode .text-white,
-  .cyberpunk-light-mode [class*="text-slate-100"],
-  .cyberpunk-light-mode [class*="text-slate-200"],
-  .cyberpunk-light-mode .font-black,
-  .cyberpunk-light-mode .font-extrabold,
-  .cyberpunk-light-mode .font-bold {
-    color: #0F172A !important;
-  }
+/* 所有文字全部强制深色/纯黑，彻底解决看不清的问题 */
+.cyberpunk-light-mode h1,
+.cyberpunk-light-mode h2,
+.cyberpunk-light-mode h3,
+.cyberpunk-light-mode h4,
+.cyberpunk-light-mode .text-white,
+.cyberpunk-light-mode [class*="text-slate-100"],
+.cyberpunk-light-mode [class*="text-slate-200"],
+.cyberpunk-light-mode .font-black,
+.cyberpunk-light-mode .font-extrabold,
+.cyberpunk-light-mode .font-bold {
+  color: #0F172A !important;
+}
 
-  /* 次级说明文字为清晰深灰 */
-  .cyberpunk-light-mode p,
-  .cyberpunk-light-mode [class*="text-slate-300"],
-  .cyberpunk-light-mode [class*="text-slate-400"],
-  .cyberpunk-light-mode [class*="text-slate-500"],
-  .cyberpunk-light-mode label {
-    color: #475569 !important;
-  }
+/* 次级说明文字为清晰深灰 */
+.cyberpunk-light-mode p,
+.cyberpunk-light-mode [class*="text-slate-300"],
+.cyberpunk-light-mode [class*="text-slate-400"],
+.cyberpunk-light-mode [class*="text-slate-500"],
+.cyberpunk-light-mode label {
+  color: #475569 !important;
+}
 
-  /* 消除荧光绿、黄色和粉色的刺眼/看不清，全部转换为黑白灰极简配色 */
-  .cyberpunk-light-mode .text-\[\#00FFA3\],
-  .cyberpunk-light-mode .text-\[\#F5F500\],
-  .cyberpunk-light-mode .text-\[\#FF007F\],
-  .cyberpunk-light-mode .text-\[\#6C00FF\] {
-    color: #0F172A !important;
-    font-weight: 700 !important;
-  }
+/* 消除荧光绿、黄色和粉色的刺眼/看不清，全部转换为黑白灰极简配色 */
+.cyberpunk-light-mode .text-\[\#00FFA3\],
+.cyberpunk-light-mode .text-\[\#F5F500\],
+.cyberpunk-light-mode .text-\[\#FF007F\],
+.cyberpunk-light-mode .text-\[\#6C00FF\] {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+}
 
-  .cyberpunk-light-mode [class*="bg-\[\#00FFA3\]"],
-  .cyberpunk-light-mode [class*="bg-\[\#F5F500\]"],
-  .cyberpunk-light-mode [class*="bg-\[\#FF007F\]"],
-  .cyberpunk-light-mode [class*="bg-\[\#6C00FF\]"] {
-    background-color: #F1F5F9 !important;
-    border-color: #94A3B8 !important;
-    color: #0F172A !important;
-  }
+.cyberpunk-light-mode [class*="bg-\[\#00FFA3\]"],
+.cyberpunk-light-mode [class*="bg-\[\#F5F500\]"],
+.cyberpunk-light-mode [class*="bg-\[\#FF007F\]"],
+.cyberpunk-light-mode [class*="bg-\[\#6C00FF\]"] {
+  background-color: #F1F5F9 !important;
+  border-color: #94A3B8 !important;
+  color: #0F172A !important;
+}
 
-  /* 标签 Badge 转换为经典白底黑边极简风 */
-  .cyberpunk-light-mode span.rounded,
-  .cyberpunk-light-mode span[class*="px-1.5"] {
-    background-color: #F8FAFC !important;
-    border-color: #64748B !important;
-    color: #0F172A !important;
-  }
+/* 标签 Badge 转换为经典白底黑边极简风 */
+.cyberpunk-light-mode span.rounded,
+.cyberpunk-light-mode span[class*="px-1.5"] {
+  background-color: #F8FAFC !important;
+  border-color: #64748B !important;
+  color: #0F172A !important;
+}
 
-  /* 输入框在浅色下为白底黑字、清晰细黑灰边 */
-  .cyberpunk-light-mode input,
-  .cyberpunk-light-mode textarea,
-  .cyberpunk-light-mode select {
-    background-color: #FFFFFF !important;
-    border: 1px solid #94A3B8 !important;
-    color: #0F172A !important;
-  }
+/* 输入框在浅色下为白底黑字、清晰细黑灰边 */
+.cyberpunk-light-mode input,
+.cyberpunk-light-mode textarea,
+.cyberpunk-light-mode select {
+  background-color: #FFFFFF !important;
+  border: 1px solid #94A3B8 !important;
+  color: #0F172A !important;
+}
 
-  .cyberpunk-light-mode input:focus,
-  .cyberpunk-light-mode textarea:focus,
-  .cyberpunk-light-mode select:focus {
-    border-color: #000000 !important;
-    outline: none !important;
-  }
+.cyberpunk-light-mode input:focus,
+.cyberpunk-light-mode textarea:focus,
+.cyberpunk-light-mode select:focus {
+  border-color: #000000 !important;
+  outline: none !important;
+}
 
-  /* 义体安装按钮与交互框 */
-  .cyberpunk-light-mode button[class*="border-dashed"] {
-    background-color: #F8FAFC !important;
-    border-color: #94A3B8 !important;
-    color: #0F172A !important;
-  }
+/* 义体安装按钮与交互框 */
+.cyberpunk-light-mode button[class*="border-dashed"] {
+  background-color: #F8FAFC !important;
+  border-color: #94A3B8 !important;
+  color: #0F172A !important;
+}
 
-  .cyberpunk-light-mode button[class*="border-dashed"]:hover {
-    background-color: #E2E8F0 !important;
-    border-color: #000000 !important;
-  }
+.cyberpunk-light-mode button[class*="border-dashed"]:hover {
+  background-color: #E2E8F0 !important;
+  border-color: #000000 !important;
+}
 
-  /* 消耗品圆圈标记状态 */
-  .cyberpunk-light-mode svg.lucide-circle {
-    stroke: #0F172A !important;
-  }
+/* 消耗品圆圈标记状态 */
+.cyberpunk-light-mode svg.lucide-circle {
+  stroke: #0F172A !important;
+}
 
-  .cyberpunk-light-mode svg.lucide-check-circle2 {
-    stroke: #64748B !important;
-    fill: #CBD5E1 !important;
-  }
+.cyberpunk-light-mode svg.lucide-check-circle2 {
+  stroke: #64748B !important;
+  fill: #CBD5E1 !important;
+}
 
-  /* 属性加减微调按钮 */
-  .cyberpunk-light-mode button[class*="bg-white/5"] {
-    background-color: #F1F5F9 !important;
-    border: 1px solid #CBD5E1 !important;
-    color: #0F172A !important;
-  }
+/* 属性加减微调按钮 */
+.cyberpunk-light-mode button[class*="bg-white/5"] {
+  background-color: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+}
 
-  .cyberpunk-light-mode button[class*="bg-white/5"]:hover {
-    background-color: #E2E8F0 !important;
-    color: #000000 !important;
-  }
+.cyberpunk-light-mode button[class*="bg-white/5"]:hover {
+  background-color: #E2E8F0 !important;
+  color: #000000 !important;
+}
 
-  /* 模态弹窗与下拉框黑白灰化 */
-  .cyberpunk-light-mode .fixed.inset-0 .bg-\[\#0B0320\],
-  .cyberpunk-light-mode .fixed.inset-0 .bg-black\/80 {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-  }
+/* 模态弹窗与下拉框黑白灰化 */
+.cyberpunk-light-mode .fixed.inset-0 .bg-\[\#0B0320\],
+.cyberpunk-light-mode .fixed.inset-0 .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
 
-  .cyberpunk-light-mode .fixed.inset-0 .rounded-2xl {
-    background-color: #FFFFFF !important;
-    border: 1px solid #475569 !important;
-  }
+.cyberpunk-light-mode .fixed.inset-0 .rounded-2xl {
+  background-color: #FFFFFF !important;
+  border: 1px solid #475569 !important;
 }
 
 /* 打印机实际出纸时的极致线框化 */
