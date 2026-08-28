@@ -39,16 +39,13 @@ interface ToolShowcase {
   themeColor: string
   glowClass: string
   btnColor: string
-  poster: {
-    category: string
-    cardTitle: string
-    cardSubtitle: string
-    stats?: { label: string; val: string }[]
-    tags: string[]
-    flavor: string
-    mechanics: string
-    footerInfo: string
-  }
+  imageSrc: string
+  imageFitContain?: boolean
+  badge: string
+  authorCredit: string
+  borderColor: string
+  glowShadow: string
+  tagBg: string
 }
 
 const SHOWCASE_LIST: ToolShowcase[] = [
@@ -65,21 +62,12 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     themeColor: 'cyan',
     glowClass: 'from-cyan-500/20 via-blue-500/10 to-transparent',
     btnColor: 'bg-cyan-500 hover:bg-cyan-400 text-stone-950 hover:shadow-[0_8px_24px_rgba(6,182,212,0.35)]',
-    poster: {
-      category: '赛博义体 · 植入件',
-      cardTitle: '「超光子」神经超频突触',
-      cardSubtitle: 'NEURAL OVERCLOCK SYNAPSE · T3',
-      stats: [
-        { label: '部位', val: '头部 (Head)' },
-        { label: '槽位', val: '1 槽' },
-        { label: '压力消耗', val: '+2 神经压力' },
-        { label: '手术费用', val: '8000 信用点' }
-      ],
-      tags: ['【黑市改造】', '【超频输出】', '【故障隐患】'],
-      flavor: '“当你能在千分之一秒内思考三次，整个世界的子弹都慢得像蜗牛。” —— 义体黑医 老K',
-      mechanics: '消耗 2 点神经压力开启突触超频，本轮灵巧检定掷骰结果额外增加 +1d8，若掷出 1 则承受 1 点严重伤害。',
-      footerInfo: '已适配 A4 极简浅色线框打印与海豹骰数据导出'
-    }
+    imageSrc: './images/shuangbopunk-cover.jpg',
+    badge: '《爽博朋克》原画封面',
+    authorCredit: '视觉渲染：狂炫巨大汉堡',
+    borderColor: 'border-cyan-500/40 hover:border-cyan-400',
+    glowShadow: 'shadow-[0_15px_45px_rgba(6,182,212,0.25)] hover:shadow-[0_20px_55px_rgba(6,182,212,0.35)]',
+    tagBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
   },
   {
     id: 'workshop',
@@ -94,21 +82,12 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     themeColor: 'amber',
     glowClass: 'from-amber-500/20 via-orange-500/10 to-transparent',
     btnColor: 'bg-amber-500 hover:bg-amber-400 text-stone-950 hover:shadow-[0_8px_24px_rgba(245,158,11,0.35)]',
-    poster: {
-      category: '战斗敌人卡 · 精英遭遇',
-      cardTitle: '荒原裂隙漫游者',
-      cardSubtitle: 'VOID RIFT WANDERER · T2',
-      stats: [
-        { label: '难度(DC)', val: '14' },
-        { label: '生命(HP)', val: '12' },
-        { label: '压力(Stress)', val: '5' },
-        { label: '伤害阈值', val: '轻 6 / 重 12' }
-      ],
-      tags: ['【近战物理】', '【暗影裂隙】', '【精英敌人】'],
-      flavor: '它穿梭于破碎的现实边缘，每一次呼吸都会引起周围空间的轻微坍塌。',
-      mechanics: '动作：裂隙突袭（近距 / 伤害 2d8+3）。被动：当漫游者受到物理伤害时，可消耗 1 点压力向任意方向瞬间传送 30 尺。',
-      footerInfo: '支持导出 FVTT 格式与 PNG 隐写数据卡'
-    }
+    imageSrc: './images/showcase-workshop.png',
+    badge: '战利品卡牌 · 寂静银戒',
+    authorCredit: '制作者：基德 · 万国图书馆',
+    borderColor: 'border-amber-500/40 hover:border-amber-400',
+    glowShadow: 'shadow-[0_15px_45px_rgba(245,158,11,0.25)] hover:shadow-[0_20px_55px_rgba(245,158,11,0.35)]',
+    tagBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40'
   },
   {
     id: 'campaign',
@@ -123,21 +102,12 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     themeColor: 'emerald',
     glowClass: 'from-emerald-500/20 via-teal-500/10 to-transparent',
     btnColor: 'bg-emerald-500 hover:bg-emerald-400 text-stone-950 hover:shadow-[0_8px_24px_rgba(16,185,129,0.35)]',
-    poster: {
-      category: '战役模组章节 · 第 2 章',
-      cardTitle: '地下管道的伏击与抉择',
-      cardSubtitle: 'ACT II: THE UNDERGROUND AMBUSH',
-      stats: [
-        { label: '环境险境', val: '废弃沉淀池 (DC 13)' },
-        { label: '遭遇敌人', val: '生化拾荒者 × 4' },
-        { label: '倒计时', val: '4 轮毒气蔓延' },
-        { label: '奖励战利品', val: 'd60 随机抽取 × 2' }
-      ],
-      tags: ['【朗读框】', '【判定分支】', '【数据表格】'],
-      flavor: '潮湿的水汽混合着刺鼻的机油味，锈蚀的铁栅栏后隐约传来某种金属碰撞的声音。',
-      mechanics: '朗读框：请向玩家描述四周的警报红光。若调查检定成功（DC 12），发现隐藏的安全气阀，关闭可解除倒计时机制。',
-      footerInfo: '已完美支持表格与块语法导出为 GitHub Markdown'
-    }
+    imageSrc: './images/showcase-campaign.png',
+    badge: '模组创作者 · 写稿中',
+    authorCredit: '不咕鸟战役写作工坊',
+    borderColor: 'border-emerald-500/40 hover:border-emerald-400',
+    glowShadow: 'shadow-[0_15px_45px_rgba(16,185,129,0.25)] hover:shadow-[0_20px_55px_rgba(16,185,129,0.35)]',
+    tagBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
   },
   {
     id: 'vault',
@@ -152,21 +122,12 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     themeColor: 'indigo',
     glowClass: 'from-indigo-500/20 via-violet-500/10 to-transparent',
     btnColor: 'bg-indigo-500 hover:bg-indigo-400 text-white hover:shadow-[0_8px_24px_rgba(99,102,241,0.35)]',
-    poster: {
-      category: '官方预装种子库 · d60 战利品',
-      cardTitle: '回音共鸣水晶',
-      cardSubtitle: 'ECHO RESONANCE CRYSTAL · 遗宝 #24',
-      stats: [
-        { label: '分类', val: '官方战利品' },
-        { label: '编号', val: 'd60 #24' },
-        { label: '属性加成', val: '本能 +1' },
-        { label: '跨界编译', val: '可转为躯干义体' }
-      ],
-      tags: ['【官方种子】', '【角色卡直装】', '【战役直插】'],
-      flavor: '水晶内部封存着远古风暴的微弱回响，贴近耳边时能听见未来的低语。',
-      mechanics: '当持有者进行本能检定掷出希望骰时，可额外清除 1 点压力。在爽博朋克车卡器中安装时自动转为「共鸣声纳发生器」。',
-      footerInfo: '支持批量勾选打包导出卡包与全量 JSON 备份'
-    }
+    imageSrc: './images/showcase-vault.jpg',
+    badge: '万国藏书阁 · 资料中枢',
+    authorCredit: '全生态数据储存',
+    borderColor: 'border-indigo-500/40 hover:border-indigo-400',
+    glowShadow: 'shadow-[0_15px_45px_rgba(99,102,241,0.25)] hover:shadow-[0_20px_55px_rgba(99,102,241,0.35)]',
+    tagBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
   },
   {
     id: 'standard',
@@ -181,21 +142,13 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     themeColor: 'rose',
     glowClass: 'from-rose-500/20 via-pink-500/10 to-transparent',
     btnColor: 'bg-rose-500 hover:bg-rose-400 text-white hover:shadow-[0_8px_24px_rgba(244,63,94,0.35)]',
-    poster: {
-      category: '核心职业卡 · 领域卡组',
-      cardTitle: '利刃潜行者',
-      cardSubtitle: 'ROGUE & MIDNIGHT DOMAIN',
-      stats: [
-        { label: '职业', val: '游荡者 (Rogue)' },
-        { label: '领域', val: '午夜 / 灵巧' },
-        { label: '敏捷', val: '+2' },
-        { label: '回避值', val: '12' }
-      ],
-      tags: ['【暗影斗篷】', '【偷袭刺击】', '【精准爆发】'],
-      flavor: '“在阴影中行动，在月光下消失。匕首所到之处，不留痕迹。”',
-      mechanics: '装配午夜领域卡「暗影步」，消耗 1 点希望潜入阴影，下一次攻击对未防备目标额外造成 1d8 伤害。',
-      footerInfo: '支持海豹骰格式导出与角色卡实时备份'
-    }
+    imageSrc: './images/showcase-standard.png',
+    imageFitContain: true,
+    badge: 'Daggerheart 官方核心',
+    authorCredit: '经典规则装配',
+    borderColor: 'border-rose-500/40 hover:border-rose-400',
+    glowShadow: 'shadow-[0_15px_45px_rgba(244,63,94,0.25)] hover:shadow-[0_20px_55px_rgba(244,63,94,0.35)]',
+    tagBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40'
   }
 ]
 
@@ -340,7 +293,7 @@ export function PortalHub() {
       {/* ================= 核心内容主区域 ================= */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
-        {/* 1. 海报滑动核心展区：左侧卡牌海报展示（适度缩放），右侧文本框说明 */}
+        {/* 1. 海报滑动核心展区：左侧统一尺寸海报展示，右侧文本框说明 */}
         <section 
           className="relative rounded-3xl border border-stone-800 bg-gradient-to-b from-stone-900/95 via-stone-950/95 to-[#0d0f17] p-6 sm:p-8 lg:p-10 shadow-2xl overflow-hidden backdrop-blur-xl transition-all"
           onMouseEnter={() => setIsAutoPlay(false)}
@@ -352,95 +305,31 @@ export function PortalHub() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
             
-            {/* 左侧：实体卡片/海报视觉展示区 (5列，适度缩放至与右文对称) */}
+            {/* 左侧：统一版面大小的封面海报卡片 (5列，固定 max-w-[280px] sm:max-w-[320px]) */}
             <div className="lg:col-span-5 flex justify-center items-center">
-              {activeTool.id === 'cyberpunk' ? (
-                /* 爽博朋克专属封面海报（适度缩放 max-w-[280px] sm:max-w-[320px]） */
-                <div className="w-full max-w-[280px] sm:max-w-[320px] rounded-2xl border border-cyan-500/40 bg-[#161822] shadow-[0_15px_45px_rgba(6,182,212,0.25)] overflow-hidden relative group hover:border-cyan-400 hover:shadow-[0_20px_55px_rgba(6,182,212,0.35)] transition-all duration-500">
-                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-stone-950 max-h-[400px]">
-                    <img 
-                      src="./images/shuangbopunk-cover.jpg" 
-                      alt="SHUANGBOPUNK 爽博朋克：渊边行者"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-50 pointer-events-none" />
-                  </div>
-
-                  {/* 底部精炼标注 */}
-                  <div className="px-3.5 py-2.5 bg-stone-900/95 backdrop-blur-md border-t border-cyan-500/30 flex items-center justify-between text-xs">
-                    <span className="text-stone-300 font-bold text-[11px]">《爽博朋克》原画封面</span>
-                    <span className="text-[11px] font-mono text-cyan-300 font-semibold bg-stone-950/80 px-2 py-0.5 rounded border border-cyan-500/20">
-                      视觉渲染：QQ 2077163152
-                    </span>
-                  </div>
+              <div className={`w-full max-w-[280px] sm:max-w-[320px] rounded-2xl border ${activeTool.borderColor} bg-[#161822] ${activeTool.glowShadow} overflow-hidden relative group transition-all duration-500`}>
+                
+                {/* 统一宽高比图片容器 (aspect-[2/3] max-h-[400px]) */}
+                <div className="relative aspect-[2/3] w-full overflow-hidden bg-stone-950 max-h-[400px] flex items-center justify-center">
+                  <img 
+                    src={activeTool.imageSrc} 
+                    alt={activeTool.title}
+                    className={`w-full h-full ${activeTool.imageFitContain ? 'object-contain p-6' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-40 pointer-events-none" />
                 </div>
-              ) : (
-                /* 其他工具的结构化卡片排版展示（适度缩放） */
-                <div className="w-full max-w-[320px] sm:max-w-[350px] rounded-2xl border border-stone-700/80 bg-[#161822] shadow-[0_15px_40px_rgba(0,0,0,0.6)] p-5 space-y-3.5 relative group hover:border-amber-500/70 hover:shadow-[0_15px_40px_rgba(245,158,11,0.15)] transition-all duration-300">
-                  
-                  {/* 卡牌顶栏 */}
-                  <div className="flex items-center justify-between border-b border-stone-700/60 pb-2.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700 group-hover:scale-105 transition-transform">
-                      {activeTool.poster.category}
-                    </span>
-                    <span className="text-[10px] text-stone-500 font-mono">
-                      DH-IN-ONE
-                    </span>
-                  </div>
 
-                  {/* 卡牌标题 */}
-                  <div>
-                    <h3 className="text-lg font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors">
-                      {activeTool.poster.cardTitle}
-                    </h3>
-                    <p className="text-[10px] font-mono text-amber-400/80 tracking-wider">
-                      {activeTool.poster.cardSubtitle}
-                    </p>
-                  </div>
-
-                  {/* 属性数据框 */}
-                  {activeTool.poster.stats && (
-                    <div className="grid grid-cols-2 gap-1.5 bg-stone-900/80 p-2.5 rounded-xl border border-stone-800">
-                      {activeTool.poster.stats.map((st, i) => (
-                        <div key={i} className="text-xs">
-                          <span className="text-stone-500 block text-[9px]">{st.label}</span>
-                          <span className="font-bold text-stone-200 text-xs">{st.val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 标签 */}
-                  <div className="flex flex-wrap gap-1">
-                    {activeTool.poster.tags.map((tg, i) => (
-                      <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-stone-800/80 text-stone-300 border border-stone-700/50">
-                        {tg}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* 效果机制说明 */}
-                  <div className="p-2.5 rounded-xl bg-stone-950/70 border border-stone-800/80 text-xs text-stone-300 leading-relaxed space-y-1">
-                    <div className="font-bold text-amber-400 text-[10px] flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      <span>规则机制</span>
-                    </div>
-                    <p className="text-[11px] leading-snug">{activeTool.poster.mechanics}</p>
-                  </div>
-
-                  {/* 风味文案 */}
-                  <p className="text-[10px] italic text-stone-400 leading-relaxed border-l-2 border-amber-500/50 pl-2">
-                    {activeTool.poster.flavor}
-                  </p>
-
-                  {/* 卡牌页脚 */}
-                  <div className="pt-2 border-t border-stone-800 text-[9px] text-stone-500 flex items-center justify-between">
-                    <span>{activeTool.poster.footerInfo}</span>
-                    <span className="text-amber-400">● 实时渲染</span>
-                  </div>
-
+                {/* 底部统一精炼标注栏 */}
+                <div className="px-3.5 py-2.5 bg-stone-900/95 backdrop-blur-md border-t border-stone-800 flex items-center justify-between text-xs">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${activeTool.tagBg}`}>
+                    {activeTool.badge}
+                  </span>
+                  <span className="text-[11px] font-mono text-stone-300 font-semibold bg-stone-950/80 px-2 py-0.5 rounded border border-stone-800">
+                    {activeTool.authorCredit}
+                  </span>
                 </div>
-              )}
+
+              </div>
             </div>
 
             {/* 右侧：文本框文字说明与快速操作区 (7列) */}
