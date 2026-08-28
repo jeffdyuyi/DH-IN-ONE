@@ -190,14 +190,9 @@ export function InstallExternalGearModal({
         {/* 头部 */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10 flex-shrink-0">
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/40">
-                外置装备挂载
-              </span>
-              <h3 className="font-bold text-base text-white">装配外置战术装备 / 无人机 / 作战武具</h3>
-            </div>
+            <h3 className="font-bold text-base text-white">添加外置装备</h3>
             <p className="text-xs text-slate-400 mt-1">
-              激活槽位状态：剩余 <span className="text-[#00FFA3] font-bold font-mono">{availableSlots}</span> 槽可用（上限 {maxSlots} 槽）
+              可用槽位：<span className="text-[#00FFA3] font-bold font-mono">{availableSlots}</span> / {maxSlots} 槽
             </p>
           </div>
           <button
@@ -219,7 +214,7 @@ export function InstallExternalGearModal({
             }`}
           >
             <Database className="w-3.5 h-3.5" />
-            <span>从公共卡库挑选</span>
+            <span>卡库选择</span>
           </button>
           <button
             onClick={() => setActiveTab('json')}
@@ -230,7 +225,7 @@ export function InstallExternalGearModal({
             }`}
           >
             <FileJson className="w-3.5 h-3.5" />
-            <span>卡牌工坊 JSON</span>
+            <span>导入 JSON</span>
           </button>
           <button
             onClick={() => setActiveTab('custom')}
@@ -241,7 +236,7 @@ export function InstallExternalGearModal({
             }`}
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>快捷自制外置装备</span>
+            <span>新建装备</span>
           </button>
         </div>
 
@@ -254,7 +249,7 @@ export function InstallExternalGearModal({
                 <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="搜索外置设备、武器、无人机、挂载..."
+                  placeholder="搜索外置装备..."
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                   className="w-full pl-9 pr-3 py-1.5 bg-[#12072B] border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00FFA3]"
@@ -269,7 +264,7 @@ export function InstallExternalGearModal({
                       filterType === t ? 'bg-[#00FFA3]/20 text-[#00FFA3] font-bold' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {t === 'cyberware' ? '赛博外置' : t === 'weapon' ? '武器' : t === 'armor' ? '护甲' : '全部'}
+                    {t === 'cyberware' ? '外置设备' : t === 'weapon' ? '武器' : t === 'armor' ? '护甲' : '全部'}
                   </button>
                 ))}
               </div>
@@ -278,28 +273,29 @@ export function InstallExternalGearModal({
             {/* 卡片列表 */}
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
               {loading ? (
-                <div className="py-12 text-center text-xs text-slate-400">正在检索公共卡牌库...</div>
+                <div className="py-12 text-center text-xs text-slate-400">正在检索卡库...</div>
               ) : vaultCards.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500">未找到匹配的外置装备或卡片</div>
+                <div className="py-12 text-center text-xs text-slate-500">未找到相关装备</div>
               ) : (
                 vaultCards.map((card) => {
                   const anyData = (card.data || {}) as Record<string, any>
-                  const isWeapon = card.category === 'weapon' || anyData.damage || anyData.zone === '主武器'
-                  const isArmor = card.category === 'armor' || anyData.score || anyData.armorScore || anyData.zone === '战术护甲'
+                  const slotCount = Number(anyData.slots) || (anyData.slotCost ? Number(anyData.slotCost) : 1)
+                  const isWeapon = card.category === 'weapon' || anyData.damage || anyData.zone === '主武器' || anyData.zone === '副武器'
+                  const isArmor = card.category === 'armor' || anyData.armorScore || anyData.score || anyData.zone === '护甲'
 
                   return (
                     <div
                       key={card.id}
-                      className="p-3 rounded-xl border border-white/10 bg-[#12072B] hover:border-[#00FFA3]/50 transition flex items-center justify-between gap-3 group"
+                      className="p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#00FFA3]/40 transition flex items-center justify-between gap-3"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
-                          <span className="font-bold text-xs text-white">{card.name}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/10 text-slate-300">
-                            {anyData.tier || 'T1'}
+                          <span className="font-bold text-xs text-white truncate">{card.name}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-mono">
+                            {slotCount} 槽
                           </span>
                           <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#00FFA3]/10 text-[#00FFA3]">
-                            {anyData.cyberType || anyData.zone || (isWeapon ? '外置武器' : isArmor ? '战术护甲' : '外置设备')}
+                            {anyData.cyberType || anyData.zone || (isWeapon ? '主武器' : isArmor ? '护甲' : '外置设备')}
                           </span>
                           {isWeapon && anyData.damage && (
                             <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#FF003C]/20 text-[#FF003C] font-mono font-bold">
@@ -313,7 +309,7 @@ export function InstallExternalGearModal({
                           )}
                         </div>
                         <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
-                          {anyData.effect || anyData.feature || card.description || '无详细机制说明'}
+                          {anyData.effect || anyData.feature || card.description || '无说明'}
                         </p>
                       </div>
 
@@ -322,7 +318,7 @@ export function InstallExternalGearModal({
                         className="px-3 py-1.5 text-xs font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/30 rounded-lg border border-[#00FFA3]/30 transition shrink-0 flex items-center space-x-1"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>装配</span>
+                        <span>添加</span>
                       </button>
                     </div>
                   )
@@ -336,12 +332,12 @@ export function InstallExternalGearModal({
         {activeTab === 'json' && (
           <div className="flex-1 flex flex-col space-y-3">
             <p className="text-xs text-slate-400">
-              在卡牌工坊中设计好“外置设备”卡片后，点击导出 JSON 并粘贴在下方：
+              粘贴卡牌工坊导出的卡牌 JSON：
             </p>
             <textarea
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
-              placeholder="在此粘贴卡牌工坊卡片 JSON..."
+              placeholder="在此粘贴卡片 JSON..."
               rows={8}
               className="w-full flex-1 p-3 bg-[#12072B] border border-white/10 rounded-xl text-xs font-mono text-[#00FFA3] focus:outline-none focus:border-[#00FFA3]"
             />
@@ -352,7 +348,7 @@ export function InstallExternalGearModal({
               onClick={handleImportJson}
               className="w-full py-2.5 bg-[#00FFA3] text-black font-bold text-xs rounded-xl shadow-lg hover:bg-[#00FFA3]/90 transition"
             >
-              解析并挂载外置设备
+              导入
             </button>
           </div>
         )}
@@ -368,7 +364,7 @@ export function InstallExternalGearModal({
                   required
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="例如: 红丸武士刀 / 便携战术目镜"
+                  placeholder="例如: 武士刀 / 便携目镜"
                   className="w-full p-2 bg-[#12072B] border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FFA3]"
                 />
               </div>
@@ -383,17 +379,13 @@ export function InstallExternalGearModal({
                   <option value="副武器">副武器</option>
                   <option value="护甲">护甲</option>
                   <option value="外置设备">外置设备</option>
-                  <option value="头部">头部</option>
-                  <option value="躯干">躯干</option>
-                  <option value="上肢">上肢</option>
-                  <option value="下肢">下肢</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] font-bold text-slate-300 block mb-1">占用激活槽</label>
+                <label className="text-[11px] font-bold text-slate-300 block mb-1">占用槽位</label>
                 <input
                   type="number"
                   min="1"
@@ -404,7 +396,7 @@ export function InstallExternalGearModal({
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[11px] font-bold text-slate-300 block mb-1">前置限制条件 (可留空)</label>
+                <label className="text-[11px] font-bold text-slate-300 block mb-1">限制条件 (可选)</label>
                 <input
                   type="text"
                   value={customRestriction}
@@ -417,7 +409,7 @@ export function InstallExternalGearModal({
 
             {/* 作战参数 (可选) */}
             <div className="p-3 rounded-lg border border-[#00FFA3]/30 bg-[#12072B]/60 space-y-2">
-              <span className="text-xs font-bold text-slate-200 block">作战属性 (主武器 / 副武器 / 护甲 - 可选)</span>
+              <span className="text-xs font-bold text-slate-200 block">作战属性 (可选)</span>
               <div className="grid grid-cols-4 gap-2">
                 <input
                   type="text"
@@ -477,11 +469,11 @@ export function InstallExternalGearModal({
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-slate-300 block mb-1">机制效果说明</label>
+              <label className="text-[11px] font-bold text-slate-300 block mb-1">说明</label>
               <textarea
                 value={customEffect}
                 onChange={(e) => setCustomEffect(e.target.value)}
-                placeholder="效果机制与战术能力说明..."
+                placeholder="效果说明..."
                 rows={3}
                 className="w-full p-2 bg-[#12072B] border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#00FFA3]"
               />

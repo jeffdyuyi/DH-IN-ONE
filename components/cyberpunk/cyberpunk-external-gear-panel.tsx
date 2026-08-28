@@ -104,13 +104,13 @@ export function CyberpunkExternalGearPanel({
           <Radio className="w-4 h-4 text-[#00FFA3] animate-pulse" />
           <div>
             <h2 className="text-sm font-bold text-white tracking-wide flex items-center gap-2">
-              <span>外置战术挂载与装备 (External Rig & Devices)</span>
+              <span>外置装备</span>
               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#00FFA3]/15 text-[#00FFA3] border border-[#00FFA3]/30">
                 位阶 {currentTier}
               </span>
             </h2>
             <p className="text-[11px] text-slate-400">
-              包含外置武器、护甲、战术目镜、无人机及战术外挂，受位阶激活槽位限制
+              包含主武器、副武器、护甲及其他外置设备，受位阶激活槽位限制
             </p>
           </div>
         </div>
@@ -138,7 +138,7 @@ export function CyberpunkExternalGearPanel({
             className="flex items-center gap-1 text-xs font-bold text-black bg-[#00FFA3] hover:bg-[#00FFA3]/90 px-2.5 py-1 rounded-lg shadow-sm transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>挂载外置装备</span>
+            <span>添加装备</span>
           </button>
         </div>
       </div>
@@ -146,7 +146,6 @@ export function CyberpunkExternalGearPanel({
       {/* 警告通知 */}
       {warningMessage && (
         <div className="p-2.5 rounded-lg bg-[#FF007F]/15 border border-[#FF007F]/40 text-[#FF007F] text-xs flex items-start gap-2 animate-fade-in">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="flex-1">{warningMessage}</div>
           <button
             type="button"
@@ -161,8 +160,8 @@ export function CyberpunkExternalGearPanel({
       {/* 装备列表 */}
       {gearList.length === 0 ? (
         <div className="py-6 text-center text-xs text-slate-500 rounded-xl border border-dashed border-white/10 bg-[#0B0320]/60">
-          <p>暂未挂载任何外置装备 / 无人机 / 外挂设备</p>
-          <p className="text-[11px] text-slate-600 mt-1">点击上方“挂载外置装备”可从公共库挑选或自制</p>
+          <p>暂无外置装备</p>
+          <p className="text-[11px] text-slate-600 mt-1">点击右上角“添加装备”从卡库选择或创建</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -194,7 +193,7 @@ export function CyberpunkExternalGearPanel({
                     <button
                       type="button"
                       onClick={() => handleToggleActive(gear.id)}
-                      title={gear.active ? '点击休眠 (释放槽位)' : '点击激活 (占用槽位)'}
+                      title={gear.active ? '点击休眠' : '点击激活'}
                       className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition-colors ${
                         gear.active
                           ? 'bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/40 shadow-sm'
@@ -214,7 +213,7 @@ export function CyberpunkExternalGearPanel({
                     <button
                       type="button"
                       onClick={() => handleRemove(gear.id)}
-                      title="卸载此装备"
+                      title="删除"
                       className="p-1 text-slate-500 hover:text-[#FF007F] transition-colors rounded"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -222,7 +221,7 @@ export function CyberpunkExternalGearPanel({
                   </div>
                 </div>
 
-                {/* 第二行：战术数值徽章 */}
+                {/* 第二行：数值与分类徽章 */}
                 <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10px]">
                   <span className="px-1.5 py-0.2 rounded bg-[#6C00FF]/20 text-[#6C00FF] border border-[#6C00FF]/30">
                     {gear.zone || '外置设备'}
@@ -261,37 +260,43 @@ export function CyberpunkExternalGearPanel({
                   </div>
                 )}
 
-                {/* 底部作战联动按钮 */}
-                <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
-                    {isWeapon && onEquipToCombatWeapon && (
-                      <div className="flex items-center gap-1">
+                {/* 操作栏：挂载到战斗插槽 */}
+                <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/5 text-[10px]">
+                  <div className="flex items-center gap-1.5">
+                    {isWeapon && (
+                      <>
                         <button
                           type="button"
-                          onClick={() => onEquipToCombatWeapon('primary', gear)}
-                          className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-1.5 py-0.5 rounded border border-[#F5F500]/30 transition-colors flex items-center gap-0.5"
+                          disabled={!gear.active}
+                          onClick={() => onEquipToCombatWeapon?.(gear, 'primary')}
+                          title={gear.active ? '设为主手' : '需激活后使用'}
+                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
                         >
-                          <Sword className="w-2.5 h-2.5" />
-                          <span>挂载为主手</span>
+                          <Crosshair className="w-3 h-3" />
+                          <span>设为主手</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => onEquipToCombatWeapon('secondary', gear)}
-                          className="text-[10px] font-bold text-slate-300 bg-white/10 hover:bg-white/20 px-1.5 py-0.5 rounded border border-white/20 transition-colors flex items-center gap-0.5"
+                          disabled={!gear.active}
+                          onClick={() => onEquipToCombatWeapon?.(gear, 'secondary')}
+                          title={gear.active ? '设为副手' : '需激活后使用'}
+                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
-                          <span>副手</span>
+                          设为副手
                         </button>
-                      </div>
+                      </>
                     )}
 
-                    {isArmor && onEquipToCombatArmor && (
+                    {isArmor && (
                       <button
                         type="button"
-                        onClick={() => onEquipToCombatArmor(gear)}
-                        className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-1.5 py-0.5 rounded border border-[#F5F500]/30 transition-colors flex items-center gap-0.5"
+                        disabled={!gear.active}
+                        onClick={() => onEquipToCombatArmor?.(gear)}
+                        title={gear.active ? '设为护甲' : '需激活后使用'}
+                        className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
                       >
-                        <Shield className="w-2.5 h-2.5" />
-                        <span>挂载为战术护甲</span>
+                        <Shield className="w-3 h-3" />
+                        <span>设为护甲</span>
                       </button>
                     )}
                   </div>
