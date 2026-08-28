@@ -24,6 +24,8 @@ import {
   FolderOpen,
   Github,
   HeartHandshake,
+  Home,
+  Cpu,
   Info,
   Layers,
   Megaphone,
@@ -325,6 +327,15 @@ function MainModeContent(props: MainModeProps) {
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end" side="top" className={cn("w-56", isMobile && "text-base")}>
+            <DropdownMenuItem onClick={() => navigateToPage("/")} className={cn(isMobile && "py-3 px-4", "font-bold text-amber-500")}>
+              <Home className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+              <span>返回主站门户 (Hub)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigateToPage("/cyberpunk")} className={cn(isMobile && "py-3 px-4", "font-bold text-cyan-400")}>
+              <Cpu className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+              <span>切换至爽博朋克车卡器</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={props.onOpenAnnouncements} className={cn(isMobile && "py-3 px-4")}>
               <Megaphone className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
               <span>更新公告</span>
