@@ -52,7 +52,7 @@ export function CyberpunkEquipActivation({
               </div>
             )}
             {primaryWeapon?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 line-clamp-2">
+              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {primaryWeapon.feature}
               </div>
             )}
@@ -81,7 +81,7 @@ export function CyberpunkEquipActivation({
               </div>
             )}
             {secondaryWeapon?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 line-clamp-2">
+              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {secondaryWeapon.feature}
               </div>
             )}
@@ -114,7 +114,7 @@ export function CyberpunkEquipActivation({
               </span>
             </div>
             {armorSlot?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 line-clamp-2">
+              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {armorSlot.feature}
               </div>
             )}

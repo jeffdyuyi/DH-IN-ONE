@@ -28,9 +28,9 @@ export function CyberpunkSlotItem({ aug, onUninstall }: CyberpunkSlotItemProps) 
           {aug.name}
         </h4>
 
-        <p className="text-[11px] text-slate-300 leading-relaxed mt-0.5 line-clamp-2">
-          {aug.effect}
-        </p>
+        <div className="text-[11px] text-slate-300 leading-relaxed mt-1 whitespace-pre-wrap break-words">
+          {formatMarkdownEffect(aug.effect)}
+        </div>
       </div>
 
       <button
@@ -42,4 +42,15 @@ export function CyberpunkSlotItem({ aug, onUninstall }: CyberpunkSlotItemProps) 
       </button>
     </div>
   )
+}
+
+function formatMarkdownEffect(text: string | undefined) {
+  if (!text) return null
+  const parts = text.split(/(\*\*.*?\*\*)/g)
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={idx} className="font-bold text-amber-300">{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
 }
