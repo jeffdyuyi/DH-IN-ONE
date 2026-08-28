@@ -1,103 +1,178 @@
 "use client"
 
 import React, { useState } from 'react'
-import type { StandardCard } from '../../card/card-types'
-import { Eye, X, BookOpen, Layers } from 'lucide-react'
+import { useSheetStore } from '@/lib/sheet-store'
+import { useCardStore } from '@/card/stores/unified-card-store'
+import type { StandardCard } from '@/card/card-types'
+import { BookOpen, Eye, ChevronDown, ChevronUp } from 'lucide-react'
+import { CardMarkdown } from '@/components/ui/card-markdown'
+import rehypeRaw from 'rehype-raw'
 
-interface ModalCardState {
-  title: string
-  card?: StandardCard | null
-  text?: string
-}
+export function CyberpunkFeaturesDetailPanel() {
+  const formData = useSheetStore((state) => state.sheetData)
+  const cardStore = useCardStore()
 
-interface CyberpunkFeaturesDetailPanelProps {
-  cards?: StandardCard[]
-  professionCard?: StandardCard | null
-  subclassCard?: StandardCard | null
-  ancestry1Card?: StandardCard | null
-  ancestry2Card?: StandardCard | null
-  communityCard?: StandardCard | null
-}
+  const [activeModalCard, setActiveModalCard] = useState<{ title: string; card?: StandardCard | null; text?: string } | null>(null)
+  const [isExpanded, setIsExpanded] = useState(true)
 
-export function CyberpunkFeaturesDetailPanel({
-  cards = [],
-  professionCard,
-  subclassCard,
-  ancestry1Card,
-  ancestry2Card,
-  communityCard,
-}: CyberpunkFeaturesDetailPanelProps) {
-  const [activeModalCard, setActiveModalCard] = useState<ModalCardState | null>(null)
+  // 1. 职业卡 (cards[0] 或 professionRef)
+  const professionCard: StandardCard | undefined =
+    (formData.cards && formData.cards[0]) ||
+    (formData.professionRef?.id ? cardStore.getCardById(formData.professionRef.id) : undefined)
 
-  const featureItems = [
-    { title: '职业特性', card: professionCard },
-    { title: '子职业特性', card: subclassCard },
-    { title: '种族特性一', card: ancestry1Card },
-    { title: '种族特性二', card: ancestry2Card },
-    { title: '社群特性', card: communityCard },
-  ].filter(item => item.card && item.card.name)
+  // 2. 种族特性一 (cards[1] 或 ancestry1Ref)
+  const ancestry1Card: StandardCard | undefined =
+    (formData.cards && formData.cards[1]) ||
+    (formData.ancestry1Ref?.id ? cardStore.getCardById(formData.ancestry1Ref.id) : undefined)
+
+  // 3. 种族特性二 (cards[2] 或 ancestry2Ref)
+  const ancestry2Card: StandardCard | undefined =
+    (formData.cards && formData.cards[2]) ||
+    (formData.ancestry2Ref?.id ? cardStore.getCardById(formData.ancestry2Ref.id) : undefined)
+
+  // 4. 社群特性 (cards[3] 或 communityRef)
+  const communityCard: StandardCard | undefined =
+    (formData.cards && formData.cards[3]) ||
+    (formData.communityRef?.id ? cardStore.getCardById(formData.communityRef.id) : undefined)
+
+  // 5. 子职业特性 (cards[4] 或 subclassRef)
+  const subclassCard: StandardCard | undefined =
+    (formData.cards && formData.cards[4]) ||
+    (formData.subclassRef?.id ? cardStore.getCardById(formData.subclassRef.id) : undefined)
+
+  const featuresList = [
+    {
+      title: '职业特性',
+      name: formData.profession || professionCard?.name || '（未选定职业）',
+      card: professionCard,
+      desc: professionCard?.description || (professionCard as any)?.feature || '请先在基础信息中选择职业',
+      tagColor: 'text-[#FCEE0A] border-[#FCEE0A]/40 bg-[#FCEE0A]/10',
+    },
+    {
+      title: '子职业特性',
+      name: formData.subclass || subclassCard?.name || '（未选定子职业）',
+      card: subclassCard,
+      desc: subclassCard?.description || (subclassCard as any)?.feature || '请先在基础信息中选择子职业',
+      tagColor: 'text-purple-400 border-purple-500/40 bg-purple-950/30',
+    },
+    {
+      title: '种族特性一',
+      name: formData.ancestry1 || ancestry1Card?.name || '（未选定种族一）',
+      card: ancestry1Card,
+      desc: ancestry1Card?.description || (ancestry1Card as any)?.feature || '请先在基础信息中选择种族特性一',
+      tagColor: 'text-[#00F0FF] border-[#00F0FF]/40 bg-[#00F0FF]/10',
+    },
+    {
+      title: '种族特性二',
+      name: formData.ancestry2 || ancestry2Card?.name || '（未选定种族二）',
+      card: ancestry2Card,
+      desc: ancestry2Card?.description || (ancestry2Card as any)?.feature || '请先在基础信息中选择种族特性二',
+      tagColor: 'text-[#00F0FF] border-[#00F0FF]/40 bg-[#00F0FF]/10',
+    },
+    {
+      title: '社群特性',
+      name: formData.community || communityCard?.name || '（未选定社群）',
+      card: communityCard,
+      desc: communityCard?.description || (communityCard as any)?.feature || '请先在基础信息中选择社群',
+      tagColor: 'text-emerald-400 border-emerald-500/40 bg-emerald-950/30',
+    },
+  ]
 
   return (
-    <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-xs text-[#00FFA3] uppercase tracking-wider flex items-center space-x-1.5">
-          <BookOpen className="w-3.5 h-3.5" />
-          <span>核心角色与背景特性文案 ({featureItems.length})</span>
-        </h3>
-        <span className="text-[10px] text-slate-500">点击卡片展开阅读完整裁决文案</span>
+    <div className="rounded-xl border border-slate-800 bg-[#0d0d1a] p-4 text-slate-100 font-sans shadow-md">
+      {/* 头部切换 */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-[#00F0FF]" />
+          <h3 className="text-sm font-bold text-white">身份特性与能力详情</h3>
+          <span className="text-[11px] text-slate-400">（职业专精、子职、双种族特性与社群）</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-xs text-slate-400 hover:text-white"
+        >
+          <span>{isExpanded ? '收起' : '展开'}</span>
+          {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
       </div>
 
-      {featureItems.length === 0 ? (
-        <p className="text-xs text-slate-500 py-3 text-center">暂未选择基础职业或种族社群</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          {featureItems.map((item, idx) => (
+      {isExpanded && (
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {featuresList.map((item, idx) => (
             <div
-              key={idx}
-              onClick={() => setActiveModalCard(item)}
-              className="p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#00FFA3]/50 transition cursor-pointer flex items-center justify-between group"
+              key={`feature_${idx}`}
+              className="flex flex-col justify-between rounded-lg border border-slate-800 bg-[#0f0f22] p-3 hover:border-slate-700 transition-colors"
             >
-              <div className="pr-2">
-                <span className="text-[10px] text-slate-400 block">{item.title}</span>
-                <h4 className="font-bold text-xs text-white group-hover:text-[#00FFA3] transition truncate">
-                  {item.card?.name}
-                </h4>
+              <div>
+                <div className="flex items-center justify-between gap-1">
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${item.tagColor}`}>
+                    {item.title}
+                  </span>
+                  {item.card && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveModalCard({ title: `${item.title}: ${item.name}`, card: item.card })}
+                      className="flex items-center gap-1 text-[11px] text-cyan-400 hover:underline font-bold"
+                    >
+                      <Eye className="h-3 w-3" />
+                      <span>全文</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-1.5 font-bold text-xs text-white truncate" title={item.name}>
+                  {item.name}
+                </div>
+
+                <div className="mt-1 text-[11px] text-slate-300 leading-relaxed max-h-24 overflow-hidden">
+                  <CardMarkdown rehypePlugins={[rehypeRaw]}>
+                    {item.desc}
+                  </CardMarkdown>
+                </div>
               </div>
-              <Eye className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#00FFA3] transition flex-shrink-0" />
+
+              {item.card?.level && (
+                <div className="mt-2 pt-1 border-t border-slate-800/80 text-[10px] text-slate-500 font-mono">
+                  等级: Lv.{item.card.level}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* 特性全文弹窗 */}
+      {/* 全文查看弹窗 */}
       {activeModalCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#0B0320] text-slate-100 p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-lg rounded-xl border border-slate-700 bg-white text-gray-900 p-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-2 mb-3">
               <div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#00FFA3]/10 text-[#00FFA3]">
-                  {activeModalCard.title}
-                </span>
-                <h3 className="font-bold text-base text-white mt-1">
+                <div className="text-xs font-bold text-cyan-700">{activeModalCard.title}</div>
+                <div className="text-base font-bold text-gray-900 mt-0.5">
                   {activeModalCard.card?.name || '特性详情'}
-                </h3>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setActiveModalCard(null)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition"
+                className="h-7 w-7 rounded bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"
               >
-                <X className="w-5 h-5" />
+                ✕
               </button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto pr-1 text-xs text-slate-300 leading-relaxed bg-black/30 p-4 rounded-xl border border-white/5 whitespace-pre-wrap">
-              {activeModalCard.card?.description || (activeModalCard.card as any)?.feature || activeModalCard.text || '暂无详细描述'}
+            <div className="max-h-[60vh] overflow-y-auto pr-2 text-xs text-gray-800 space-y-2 leading-relaxed">
+              <CardMarkdown rehypePlugins={[rehypeRaw]}>
+                {activeModalCard.card?.description || (activeModalCard.card as any)?.feature || activeModalCard.text || '暂无详细描述'}
+              </CardMarkdown>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-end border-t pt-2">
               <button
+                type="button"
                 onClick={() => setActiveModalCard(null)}
-                className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition"
+                className="rounded bg-gray-900 px-4 py-1.5 text-xs font-bold text-white hover:bg-gray-800"
               >
                 关闭
               </button>

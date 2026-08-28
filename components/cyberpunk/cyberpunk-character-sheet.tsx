@@ -1,181 +1,624 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import type { SheetData } from '../../lib/sheet-data'
-import type { CyberpunkSheetExtension } from '../../types/cyberpunk'
-import { defaultSheetData } from '../../lib/default-sheet-data'
-import { loadCharacterSheet, saveCharacterSheet } from '../../character/storage/character-save-storage'
-import { loadCharacterList } from '../../lib/multi-character-storage'
+import { useSheetStore, type WeaponSelectionInput, type ArmorSelectionInput } from '@/lib/sheet-store'
+import type { CyberpunkSheetExtension } from '@/types/cyberpunk'
+import { DEFAULT_CYBERPUNK_EXTENSION } from '@/lib/cyberpunk/tier-constants'
+import { CardType, type StandardCard } from '@/card/card-types'
+import { useCardStore } from '@/card/stores/unified-card-store'
+
+// 爽博朋克专有组件
 import { CyberpunkTopBar } from './cyberpunk-top-bar'
-import { CyberpunkAttributesHopePanel } from './cyberpunk-attributes-hope-panel'
-import { CyberpunkZonePanel } from './cyberpunk-zone-panel'
 import { CyberpunkThresholdDisplay } from './cyberpunk-threshold-display'
-import { CyberpunkConsumablesBar } from './cyberpunk-consumables-bar'
-import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
+import { CyberpunkAttributesHopePanel } from './cyberpunk-attributes-hope-panel'
 import { CyberpunkFeaturesDetailPanel } from './cyberpunk-features-detail-panel'
-import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
+import { CyberpunkConsumablesBar } from './cyberpunk-consumables-bar'
+import { CyberpunkZonePanel } from './cyberpunk-zone-panel'
+import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkEquipActivation } from './cyberpunk-equip-activation'
+import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import './cyberpunk-light-minimal.css'
 
+// 核心车卡器模态框与通用组件
+import { GenericCardSelectionModal } from '@/components/modals/generic-card-selection-modal'
+import { CardSelectionModal } from '@/components/modals/card-selection-modal'
+import { WeaponSelectionModal } from '@/components/modals/weapon-selection-modal'
+import { ArmorSelectionModal } from '@/components/modals/armor-selection-modal'
+import { CharacterManagementModal } from '@/components/modals/character-management-modal'
+import { CharacterCreationGuide } from '@/components/guide/character-creation-guide'
+import { FloatingNotebook } from '@/components/notebook'
+import { SealDiceExportModal } from '@/components/modals/seal-dice-export-modal'
+import { AnnouncementsModal } from '@/components/modals/announcements-modal'
+import { BottomDock } from '@/components/layout/bottom-dock'
+import { useCharacterManagement } from '@/hooks/use-character-management'
+import { useExportHandlers } from '@/hooks/use-export-handlers'
+import { announcements, isLatestAnnouncementRead, markLatestAnnouncementRead } from '@/lib/announcements'
+import { User, CheckCircle2 } from 'lucide-react'
+
 export function CyberpunkCharacterSheet() {
-  const [formData, setFormData] = useState<SheetData>(defaultSheetData)
-  const [isLightPreview, setIsLightPreview] = useState<boolean>(false)
-  const [saveName, setSaveName] = useState<string>('默认角色')
-  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(null)
-  const [saveToast, setSaveToast] = useState<boolean>(false)
+  // Store 状态与动作
+  const formData = useSheetStore((state) => state.sheetData)
+  const setFormData = useSheetStore((state) => state.setSheetData)
+  const selectCardForSlot = useSheetStore((state) => state.selectCardForSlot)
+  const deleteCard = useSheetStore((state) => state.deleteCard)
+  const selectCharacterChoiceCard = useSheetStore((state) => state.selectCharacterChoiceCard)
+  const handleProfessionChange = useSheetStore((state) => state.handleProfessionChange)
+  const selectWeapon = useSheetStore((state) => state.selectWeapon)
+  const selectArmorSlot = useSheetStore((state) => state.selectArmorSlot)
 
-  // 初始化加载当前活动角色
+  // 卡牌数据库 store
+  const cardStore = useCardStore()
+
+  // 浅色/极简黑白打印预览状态
+  const [isLightPreview, setIsLightPreview] = useState(false)
+  const [saveToast, setSaveToast] = useState(false)
+
+  // 移动端检测
+  const [isMobile, setIsMobile] = useState(false)
   useEffect(() => {
-    const list = loadCharacterList()
-    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-    const queryId = urlParams?.get('id')
-    const targetId = queryId || list.activeCharacterId || list.characters[0]?.id
-
-    if (targetId) {
-      setCurrentCharacterId(targetId)
-      const meta = list.characters.find(c => c.id === targetId)
-      if (meta) setSaveName(meta.saveName)
-
-      loadCharacterSheet(targetId).then((sheet) => {
-        if (sheet) {
-          setFormData(sheet)
-        }
-      })
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window)
     }
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    return () => window.removeEventListener('resize', checkIsMobile)
   }, [])
 
-  // 保存当前角色卡
-  const handleSave = async () => {
-    if (!currentCharacterId) return
-    try {
-      await saveCharacterSheet(currentCharacterId, formData)
-      setSaveToast(true)
-      setTimeout(() => setSaveToast(false), 2000)
-    } catch (e) {
-      console.error('Failed to save cyberpunk character sheet:', e)
-    }
+  // 1. 多角色存档管理
+  const [characterManagementModalOpen, setCharacterManagementModalOpen] = useState(false)
+  const openCharacterManagementModal = () => setCharacterManagementModalOpen(true)
+  const closeCharacterManagementModal = () => setCharacterManagementModalOpen(false)
+
+  const {
+    characterList,
+    currentCharacterId,
+    switchToCharacter,
+    createNewCharacterHandler,
+    createImportedCharacterHandler,
+    deleteCharacterHandler,
+    duplicateCharacterHandler,
+    renameCharacterHandler,
+    handleQuickCreateArchive,
+  } = useCharacterManagement({
+    isClient: true,
+    setCurrentTabValue: () => {},
+  })
+
+  // 2. 导出功能 Hook
+  const {
+    handlePrintAll,
+    handleExportHTML,
+    handleExportJSON,
+    handleQuickExportPDF,
+    handleQuickExportHTML,
+    handleQuickExportJSON,
+  } = useExportHandlers({
+    formData,
+    setIsPrintingAll: () => {},
+  })
+
+  // 3. 通用功能浮窗状态（建卡指引、骰子导出、更新公告）
+  const [isGuideOpen, setIsGuideOpen] = useState(false)
+  const [sealDiceExportModalOpen, setSealDiceExportModalOpen] = useState(false)
+  const [announcementsModalOpen, setAnnouncementsModalOpen] = useState(false)
+  const [hasUnreadAnnouncements, setHasUnreadAnnouncements] = useState(false)
+
+  useEffect(() => {
+    setHasUnreadAnnouncements(!isLatestAnnouncementRead())
+  }, [])
+
+  const openAnnouncementsModal = () => {
+    markLatestAnnouncementRead()
+    setHasUnreadAnnouncements(false)
+    setAnnouncementsModalOpen(true)
   }
 
-  // 爽博朋克特化数据更新
-  const cyberpunkData: CyberpunkSheetExtension = formData?.cyberpunkData || {
-    tier: 'T1',
-    credits: 0,
-    zones: {},
-    illegalMods: [],
-    consumables: [],
-  }
+  // 爽博朋克特化数据
+  const cyberpunkData: CyberpunkSheetExtension = formData?.cyberpunkData || DEFAULT_CYBERPUNK_EXTENSION
 
   const handleCyberpunkChange = (updated: CyberpunkSheetExtension) => {
     setFormData((prev) => ({
       ...prev,
+      campaignMode: 'cyberpunk',
       cyberpunkData: updated,
     }))
   }
 
-  return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${
-      isLightPreview
-        ? 'cyberpunk-light-mode bg-white text-slate-900 selection:bg-slate-300 selection:text-black'
-        : 'bg-[#0B0320] text-slate-100 selection:bg-[#FF007F] selection:text-white'
-    }`}>
-      {/* 顶部主导航栏 */}
-      <CyberpunkTopBar
-        characterName={formData.name}
-        saveName={saveName}
-        level={formData.level || '1'}
-        isLightPreview={isLightPreview}
-        onToggleLightPreview={() => setIsLightPreview(!isLightPreview)}
-        onSave={handleSave}
-      />
+  // 快速保存提示
+  const handleQuickSave = () => {
+    setSaveToast(true)
+    setTimeout(() => setSaveToast(false), 2000)
+  }
 
-      {/* 主体页面内容 (第 1 页: 核心战斗机体) */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* 1. 角色基本身份行 */}
-        <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1">角色姓名</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#00FFA3]"
+  // 4. 数据库选择模态框状态 (支持 levelFilter 区分种族特性一 / 二)
+  const [genericModalState, setGenericModalState] = useState<{
+    isOpen: boolean
+    type: 'profession' | 'ancestry' | 'community' | 'subclass'
+    field?: string
+    levelFilter?: number
+  }>({
+    isOpen: false,
+    type: 'profession',
+  })
+
+  const [domainModalState, setDomainModalState] = useState<{
+    isOpen: boolean
+    slotIndex: number
+    isVault: boolean
+  }>({
+    isOpen: false,
+    slotIndex: 5,
+    isVault: false,
+  })
+
+  const [weaponModalOpen, setWeaponModalOpen] = useState(false)
+  const [activeWeaponSlot, setActiveWeaponSlot] = useState<'primary' | 'secondary'>('primary')
+  const [armorModalOpen, setArmorModalOpen] = useState(false)
+
+  // 处理通用卡牌库选择（种族/职业/社群/子职业）
+  const handleGenericCardSelect = (cardId: string, field?: string) => {
+    const card = cardStore.getCardById(cardId)
+    if (!card) return
+
+    if (genericModalState.type === 'profession') {
+      let fullName = card.name
+      if (card.cardSelectDisplay?.item1 && card.cardSelectDisplay?.item2) {
+        fullName = `${card.name} - ${card.cardSelectDisplay.item1}&${card.cardSelectDisplay.item2}`
+      }
+      handleProfessionChange({ id: card.id, name: fullName }, card)
+      setFormData((prev) => ({
+        ...prev,
+        profession: card.name,
+      }))
+    } else if (genericModalState.type === 'ancestry' && field) {
+      const kind = field === 'ancestry1' ? 'ancestry1' : 'ancestry2'
+      selectCharacterChoiceCard(kind, { id: card.id, name: card.name }, card)
+      setFormData((prev) => ({
+        ...prev,
+        [field]: card.name,
+      }))
+    } else if (genericModalState.type === 'community') {
+      selectCharacterChoiceCard('community', { id: card.id, name: card.name }, card)
+      setFormData((prev) => ({
+        ...prev,
+        community: card.name,
+      }))
+    } else if (genericModalState.type === 'subclass') {
+      selectCharacterChoiceCard('subclass', { id: card.id, name: card.name }, card)
+      setFormData((prev) => ({
+        ...prev,
+        subclass: card.name,
+      }))
+    }
+
+    setGenericModalState((prev) => ({ ...prev, isOpen: false }))
+  }
+
+  // 处理领域卡选择与删除
+  const handleDomainCardSelect = (selectedCard: StandardCard) => {
+    selectCardForSlot({
+      zone: domainModalState.isVault ? 'vault' : 'loadout',
+      index: domainModalState.slotIndex,
+      template: selectedCard,
+    })
+    setDomainModalState((prev) => ({ ...prev, isOpen: false }))
+  }
+
+  const handleDomainCardRemove = (index: number, isVault = false) => {
+    deleteCard(index, isVault)
+  }
+
+  // 处理武器与护甲选择
+  const handleWeaponSelect = (input: WeaponSelectionInput) => {
+    selectWeapon({ slotType: activeWeaponSlot }, input)
+    setWeaponModalOpen(false)
+  }
+
+  const handleArmorSelect = (input: ArmorSelectionInput) => {
+    selectArmorSlot(input)
+    setArmorModalOpen(false)
+  }
+
+  // 快速导入 HTML
+  const handleQuickImportFromHTML = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.html,.htm'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        try {
+          const { importCharacterFromHTMLFile } = await import('@/lib/html-importer')
+          const result = await importCharacterFromHTMLFile(file)
+
+          if (result.success && result.data) {
+            const characterName = result.data.name || '未命名角色'
+            const defaultSaveName = `${characterName} (导入)`
+            const saveName = prompt('请输入新存档的名称:', defaultSaveName)
+            if (saveName && saveName.trim()) {
+              const success = await createImportedCharacterHandler(saveName.trim(), result.data)
+              if (success) {
+                alert(`HTML导入成功并创建新存档 "${saveName}"`)
+              }
+            }
+          } else {
+            alert(`HTML导入失败：${result.error}`)
+          }
+        } catch (error) {
+          console.error('HTML导入失败:', error)
+          alert('HTML导入失败: ' + (error instanceof Error ? error.message : '未知错误'))
+        }
+      }
+    }
+    input.click()
+  }
+
+  // 当前激活存档名称
+  const currentArchiveMeta = characterList.find((c) => c.id === currentCharacterId)
+  const currentSaveName = currentArchiveMeta?.saveName || formData?.name || '默认存档'
+
+  return (
+    <div
+      className={`min-h-screen transition-colors duration-200 ${
+        isLightPreview
+          ? 'cyberpunk-light-mode bg-white text-slate-900'
+          : 'bg-[#070710] text-slate-100'
+      } p-3 sm:p-5 font-sans pb-36`}
+    >
+      <div className="mx-auto max-w-7xl space-y-4">
+        {/* 1. 顶部控制 HUD (角色身份、位阶、经济、浅色预览与 A4 打印) */}
+        <CyberpunkTopBar
+          cyberpunkData={cyberpunkData}
+          characterName={formData?.name || '未命名角色'}
+          saveName={currentSaveName}
+          level={formData?.level || '1'}
+          onChange={handleCyberpunkChange}
+          onOpenCharacterManagement={openCharacterManagementModal}
+          isLightPreview={isLightPreview}
+          onToggleLightPreview={() => setIsLightPreview(!isLightPreview)}
+          onSave={handleQuickSave}
+        />
+
+        {/* 保存成功提示 */}
+        {saveToast && (
+          <div className="fixed top-20 right-6 z-50 flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xl animate-fade-in">
+            <CheckCircle2 className="h-4 w-4" />
+            <span>角色卡数据已即时保存！</span>
+          </div>
+        )}
+
+        {/* 2. 伤害阈值 HUD (含巨额伤害可选房规开关) */}
+        <CyberpunkThresholdDisplay
+          cyberpunkData={cyberpunkData}
+          armorMinor={formData?.equipment?.armorSlot?.baseThresholds?.minor || 0}
+          armorMajor={formData?.equipment?.armorSlot?.baseThresholds?.major || 0}
+          equippedArmorName={formData?.equipment?.armorSlot?.name}
+        />
+
+        {/* 3. 角色基础身份信息矩阵 */}
+        <div className="rounded-xl border border-slate-800 bg-[#0d0d1a] p-4 shadow-md">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3">
+            <User className="h-4 w-4 text-[#00F0FF]" />
+            <h2 className="text-sm font-bold text-white">基础信息</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+            {/* 角色姓名 */}
+            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5">
+              <label className="text-[11px] text-slate-400 font-bold block">角色姓名 / 代号</label>
+              <input
+                type="text"
+                value={formData?.name || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
+                placeholder="输入姓名..."
+                className="mt-1 w-full rounded border border-slate-700 bg-black/60 px-2 py-1 text-xs font-bold text-cyan-300 focus:border-cyan-400 focus:outline-none font-mono"
+              />
+            </div>
+
+            {/* 种族特性一 (限定特性一 levelFilter: 1) */}
+            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] text-slate-400 font-bold">种族特性一</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGenericModalState({
+                        isOpen: true,
+                        type: 'ancestry',
+                        field: 'ancestry1',
+                        levelFilter: 1,
+                      })
+                    }
+                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                  >
+                    选择 ⇄
+                  </button>
+                </div>
+                <div className="mt-1 font-bold text-xs text-white truncate">
+                  {formData?.ancestry1 || '（未选择）'}
+                </div>
+              </div>
+            </div>
+
+            {/* 种族特性二 (限定特性二 levelFilter: 2) */}
+            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] text-slate-400 font-bold">种族特性二</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGenericModalState({
+                        isOpen: true,
+                        type: 'ancestry',
+                        field: 'ancestry2',
+                        levelFilter: 2,
+                      })
+                    }
+                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                  >
+                    选择 ⇄
+                  </button>
+                </div>
+                <div className="mt-1 font-bold text-xs text-white truncate">
+                  {formData?.ancestry2 || '（未选择）'}
+                </div>
+              </div>
+            </div>
+
+            {/* 职业与子职业 */}
+            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] text-slate-400 font-bold">职业 / 子职业</label>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGenericModalState({
+                          isOpen: true,
+                          type: 'profession',
+                        })
+                      }
+                      className="text-[10px] font-bold text-[#FCEE0A] bg-[#FCEE0A]/15 hover:bg-[#FCEE0A]/25 px-1.5 py-0.5 rounded border border-[#FCEE0A]/30 transition-colors"
+                    >
+                      职业 ⇄
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGenericModalState({
+                          isOpen: true,
+                          type: 'subclass',
+                          levelFilter: 1,
+                        })
+                      }
+                      className="text-[10px] font-bold text-purple-400 bg-purple-950/50 hover:bg-purple-900/60 px-1.5 py-0.5 rounded border border-purple-700/40 transition-colors"
+                    >
+                      子职 ⇄
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-1 font-bold text-xs text-white truncate">
+                  {formData?.profession || '（未选择）'}
+                  {formData?.subclass ? ` · ${formData.subclass}` : ''}
+                </div>
+              </div>
+            </div>
+
+            {/* 社群 */}
+            <div className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] text-slate-400 font-bold">社群</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGenericModalState({
+                        isOpen: true,
+                        type: 'community',
+                      })
+                    }
+                    className="text-[10px] font-bold text-[#00F0FF] bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 px-1.5 py-0.5 rounded border border-[#00F0FF]/30 transition-colors"
+                  >
+                    选择 ⇄
+                  </button>
+                </div>
+                <div className="mt-1 font-bold text-xs text-white truncate">
+                  {formData?.community || '（未选择）'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. 角色六维属性、生命 HP、压力 Stress、经历与希望点 Hope Panel */}
+        <CyberpunkAttributesHopePanel />
+
+        {/* 5. 身份特性与能力详情展示面板（职业专精、子职、种族一/二、社群全文阅读） */}
+        <CyberpunkFeaturesDetailPanel />
+
+        {/* 6. 装备专区 (主手、副手、护甲) */}
+        <CyberpunkEquipActivation
+          equipment={formData?.equipment}
+          onOpenWeaponModal={(slot) => {
+            setActiveWeaponSlot(slot)
+            setWeaponModalOpen(true)
+          }}
+          onOpenArmorModal={() => setArmorModalOpen(true)}
+        />
+
+        {/* 7. 中部：义体改造四大区、可选非法改造与消耗品 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* 左栏 (7/12)：四大区改造 & 可选非法改造 */}
+          <div className="lg:col-span-7 space-y-4">
+            <CyberpunkZonePanel
+              cyberpunkData={cyberpunkData}
+              onChange={handleCyberpunkChange}
+            />
+
+            <CyberpunkIllegalModPanel
+              illegalModData={cyberpunkData.illegalModifications || DEFAULT_CYBERPUNK_EXTENSION.illegalModifications}
+              onChange={(updated) =>
+                handleCyberpunkChange({
+                  ...cyberpunkData,
+                  illegalModifications: updated,
+                })
+              }
             />
           </div>
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1">职业 / 职能定位</label>
-            <input
-              type="text"
-              value={formData.profession}
-              onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#00FFA3]"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1">社群 / 派系背景</label>
-            <input
-              type="text"
-              value={formData.community}
-              onChange={(e) => setFormData({ ...formData, community: e.target.value })}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1">等级 (Level)</label>
-            <input
-              type="text"
-              value={formData.level}
-              onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none"
+
+          {/* 右栏 (5/12)：消耗品 (上限 5 份) */}
+          <div className="lg:col-span-5 space-y-4">
+            <CyberpunkConsumablesBar
+              consumables={cyberpunkData.consumables}
+              onChange={(updated) =>
+                handleCyberpunkChange({
+                  ...cyberpunkData,
+                  consumables: updated,
+                })
+              }
             />
           </div>
         </div>
 
-        {/* 2. 六维属性与状态资源 (HP/压力/希望点/闪避) */}
-        <CyberpunkAttributesHopePanel
-          formData={formData}
-          setFormData={setFormData}
-          calculatedEvasion={Number(formData.evasion) || 10}
-        />
-
-        {/* 3. 战术护甲与伤害阈值 */}
-        <CyberpunkThresholdDisplay
-          armorScore={Number(formData.armorMax) || 3}
-          minorThreshold={Number(formData.minorThreshold) || 1}
-          majorThreshold={Number(formData.majorThreshold) || 6}
-          severeThreshold={13}
-        />
-
-        {/* 4. 身体 5 大区改造插槽 (支持跨画风挑选战利品) */}
-        <CyberpunkZonePanel
-          cyberpunkData={cyberpunkData}
-          onChange={handleCyberpunkChange}
-        />
-
-        {/* 分页标记：用于 A4 打印两页式契约 */}
-        <div className="cyberpunk-page-break" />
-
-        {/* 5. 随身 4 格消耗品快捷栏 */}
-        <CyberpunkConsumablesBar
-          consumables={cyberpunkData.consumables as any}
-          onChange={(items) => handleCyberpunkChange({ ...cyberpunkData, consumables: items as any })}
-        />
-
-        {/* 6. 黑市非法改造与神经代价 */}
-        <CyberpunkIllegalModPanel
-          mods={cyberpunkData.illegalMods as any}
-          onChange={(items) => handleCyberpunkChange({ ...cyberpunkData, illegalMods: items as any })}
-        />
-
-        {/* 7. 领域法术与网络协议手牌 */}
+        {/* 8. 底部：领域卡 (Domain Cards & Vault) */}
         <CyberpunkDomainDeck
-          cards={formData.cards || []}
+          cards={formData?.cards || []}
+          vaultCards={formData?.inventory_cards || []}
+          onSelectSlot={(slotIndex, isVault) => {
+            setDomainModalState({
+              isOpen: true,
+              slotIndex,
+              isVault: isVault || false,
+            })
+          }}
+          onRemoveCard={handleDomainCardRemove}
         />
+      </div>
 
-        {/* 8. 角色核心特性详细文案 */}
-        <CyberpunkFeaturesDetailPanel
-          cards={formData.cards}
+      {/* 底部浮动通用工具栏 (Bottom Dock - 可收缩展开) */}
+      <BottomDock
+        mode="main"
+        isMobile={isMobile}
+        isCardDrawerOpen={false}
+        characterCount={characterList.length}
+        onToggleCardDrawer={() => {}}
+        onToggleGuide={() => setIsGuideOpen(!isGuideOpen)}
+        onToggleNotebook={() => {
+          setFormData((prev) => ({
+            ...prev,
+            notebook: {
+              ...(prev.notebook || { pages: [{ id: 'page-1', lines: [] }], currentPageIndex: 0, isOpen: false }),
+              isOpen: !(prev.notebook?.isOpen ?? false),
+            },
+          }))
+        }}
+        onPrintAll={handlePrintAll}
+        onOpenSealDiceExport={() => setSealDiceExportModalOpen(true)}
+        onQuickExportJSON={handleQuickExportJSON}
+        onQuickExportPDF={handleQuickExportPDF}
+        onQuickExportHTML={handleQuickExportHTML}
+        onOpenCharacterManagement={openCharacterManagementModal}
+        onQuickCreateArchive={handleQuickCreateArchive}
+        onQuickImportFromHTML={handleQuickImportFromHTML}
+        hasUnreadAnnouncements={hasUnreadAnnouncements}
+        onOpenAnnouncements={openAnnouncementsModal}
+      />
+
+      {/* 全局浮动笔记本组件 */}
+      <FloatingNotebook />
+
+      {/* 新手建卡指引 */}
+      <CharacterCreationGuide isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+
+      {/* 骰子导出模态框 */}
+      <SealDiceExportModal
+        isOpen={sealDiceExportModalOpen}
+        onClose={() => setSealDiceExportModalOpen(false)}
+        sheetData={formData}
+      />
+
+      {/* 更新公告模态框 */}
+      <AnnouncementsModal
+        isOpen={announcementsModalOpen}
+        onClose={() => setAnnouncementsModalOpen(false)}
+        announcements={announcements}
+      />
+
+      {/* 卡牌与特性选择模态框 */}
+      {genericModalState.isOpen && (
+        <GenericCardSelectionModal
+          isOpen={genericModalState.isOpen}
+          onClose={() => setGenericModalState((prev) => ({ ...prev, isOpen: false }))}
+          onSelect={handleGenericCardSelect}
+          title={
+            genericModalState.type === 'profession'
+              ? '选择职业'
+              : genericModalState.type === 'ancestry'
+              ? (genericModalState.levelFilter === 1 ? '选择种族特性一 (原生特性一)' : '选择种族特性二 (原生特性二)')
+              : genericModalState.type === 'community'
+              ? '选择社群'
+              : '选择子职业'
+          }
+          cardType={
+            genericModalState.type === 'profession'
+              ? CardType.Profession
+              : genericModalState.type === 'ancestry'
+              ? CardType.Ancestry
+              : genericModalState.type === 'community'
+              ? CardType.Community
+              : CardType.Subclass
+          }
+          field={genericModalState.field}
+          levelFilter={genericModalState.levelFilter}
         />
-      </main>
+      )}
+
+      {/* 领域卡选择模态框 */}
+      {domainModalState.isOpen && (
+        <CardSelectionModal
+          isOpen={domainModalState.isOpen}
+          onClose={() => setDomainModalState((prev) => ({ ...prev, isOpen: false }))}
+          onSelect={handleDomainCardSelect}
+          selectedCardIndex={domainModalState.slotIndex}
+          initialTab="domain"
+        />
+      )}
+
+      {/* 武器选择模态框 */}
+      <WeaponSelectionModal
+        isOpen={weaponModalOpen}
+        onClose={() => setWeaponModalOpen(false)}
+        weaponSlotType={activeWeaponSlot}
+        onSelect={handleWeaponSelect}
+        title={activeWeaponSlot === 'primary' ? '选择主手武器' : '选择副手/备用武器'}
+      />
+
+      {/* 护甲选择模态框 */}
+      <ArmorSelectionModal
+        isOpen={armorModalOpen}
+        onClose={() => setArmorModalOpen(false)}
+        onSelect={handleArmorSelect}
+        title="选择护甲"
+      />
+
+      {/* 多存档管理模态框 */}
+      <CharacterManagementModal
+        isOpen={characterManagementModalOpen}
+        onClose={closeCharacterManagementModal}
+        characterList={characterList}
+        currentCharacterId={currentCharacterId}
+        onSwitchCharacter={switchToCharacter}
+        onCreateCharacter={createNewCharacterHandler}
+        onCreateImportedCharacter={createImportedCharacterHandler}
+        onDeleteCharacter={deleteCharacterHandler}
+        onDuplicateCharacter={duplicateCharacterHandler}
+        onRenameCharacter={renameCharacterHandler}
+      />
     </div>
   )
 }

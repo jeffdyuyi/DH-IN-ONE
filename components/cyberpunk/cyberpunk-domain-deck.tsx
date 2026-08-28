@@ -1,93 +1,230 @@
 "use client"
 
 import React, { useState } from 'react'
-import type { StandardCard } from '../../card/card-types'
-import { Sparkles, Eye, X, BookOpen, Layers } from 'lucide-react'
+import type { StandardCard } from '@/card/card-types'
+import { isEmptyCard } from '@/card/card-types'
+import { Plus, Trash2, Eye, Layers } from 'lucide-react'
+import { CardMarkdown } from '@/components/ui/card-markdown'
+import rehypeRaw from 'rehype-raw'
 
 interface CyberpunkDomainDeckProps {
-  cards?: StandardCard[]
-  domain1?: string
-  domain2?: string
+  cards: StandardCard[]
+  vaultCards?: StandardCard[]
+  onSelectSlot: (slotIndex: number, isVault?: boolean) => void
+  onRemoveCard: (slotIndex: number, isVault?: boolean) => void
 }
 
 export function CyberpunkDomainDeck({
   cards = [],
-  domain1,
-  domain2,
+  vaultCards = [],
+  onSelectSlot,
+  onRemoveCard,
 }: CyberpunkDomainDeckProps) {
-  const [activeCard, setActiveCard] = useState<StandardCard | null>(null)
+  const [previewCard, setPreviewCard] = useState<StandardCard | null>(null)
+  const [activeTab, setActiveTab] = useState<'loadout' | 'vault'>('loadout')
+
+  // 激活领域卡槽位（对应聚焦卡组 index 5 ~ 9，共 5 槽）
+  const activeSlots = Array.from({ length: 5 }, (_, i) => cards[5 + i] || null)
+  const validVaultCards = (vaultCards || []).filter(c => c && !isEmptyCard(c))
 
   return (
-    <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-xs text-[#6C00FF] uppercase tracking-wider flex items-center space-x-1.5">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>领域法术与网络协议手牌 ({cards.length})</span>
-        </h3>
-        <div className="flex items-center space-x-1 text-[10px] text-slate-400">
-          {domain1 && <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{domain1}</span>}
-          {domain2 && <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">{domain2}</span>}
+    <div className="rounded-xl border border-cyan-500/30 bg-[#0d0d1a] p-4 text-slate-100 font-sans">
+      {/* 头部 */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-[#00F0FF]" />
+          <h3 className="text-sm font-bold text-white">领域卡 (Domain Cards)</h3>
+          <span className="text-xs text-slate-400">已配置 {activeSlots.filter(c => c && !isEmptyCard(c)).length}/5</span>
+        </div>
+
+        {/* 卡组 / 宝库切换 */}
+        <div className="flex items-center rounded-lg border border-slate-800 bg-[#070710] p-0.5 text-xs font-mono">
+          <button
+            type="button"
+            onClick={() => setActiveTab('loadout')}
+            className={`rounded px-3 py-1 font-bold transition-colors ${
+              activeTab === 'loadout'
+                ? 'bg-[#00F0FF] text-black'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            激活卡组 ({activeSlots.filter(c => c && !isEmptyCard(c)).length}/5)
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('vault')}
+            className={`rounded px-3 py-1 font-bold transition-colors ${
+              activeTab === 'vault'
+                ? 'bg-[#FCEE0A] text-black'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            宝库 ({validVaultCards.length})
+          </button>
         </div>
       </div>
 
-      {cards.length === 0 ? (
-        <p className="text-xs text-slate-500 py-4 text-center">暂未装备任何领域法术或技能卡</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          {cards.map((c) => {
-            const domainName = (c as any).domain || (c as any).category || '领域法术'
-            const levelVal = (c as any).level || 1
+      {/* 激活卡组 (5 槽) */}
+      {activeTab === 'loadout' && (
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {activeSlots.map((card, idx) => {
+            const actualIndex = 5 + idx
+            const hasCard = card && !isEmptyCard(card)
+
+            if (!hasCard) {
+              return (
+                <button
+                  key={`domain_slot_${idx}`}
+                  type="button"
+                  onClick={() => onSelectSlot(actualIndex, false)}
+                  className="group flex h-36 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-800 bg-[#0f0f22]/60 p-3 text-center transition-all hover:border-[#00F0FF] hover:bg-[#00F0FF]/5 cursor-pointer"
+                >
+                  <Plus className="h-5 w-5 text-slate-500 group-hover:text-[#00F0FF] transition-colors" />
+                  <div className="mt-1.5 text-xs font-bold text-slate-400 group-hover:text-[#00F0FF]">
+                    卡槽 {idx + 1}
+                  </div>
+                  <div className="text-[11px] text-slate-500">点击添加领域卡</div>
+                </button>
+              )
+            }
+
+            const domainName = card.class || card.cardSelectDisplay?.item1 || '领域'
+            const levelNum = card.level || 1
 
             return (
               <div
-                key={c.id}
-                onClick={() => setActiveCard(c)}
-                className="p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#6C00FF]/50 transition cursor-pointer flex items-center justify-between group"
+                key={card.id || `domain_active_${idx}`}
+                className="flex h-36 flex-col justify-between rounded-lg border border-[#00F0FF]/40 bg-[#0f0f22] p-2.5 transition-all hover:border-[#00F0FF]"
               >
-                <div className="pr-2 min-w-0">
-                  <span className="text-[10px] text-[#6C00FF] font-semibold block truncate">
-                    {domainName} (LV.{levelVal})
-                  </span>
-                  <h4 className="font-bold text-xs text-white group-hover:text-[#6C00FF] transition truncate">
-                    {c.name}
-                  </h4>
+                <div>
+                  <div className="flex items-center justify-between gap-1 text-[10px]">
+                    <span className="rounded bg-[#00F0FF]/20 px-1.5 py-0.5 font-bold text-[#00F0FF] truncate">
+                      {domainName}
+                    </span>
+                    <span className="rounded bg-[#FCEE0A] px-1 py-0.2 font-bold text-black font-mono">
+                      Lv.{levelNum}
+                    </span>
+                  </div>
+
+                  <div className="mt-1 font-bold text-xs text-white truncate" title={card.name}>
+                    {card.name}
+                  </div>
+
+                  <div className="mt-1 text-[11px] text-slate-300 line-clamp-2 leading-tight">
+                    {card.description || (card as any)?.feature || '无效果描述'}
+                  </div>
                 </div>
-                <Eye className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#6C00FF] transition flex-shrink-0" />
+
+                <div className="flex items-center justify-between border-t border-slate-800 pt-1 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCard(card)}
+                    className="flex items-center gap-1 text-cyan-400 hover:underline font-bold"
+                  >
+                    <Eye className="h-3 w-3" />
+                    <span>查看</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveCard(actualIndex, false)}
+                    className="text-slate-500 hover:text-red-400 p-0.5"
+                    title="移除卡牌"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             )
           })}
         </div>
       )}
 
-      {/* 手牌详情弹窗 */}
-      {activeCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#0B0320] text-slate-100 p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+      {/* 宝库 */}
+      {activeTab === 'vault' && (
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-2 text-xs">
+            <span className="text-slate-400">宝库中备用的领域卡：</span>
+            <button
+              type="button"
+              onClick={() => onSelectSlot(validVaultCards.length, true)}
+              className="flex items-center gap-1 rounded bg-[#FCEE0A] px-2.5 py-1 font-bold text-black hover:bg-[#FCEE0A]/90 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>添加至宝库</span>
+            </button>
+          </div>
+
+          {validVaultCards.length === 0 ? (
+            <div className="py-6 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-lg">
+              宝库中暂无卡片，点击右上角添加备用领域卡。
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {validVaultCards.map((card, idx) => (
+                <div
+                  key={card.id || `vault_${idx}`}
+                  className="rounded-lg border border-slate-800 bg-[#0f0f22] p-2.5 text-slate-300"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-[#FCEE0A] font-bold">{card.class || '领域'}</span>
+                    <span className="text-slate-400 font-mono">Lv.{card.level || 1}</span>
+                  </div>
+                  <div className="font-bold text-xs text-white mt-1">{card.name}</div>
+                  <div className="text-[11px] text-slate-400 line-clamp-2 mt-1">{card.description}</div>
+                  <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-slate-800 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewCard(card)}
+                      className="text-cyan-400 hover:underline font-bold"
+                    >
+                      查看
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveCard(idx, true)}
+                      className="text-red-400 hover:underline"
+                    >
+                      删除
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 弹窗预览 */}
+      {previewCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-sm rounded-xl border border-slate-700 bg-white text-gray-900 p-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-2 mb-3">
               <div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#6C00FF]/20 text-[#6C00FF]">
-                  {(activeCard as any).domain || (activeCard as any).category || '领域技能'} · LV.{(activeCard as any).level || 1}
-                </span>
-                <h3 className="font-bold text-base text-white mt-1">
-                  {activeCard.name}
-                </h3>
+                <div className="text-xs font-bold text-cyan-600 uppercase">
+                  {previewCard.class || '领域'} · LV.{previewCard.level || 1}
+                </div>
+                <div className="text-base font-bold text-gray-900">{previewCard.name}</div>
               </div>
               <button
-                onClick={() => setActiveCard(null)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition"
+                type="button"
+                onClick={() => setPreviewCard(null)}
+                className="h-7 w-7 rounded bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"
               >
-                <X className="w-5 h-5" />
+                ✕
               </button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto pr-1 text-xs text-slate-300 leading-relaxed bg-black/30 p-4 rounded-xl border border-white/5 whitespace-pre-wrap">
-              {activeCard.description || (activeCard as any).feature || (activeCard as any).ability || '暂无详细描述'}
+            <div className="space-y-2 text-xs text-gray-700 max-h-[50vh] overflow-y-auto pr-1">
+              <CardMarkdown rehypePlugins={[rehypeRaw]}>
+                {previewCard.description || (previewCard as any)?.feature || '暂无描述'}
+              </CardMarkdown>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-end border-t pt-2">
               <button
-                onClick={() => setActiveCard(null)}
-                className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition"
+                type="button"
+                onClick={() => setPreviewCard(null)}
+                className="rounded bg-gray-900 px-4 py-1.5 text-xs font-bold text-white hover:bg-gray-800"
               >
                 关闭
               </button>

@@ -75,14 +75,14 @@ export interface CyberpunkZoneSlotGroup {
   augmentations: CyberpunkAugmentation[]
 }
 
-// 爽博朋克车卡器特化拓展数据结构
 export interface CyberpunkSheetExtension {
   tier?: CyberpunkTier
   credits?: number
+  streetFame?: number
+  streetCred?: number
   zones?: Partial<Record<CyberpunkBodyZoneKey, CyberpunkZoneSlotGroup>>
   illegalMods?: CyberpunkIllegalModData[] | CyberpunkIllegalModData
   illegalModifications?: any
-  streetFame?: any
   activeEquipmentIds?: any
   consumables?: CyberpunkConsumable[]
   isLightPreview?: boolean
