@@ -1,6 +1,6 @@
-﻿"use client"
+"use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import Link from 'next/link'
 import { 
   BookOpen, 
@@ -9,18 +9,35 @@ import {
   Trash2, 
   Save, 
   Download, 
+  Upload, 
   Printer, 
   Database, 
-  Layers, 
   FileText, 
   MessageSquare, 
   AlertCircle, 
   Check, 
   ChevronRight, 
   Sparkles,
-  ShieldCheck
+  Table as TableIcon,
+  Heading,
+  Minus
 } from 'lucide-react'
-import { ProjectData, Section, CampaignBlock, TextBlock, ReadAloudBlock, CalloutBlock, OutcomeBlock, EnemyBlock, EnvironmentBlock, LootBlock, CyberwareBlock } from './types'
+import { 
+  ProjectData, 
+  Section, 
+  CampaignBlock, 
+  TextBlock, 
+  SubsectionBlock,
+  TableBlock,
+  ReadAloudBlock, 
+  CalloutBlock, 
+  OutcomeBlock, 
+  EnemyBlock, 
+  EnvironmentBlock, 
+  LootBlock, 
+  CyberwareBlock,
+  exportProjectToMarkdown
+} from './types'
 import { VaultCardPickerModal } from './vault-card-picker-modal'
 
 const DEFAULT_PROJECT: ProjectData = {
@@ -65,6 +82,7 @@ export function CampaignEditorApp() {
   const [activeSectionIndex, setActiveSectionIndex] = useState<number>(0)
   const [isPickerOpen, setIsPickerOpen] = useState<boolean>(false)
   const [saveToast, setSaveToast] = useState<boolean>(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const activeSection = project.sections[activeSectionIndex] || project.sections[0]
 
@@ -73,6 +91,42 @@ export function CampaignEditorApp() {
     localStorage.setItem('dh_v1_campaign_draft', JSON.stringify(project))
     setSaveToast(true)
     setTimeout(() => setSaveToast(false), 2000)
+  }
+
+  // 导入战役 JSON 文件
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const raw = ev.target?.result as string
+        const parsed = JSON.parse(raw)
+        if (parsed.sections && Array.isArray(parsed.sections)) {
+          setProject(parsed)
+          setActiveSectionIndex(0)
+          alert(`成功导入战役模组【${parsed.title || file.name}】，包含 ${parsed.sections.length} 个章节！`)
+        } else {
+          alert('导入失败：该 JSON 文件不符合战役模组格式（缺少 sections 列表）。')
+        }
+      } catch (err) {
+        alert('解析 JSON 失败，请检查文件格式。')
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  // 导出战役 JSON 文件
+  const handleExportJson = () => {
+    const jsonStr = JSON.stringify(project, null, 2)
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${project.title || 'campaign'}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   // 新建章节
@@ -96,11 +150,27 @@ export function CampaignEditorApp() {
     setActiveSectionIndex(project.sections.length)
   }
 
-  // 添加普通文本块
-  const handleAddTextBlock = (type: 'text' | 'read_aloud' | 'callout' | 'outcome') => {
+  // 添加常规内容块
+  const handleAddBlock = (type: 'text' | 'subsection' | 'table' | 'read_aloud' | 'callout' | 'outcome' | 'divider') => {
     let newBlock: CampaignBlock
 
-    if (type === 'read_aloud') {
+    if (type === 'subsection') {
+      newBlock = {
+        id: `b_sub_${Date.now()}`,
+        type: 'subsection',
+        title: '小节标题'
+      }
+    } else if (type === 'table') {
+      newBlock = {
+        id: `b_tbl_${Date.now()}`,
+        type: 'table',
+        headers: ['装备/武器名称', '属性', '攻击距离', '基础伤害', '特性效果'],
+        rows: [
+          ['脉冲刃', '灵巧', '近战', 'd8 物理', '**双持：**近战时主武器伤害 +2。'],
+          ['手腕脉冲枪', '敏捷', '远距离', 'd6 能量', '快速装填']
+        ]
+      }
+    } else if (type === 'read_aloud') {
       newBlock = {
         id: `b_ra_${Date.now()}`,
         type: 'read_aloud',
@@ -122,6 +192,11 @@ export function CampaignEditorApp() {
           { id: 'e1', tags: ['hope', 'success'], content: '关键成功且获得希望：立即发现密门并恢复 1 点压力。' },
           { id: 'e2', tags: ['fear', 'failure'], content: '伴随恐惧失败：触发警报，两名巡逻哨兵立刻入场。' }
         ]
+      }
+    } else if (type === 'divider') {
+      newBlock = {
+        id: `b_div_${Date.now()}`,
+        type: 'divider'
       }
     } else {
       newBlock = {
@@ -150,36 +225,9 @@ export function CampaignEditorApp() {
     setProject({ ...project, sections: updatedSections, updatedAt: Date.now() })
   }
 
-  // 导出 Markdown
+  // 导出为带完整表格的 Markdown (.md)
   const handleExportMarkdown = () => {
-    let md = `# ${project.title}\n\n**作者**: ${project.author} | **系统**: ${project.systemVersion}\n\n${project.description}\n\n---\n\n`
-    for (const sec of project.sections) {
-      md += `## ${sec.title}\n\n`
-      for (const b of sec.blocks) {
-        if (b.type === 'text') md += `${(b as TextBlock).content}\n\n`
-        if (b.type === 'read_aloud') md += `> 📜 **朗读框**\n> ${(b as ReadAloudBlock).content}\n\n`
-        if (b.type === 'callout') md += `> 💡 **${(b as CalloutBlock).title}**: ${(b as CalloutBlock).content}\n\n`
-        if (b.type === 'enemy') {
-          const eb = b as EnemyBlock
-          md += `### 👾 敌人: ${eb.name} (LV.${eb.tier} ${eb.enemyType})\n- 难度: DC${eb.stats.difficulty} | HP: ${eb.stats.hp} | 压力: ${eb.stats.stress}\n- 攻击: ${eb.attack.name} (${eb.attack.damage}, ${eb.attack.range})\n- 战术: ${eb.tactics}\n\n`
-        }
-        if (b.type === 'environment') {
-          const env = b as EnvironmentBlock
-          md += `### 🌋 环境险境: ${env.name} (DC${env.difficulty}, 倒计时 ${env.countdown})\n- 趋向: ${env.trend}\n\n`
-        }
-        if (b.type === 'loot') {
-          const lb = b as LootBlock
-          md += `### 💎 ${lb.title}\n`
-          for (const item of lb.items) {
-            md += `- **${item.name}**: ${item.description}\n`
-          }
-          md += `\n`
-        }
-      }
-      md += `---\n\n`
-    }
-    md += `*遵循 Darrington Press 社区许可 (DPCGL)*\n`
-
+    const md = exportProjectToMarkdown(project)
     const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -191,6 +239,15 @@ export function CampaignEditorApp() {
 
   return (
     <div className="min-h-screen bg-[#0B0320] text-slate-100 font-sans selection:bg-[#FF007F] selection:text-white">
+      {/* 隐藏的文件上传 input */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleImportJson} 
+        accept=".json" 
+        className="hidden" 
+      />
+
       {/* 顶部主导航 */}
       <header className="border-b border-white/10 backdrop-blur-md bg-black/40 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -211,7 +268,25 @@ export function CampaignEditorApp() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition"
+              title="导入战役 JSON 文件"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>导入 JSON</span>
+            </button>
+
+            <button
+              onClick={handleExportJson}
+              className="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition"
+              title="备份战役 JSON"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>导出 JSON</span>
+            </button>
+
             <button
               onClick={() => setIsPickerOpen(true)}
               className="flex items-center space-x-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-[#FF007F]/40 text-[#FF007F] bg-[#FF007F]/10 hover:bg-[#FF007F]/20 transition shadow-[0_0_12px_rgba(255,0,127,0.15)]"
@@ -222,28 +297,19 @@ export function CampaignEditorApp() {
 
             <button
               onClick={handleSave}
-              className="flex items-center space-x-1.5 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-[#00FFA3] text-black hover:opacity-90 transition shadow-[0_0_12px_rgba(0,255,163,0.2)]"
+              className="flex items-center space-x-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-[#00FFA3] text-black hover:opacity-90 transition shadow-[0_0_12px_rgba(0,255,163,0.2)]"
             >
               {saveToast ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-              <span>{saveToast ? '已保存！' : '保存模组'}</span>
+              <span>{saveToast ? '已保存！' : '保存'}</span>
             </button>
 
             <button
               onClick={handleExportMarkdown}
-              className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition"
-              title="导出为 Markdown 文件"
+              className="flex items-center space-x-1.5 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#FF007F] to-[#6C00FF] text-white hover:opacity-90 transition shadow-[0_0_15px_rgba(255,0,127,0.3)]"
+              title="导出为包含完整 Markdown 表格的 .md 文件"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>导出 MD</span>
-            </button>
-
-            <button
-              onClick={() => window.print()}
-              className="flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition"
-              title="A4 打印 / 导出 PDF"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>打印</span>
+              <span>导出 MD (含表格)</span>
             </button>
           </div>
         </div>
@@ -254,7 +320,7 @@ export function CampaignEditorApp() {
         {/* 左侧：章节大纲导航 */}
         <div className="lg:col-span-3 bg-white/[0.02] border border-white/10 rounded-2xl p-4 max-h-[calc(100vh-140px)] overflow-y-auto">
           <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-            <span className="text-xs font-bold text-slate-400">战役大纲目录</span>
+            <span className="text-xs font-bold text-slate-400">战役大纲目录 ({project.sections.length})</span>
             <button
               onClick={handleAddSection}
               className="p-1 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition"
@@ -314,7 +380,7 @@ export function CampaignEditorApp() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <input
                 type="text"
-                value={activeSection.title}
+                value={activeSection?.title || ''}
                 onChange={(e) => {
                   const updatedSections = [...project.sections]
                   updatedSections[activeSectionIndex].title = e.target.value
@@ -326,28 +392,42 @@ export function CampaignEditorApp() {
               {/* 区块插入快捷按钮组 */}
               <div className="flex items-center space-x-2 flex-wrap gap-y-2">
                 <button
-                  onClick={() => handleAddTextBlock('text')}
+                  onClick={() => handleAddBlock('text')}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1"
                 >
                   <FileText className="w-3.5 h-3.5 text-[#00FFA3]" />
                   <span>+ 正文</span>
                 </button>
                 <button
-                  onClick={() => handleAddTextBlock('read_aloud')}
+                  onClick={() => handleAddBlock('subsection')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1"
+                >
+                  <Heading className="w-3.5 h-3.5 text-amber-300" />
+                  <span>+ 小节</span>
+                </button>
+                <button
+                  onClick={() => handleAddBlock('table')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 transition flex items-center space-x-1"
+                >
+                  <TableIcon className="w-3.5 h-3.5 text-amber-300" />
+                  <span>+ 数据表</span>
+                </button>
+                <button
+                  onClick={() => handleAddBlock('read_aloud')}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1"
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-[#F5F500]" />
                   <span>+ 朗读框</span>
                 </button>
                 <button
-                  onClick={() => handleAddTextBlock('callout')}
+                  onClick={() => handleAddBlock('callout')}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 text-cyan-400" />
                   <span>+ 提示框</span>
                 </button>
                 <button
-                  onClick={() => handleAddTextBlock('outcome')}
+                  onClick={() => handleAddBlock('outcome')}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center space-x-1"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-[#FF007F]" />
@@ -365,7 +445,7 @@ export function CampaignEditorApp() {
 
             {/* 区块列表渲染 */}
             <div className="space-y-4">
-              {activeSection.blocks.map((block, bIdx) => {
+              {activeSection?.blocks.map((block, bIdx) => {
                 return (
                   <div
                     key={block.id}
@@ -388,7 +468,7 @@ export function CampaignEditorApp() {
                     {block.type === 'text' && (
                       <textarea
                         rows={3}
-                        value={(block as TextBlock).content}
+                        value={(block as TextBlock).content || ''}
                         onChange={(e) => {
                           const updated = [...project.sections]
                           ;(updated[activeSectionIndex].blocks[bIdx] as TextBlock).content = e.target.value
@@ -398,12 +478,84 @@ export function CampaignEditorApp() {
                       />
                     )}
 
+                    {/* 小节标题编辑 */}
+                    {block.type === 'subsection' && (
+                      <input
+                        type="text"
+                        value={(block as SubsectionBlock).title || ''}
+                        onChange={(e) => {
+                          const updated = [...project.sections]
+                          ;(updated[activeSectionIndex].blocks[bIdx] as SubsectionBlock).title = e.target.value
+                          setProject({ ...project, sections: updated })
+                        }}
+                        className="w-full bg-black/40 border-b-2 border-amber-400/40 p-2 text-sm font-bold text-amber-300 outline-none focus:border-amber-400"
+                        placeholder="小节标题..."
+                      />
+                    )}
+
+                    {/* 数据表格编辑与渲染 */}
+                    {block.type === 'table' && (
+                      <div className="space-y-2 overflow-x-auto">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-amber-300 flex items-center space-x-1">
+                            <TableIcon className="w-3.5 h-3.5" />
+                            <span>数据表格 (共 {((block as TableBlock).rows || []).length} 行)</span>
+                          </span>
+                          <button
+                            onClick={() => {
+                              const updated = [...project.sections]
+                              const tb = updated[activeSectionIndex].blocks[bIdx] as TableBlock
+                              const newRow = (tb.headers || []).map(() => '—')
+                              tb.rows = [...(tb.rows || []), newRow]
+                              setProject({ ...project, sections: updated })
+                            }}
+                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/10 text-amber-300 border border-amber-400/30 hover:bg-amber-400/20 transition"
+                          >
+                            + 添加数据行
+                          </button>
+                        </div>
+                        <table className="w-full border-collapse text-xs text-left">
+                          <thead>
+                            <tr className="border-b border-amber-500/30 bg-amber-500/10">
+                              {((block as TableBlock).headers || []).map((h, hIdx) => (
+                                <th key={hIdx} className="p-2 font-bold text-amber-200">
+                                  {h}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {((block as TableBlock).rows || []).map((row, rIdx) => (
+                              <tr key={rIdx} className="border-b border-white/5 hover:bg-white/[0.02]">
+                                {((block as TableBlock).headers || []).map((_, cIdx) => (
+                                  <td key={cIdx} className="p-1.5">
+                                    <input
+                                      type="text"
+                                      value={row[cIdx] !== undefined ? row[cIdx] : ''}
+                                      onChange={(e) => {
+                                        const updated = [...project.sections]
+                                        const tb = updated[activeSectionIndex].blocks[bIdx] as TableBlock
+                                        if (!tb.rows[rIdx]) tb.rows[rIdx] = []
+                                        tb.rows[rIdx][cIdx] = e.target.value
+                                        setProject({ ...project, sections: updated })
+                                      }}
+                                      className="w-full bg-black/40 border border-white/10 rounded px-1.5 py-1 text-slate-200 outline-none focus:border-amber-400 text-xs"
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
                     {/* 朗读框编辑 */}
                     {block.type === 'read_aloud' && (
                       <div className="border-l-4 border-[#F5F500] pl-3 py-1 bg-[#F5F500]/5 rounded-r-lg">
                         <textarea
                           rows={2}
-                          value={(block as ReadAloudBlock).content}
+                          value={(block as ReadAloudBlock).content || ''}
                           onChange={(e) => {
                             const updated = [...project.sections]
                             ;(updated[activeSectionIndex].blocks[bIdx] as ReadAloudBlock).content = e.target.value
@@ -411,6 +563,40 @@ export function CampaignEditorApp() {
                           }}
                           className="w-full bg-transparent border-none text-xs italic text-amber-200 outline-none resize-none"
                         />
+                      </div>
+                    )}
+
+                    {/* GM提示框 */}
+                    {block.type === 'callout' && (
+                      <div className="border-l-4 border-cyan-400 pl-3 py-2 bg-cyan-950/20 rounded-r-lg space-y-1">
+                        <input
+                          type="text"
+                          value={(block as CalloutBlock).title || ''}
+                          onChange={(e) => {
+                            const updated = [...project.sections]
+                            ;(updated[activeSectionIndex].blocks[bIdx] as CalloutBlock).title = e.target.value
+                            setProject({ ...project, sections: updated })
+                          }}
+                          className="w-full bg-transparent font-bold text-xs text-cyan-300 outline-none"
+                          placeholder="提示标题..."
+                        />
+                        <textarea
+                          rows={2}
+                          value={(block as CalloutBlock).content || ''}
+                          onChange={(e) => {
+                            const updated = [...project.sections]
+                            ;(updated[activeSectionIndex].blocks[bIdx] as CalloutBlock).content = e.target.value
+                            setProject({ ...project, sections: updated })
+                          }}
+                          className="w-full bg-transparent text-xs text-slate-300 outline-none resize-none"
+                        />
+                      </div>
+                    )}
+
+                    {/* 分割线 */}
+                    {block.type === 'divider' && (
+                      <div className="py-2 flex items-center justify-center">
+                        <div className="w-full border-t border-dashed border-white/20" />
                       </div>
                     )}
 
@@ -439,7 +625,7 @@ export function CampaignEditorApp() {
                     {block.type === 'loot' && (
                       <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-950/20 space-y-1">
                         <h4 className="font-bold text-sm text-emerald-300">💎 {(block as LootBlock).title}</h4>
-                        {(block as LootBlock).items.map((it) => (
+                        {((block as LootBlock).items || []).map((it) => (
                           <div key={it.id} className="text-xs text-slate-300">
                             • <span className="font-semibold text-white">{it.name}</span>: {it.description}
                           </div>
@@ -451,7 +637,7 @@ export function CampaignEditorApp() {
                     {block.type === 'cyberware' && (
                       <div className="p-3 rounded-lg border border-cyan-500/30 bg-cyan-950/20 space-y-1">
                         <h4 className="font-bold text-sm text-cyan-300">🦾 {(block as CyberwareBlock).title}</h4>
-                        {(block as CyberwareBlock).items.map((it) => (
+                        {((block as CyberwareBlock).items || []).map((it) => (
                           <div key={it.id} className="text-xs text-slate-300">
                             • <span className="font-semibold text-white">{it.name}</span> ({it.zone}, {it.slots}槽位): {it.effect}
                           </div>

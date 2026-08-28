@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DH-IN-ONE 匕首心战役编辑器 核心类型契约
  */
 
@@ -7,6 +7,8 @@ import { VaultCard } from '../../lib/vault/vault-types';
 export type BlockType = 
   | 'text' 
   | 'subsection' 
+  | 'table' 
+  | 'divider' 
   | 'read_aloud' 
   | 'callout' 
   | 'outcome' 
@@ -14,13 +16,12 @@ export type BlockType =
   | 'environment' 
   | 'cyberware' 
   | 'loot'
-  | 'table' 
-  | 'divider' 
   | 'image';
 
 export interface BaseBlock {
   id: string;
   type: BlockType;
+  [key: string]: any;
 }
 
 export interface TextBlock extends BaseBlock {
@@ -31,6 +32,22 @@ export interface TextBlock extends BaseBlock {
 export interface SubsectionBlock extends BaseBlock {
   type: 'subsection';
   title: string;
+}
+
+export interface TableBlock extends BaseBlock {
+  type: 'table';
+  headers: string[];
+  rows: string[][];
+}
+
+export interface DividerBlock extends BaseBlock {
+  type: 'divider';
+}
+
+export interface ImageBlock extends BaseBlock {
+  type: 'image';
+  url: string;
+  caption?: string;
 }
 
 export interface ReadAloudBlock extends BaseBlock {
@@ -47,7 +64,7 @@ export interface CalloutBlock extends BaseBlock {
 
 export interface OutcomeEntry {
   id: string;
-  tags: Array<'hope' | 'fear' | 'success' | 'failure' | 'critical'>;
+  tags: Array<'hope' | 'fear' | 'success' | 'failure' | 'critical' | string>;
   content: string;
 }
 
@@ -137,6 +154,9 @@ export interface CyberwareBlock extends BaseBlock {
 export type CampaignBlock =
   | TextBlock
   | SubsectionBlock
+  | TableBlock
+  | DividerBlock
+  | ImageBlock
   | ReadAloudBlock
   | CalloutBlock
   | OutcomeBlock
@@ -163,6 +183,114 @@ export interface ProjectData {
   dpcglConsent: boolean;
   createdAt: number;
   updatedAt: number;
+}
+
+/**
+ * 将战役项目转为标准 Markdown，100% 支持所有区块包括数据表格
+ */
+export function exportProjectToMarkdown(project: ProjectData): string {
+  let md = `# ${project.title || '未命名战役'}\n\n`;
+  md += `**作者**: ${project.author || '匿名'} | **系统**: ${project.systemVersion || 'Daggerheart 1.0'}\n\n`;
+  if (project.description) {
+    md += `${project.description}\n\n`;
+  }
+  md += `---\n\n`;
+
+  for (const sec of project.sections) {
+    md += `## ${sec.title}\n\n`;
+    for (const b of sec.blocks) {
+      if (b.type === 'text') {
+        md += `${(b as TextBlock).content || ''}\n\n`;
+      } else if (b.type === 'subsection') {
+        md += `### ${(b as SubsectionBlock).title || '小节'}\n\n`;
+      } else if (b.type === 'table') {
+        const tb = b as TableBlock;
+        if (Array.isArray(tb.headers) && tb.headers.length > 0) {
+          md += `| ${tb.headers.join(' | ')} |\n`;
+          md += `| ${tb.headers.map(() => ':---').join(' | ')} |\n`;
+          if (Array.isArray(tb.rows)) {
+            for (const row of tb.rows) {
+              const cleanRow = tb.headers.map((_, i) => (row[i] !== undefined ? String(row[i]).replace(/\n/g, '<br/>') : ''));
+              md += `| ${cleanRow.join(' | ')} |\n`;
+            }
+          }
+          md += `\n`;
+        }
+      } else if (b.type === 'read_aloud') {
+        md += `> 📜 **朗读框**\n> ${(b as ReadAloudBlock).content || ''}\n\n`;
+      } else if (b.type === 'callout') {
+        const cb = b as CalloutBlock;
+        md += `> 💡 **${cb.title || '提示'}**: ${cb.content || ''}\n\n`;
+      } else if (b.type === 'divider') {
+        md += `---\n\n`;
+      } else if (b.type === 'image') {
+        const ib = b as ImageBlock;
+        md += `![${ib.caption || '战役插图'}](${ib.url})\n\n`;
+      } else if (b.type === 'outcome') {
+        const ob = b as OutcomeBlock;
+        md += `> 🎲 **检定判定表**\n`;
+        if (Array.isArray(ob.entries)) {
+          for (const e of ob.entries) {
+            const tagsStr = Array.isArray(e.tags) ? e.tags.join(' / ') : '判定';
+            md += `> - **[${tagsStr}]**: ${e.content}\n`;
+          }
+        }
+        md += `\n`;
+      } else if (b.type === 'enemy') {
+        const eb = b as EnemyBlock;
+        md += `### 👾 敌人: ${eb.name} (位阶 ${eb.tier || 1} ${eb.enemyType || '敌人'})\n`;
+        if (eb.stats) {
+          md += `- **难度 (DC)**: ${eb.stats.difficulty || 12} | **HP**: ${eb.stats.hp || 6} | **压力**: ${eb.stats.stress || 3} | **轻度/重度阈值**: ${eb.stats.thresholdMinor || 6}/${eb.stats.thresholdMajor || 13}\n`;
+        }
+        if (eb.attack) {
+          md += `- **主要攻击**: ${eb.attack.name || '普通攻击'} (${eb.attack.damage || 'd8'} 伤害, ${eb.attack.range || '近战'})\n`;
+        }
+        if (eb.tactics) {
+          md += `- **战术指南**: ${eb.tactics}\n`;
+        }
+        if (Array.isArray(eb.traits) && eb.traits.length > 0) {
+          md += `- **特性与能力**:\n`;
+          for (const t of eb.traits) {
+            md += `  - **${t.name}** [${t.type}]: ${t.description}\n`;
+          }
+        }
+        md += `\n`;
+      } else if (b.type === 'environment') {
+        const env = b as EnvironmentBlock;
+        md += `### 🌋 环境险境: ${env.name} (DC${env.difficulty || 12}, 倒计时 ${env.countdown || 4})\n`;
+        if (env.trend) md += `- **趋向与动向**: ${env.trend}\n`;
+        if (Array.isArray(env.features) && env.features.length > 0) {
+          md += `- **环境机制**:\n`;
+          for (const f of env.features) {
+            md += `  - **${f.name}**: ${f.description}\n`;
+          }
+        }
+        md += `\n`;
+      } else if (b.type === 'cyberware') {
+        const cb = b as CyberwareBlock;
+        md += `### 🦾 ${cb.title || '赛博装备清单'}\n`;
+        if (Array.isArray(cb.items)) {
+          for (const it of cb.items) {
+            md += `- **${it.name}** (位阶: ${it.tier || 'T1'}, 插槽: ${it.zone || '手臂'}, 占用: ${it.slots || 1}): ${it.effect}\n`;
+          }
+        }
+        md += `\n`;
+      } else if (b.type === 'loot') {
+        const lb = b as LootBlock;
+        md += `### 💎 ${lb.title || '战利品清单'}\n`;
+        if (Array.isArray(lb.items)) {
+          for (const it of lb.items) {
+            md += `- **${it.name}** (${it.type || '物品'}): ${it.description}\n`;
+          }
+        }
+        md += `\n`;
+      }
+    }
+    md += `---\n\n`;
+  }
+
+  md += `*遵循 Darrington Press 社区许可 (DPCGL)*\n`;
+  return md;
 }
 
 /**
