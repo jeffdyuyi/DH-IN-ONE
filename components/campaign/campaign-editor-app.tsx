@@ -631,8 +631,37 @@ const handleExportMarkdown = (data: ProjectData) => {
       else if (b.type === 'subsection') md += `### ${b.title}\n\n`;
       else if (b.type === 'read_aloud') md += `> **朗读:** ${b.content}\n\n`;
       else if (b.type === 'callout') md += `> **[${b.title}]**\n> ${b.content}\n\n`;
-      else if (b.type === 'enemy') md += `**敌人:** ${b.name} (难度 ${b.stats.difficulty})\n\n`;
-      else if (b.type === 'environment') md += `**环境:** ${b.name} (难度 ${b.difficulty})\n\n`;
+      else if (b.type === 'divider') md += `---\n\n`;
+      else if (b.type === 'image') {
+        md += `![${b.caption || '图片'}](${b.url || ''})\n`;
+        if (b.caption) md += `*${b.caption}*\n\n`;
+        else md += '\n';
+      }
+      else if (b.type === 'table') {
+        const headers = b.headers || [];
+        const rows = b.rows || [];
+        if (headers.length > 0) {
+          md += `| ${headers.join(' | ')} |\n`;
+          md += `| ${headers.map(() => '---').join(' | ')} |\n`;
+          rows.forEach((row: string[]) => {
+            md += `| ${(row || []).join(' | ')} |\n`;
+          });
+          md += '\n';
+        }
+      }
+      else if (b.type === 'enemy') {
+        md += `### 敌人: ${b.name} ${b.tier ? `[T${b.tier}]` : ''}\n`;
+        md += `**类型:** ${b.enemyType || '标准敌人'} | **难度 (DC):** ${b.stats?.difficulty ?? 12} | **HP:** ${b.stats?.hp ?? 0} | **压力:** ${b.stats?.stress ?? 0}\n`;
+        if (b.stats) md += `**伤害阈值:** 轻度 ${b.stats.thresholdMinor || 0} / 重度 ${b.stats.thresholdMajor || 0}\n`;
+        if (b.flavor) md += `*${b.flavor}*\n\n`;
+        if (b.tactics) md += `**战术:** ${b.tactics}\n\n`;
+      }
+      else if (b.type === 'environment') {
+        md += `### 环境: ${b.name} ${b.tier ? `[T${b.tier}]` : ''}\n`;
+        md += `**类型:** ${b.envType || '险境'} | **难度 (DC):** ${b.difficulty ?? 12}\n`;
+        if (b.description) md += `*${b.description}*\n\n`;
+        if (b.trend) md += `**趋向:** ${b.trend}\n\n`;
+      }
       else if (b.type === 'cyberware') {
         md += `### 赛博义体: ${b.name || '未命名义体'} ${b.tier ? `[${b.tier}]` : ''}\n`;
         const metaParts = [];
