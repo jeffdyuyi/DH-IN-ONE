@@ -354,70 +354,98 @@ export function PortalHub() {
             
             {/* 左侧：实体卡片/海报视觉展示区 (5列) */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-md rounded-2xl border border-stone-700/80 bg-[#161822] shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-6 space-y-4 relative group hover:border-amber-500/70 hover:shadow-[0_20px_50px_rgba(245,158,11,0.15)] transition-all duration-300">
-                
-                {/* 卡牌顶栏 */}
-                <div className="flex items-center justify-between border-b border-stone-700/60 pb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700 group-hover:scale-105 transition-transform">
-                    {activeTool.poster.category}
-                  </span>
-                  <span className="text-[10px] text-stone-500 font-mono">
-                    DH-IN-ONE PREVIEW
-                  </span>
-                </div>
+              {activeTool.id === 'cyberpunk' ? (
+                /* 爽博朋克专属震撼封面海报展示 */
+                <div className="w-full max-w-md rounded-2xl border border-cyan-500/40 bg-[#161822] shadow-[0_20px_60px_rgba(6,182,212,0.25)] overflow-hidden relative group hover:border-cyan-400 hover:shadow-[0_25px_70px_rgba(6,182,212,0.4)] transition-all duration-500">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-stone-950">
+                    <img 
+                      src="./images/shuangbopunk-cover.jpg" 
+                      alt="SHUANGBOPUNK 爽博朋克：渊边行者"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-60 pointer-events-none" />
+                  </div>
 
-                {/* 卡牌标题 */}
-                <div>
-                  <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors">
-                    {activeTool.poster.cardTitle}
-                  </h3>
-                  <p className="text-[11px] font-mono text-amber-400/80 tracking-wider">
-                    {activeTool.poster.cardSubtitle}
-                  </p>
+                  {/* 底部作者与作品标注 */}
+                  <div className="p-4 bg-stone-900/90 backdrop-blur-md border-t border-cyan-500/30 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        ⚡ 官方特化封面
+                      </span>
+                      <span className="text-stone-300 font-bold">爽博朋克：渊边行者</span>
+                    </div>
+                    <div className="text-[11px] font-mono text-cyan-300/90 font-semibold bg-stone-950/80 px-2.5 py-1 rounded-lg border border-cyan-500/20">
+                      视觉渲染：QQ 2077163152
+                    </div>
+                  </div>
                 </div>
+              ) : (
+                /* 其他工具的结构化卡片排版展示 */
+                <div className="w-full max-w-md rounded-2xl border border-stone-700/80 bg-[#161822] shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-6 space-y-4 relative group hover:border-amber-500/70 hover:shadow-[0_20px_50px_rgba(245,158,11,0.15)] transition-all duration-300">
+                  
+                  {/* 卡牌顶栏 */}
+                  <div className="flex items-center justify-between border-b border-stone-700/60 pb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700 group-hover:scale-105 transition-transform">
+                      {activeTool.poster.category}
+                    </span>
+                    <span className="text-[10px] text-stone-500 font-mono">
+                      DH-IN-ONE PREVIEW
+                    </span>
+                  </div>
 
-                {/* 属性数据框 */}
-                {activeTool.poster.stats && (
-                  <div className="grid grid-cols-2 gap-2 bg-stone-900/80 p-3 rounded-xl border border-stone-800">
-                    {activeTool.poster.stats.map((st, i) => (
-                      <div key={i} className="text-xs">
-                        <span className="text-stone-500 block text-[10px]">{st.label}</span>
-                        <span className="font-bold text-stone-200">{st.val}</span>
-                      </div>
+                  {/* 卡牌标题 */}
+                  <div>
+                    <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors">
+                      {activeTool.poster.cardTitle}
+                    </h3>
+                    <p className="text-[11px] font-mono text-amber-400/80 tracking-wider">
+                      {activeTool.poster.cardSubtitle}
+                    </p>
+                  </div>
+
+                  {/* 属性数据框 */}
+                  {activeTool.poster.stats && (
+                    <div className="grid grid-cols-2 gap-2 bg-stone-900/80 p-3 rounded-xl border border-stone-800">
+                      {activeTool.poster.stats.map((st, i) => (
+                        <div key={i} className="text-xs">
+                          <span className="text-stone-500 block text-[10px]">{st.label}</span>
+                          <span className="font-bold text-stone-200">{st.val}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 标签 */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeTool.poster.tags.map((tg, i) => (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-stone-800/80 text-stone-300 border border-stone-700/50">
+                        {tg}
+                      </span>
                     ))}
                   </div>
-                )}
 
-                {/* 标签 */}
-                <div className="flex flex-wrap gap-1.5">
-                  {activeTool.poster.tags.map((tg, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-stone-800/80 text-stone-300 border border-stone-700/50">
-                      {tg}
-                    </span>
-                  ))}
-                </div>
-
-                {/* 效果机制说明 */}
-                <div className="p-3.5 rounded-xl bg-stone-950/70 border border-stone-800/80 text-xs text-stone-300 leading-relaxed space-y-1.5">
-                  <div className="font-bold text-amber-400 text-[11px] flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5" />
-                    <span>规则机制</span>
+                  {/* 效果机制说明 */}
+                  <div className="p-3.5 rounded-xl bg-stone-950/70 border border-stone-800/80 text-xs text-stone-300 leading-relaxed space-y-1.5">
+                    <div className="font-bold text-amber-400 text-[11px] flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>规则机制</span>
+                    </div>
+                    <p>{activeTool.poster.mechanics}</p>
                   </div>
-                  <p>{activeTool.poster.mechanics}</p>
+
+                  {/* 风味文案 */}
+                  <p className="text-[11px] italic text-stone-400 leading-relaxed border-l-2 border-amber-500/50 pl-2.5">
+                    {activeTool.poster.flavor}
+                  </p>
+
+                  {/* 卡牌页脚 */}
+                  <div className="pt-2 border-t border-stone-800 text-[10px] text-stone-500 flex items-center justify-between">
+                    <span>{activeTool.poster.footerInfo}</span>
+                    <span className="text-amber-400">● 实时渲染</span>
+                  </div>
+
                 </div>
-
-                {/* 风味文案 */}
-                <p className="text-[11px] italic text-stone-400 leading-relaxed border-l-2 border-amber-500/50 pl-2.5">
-                  {activeTool.poster.flavor}
-                </p>
-
-                {/* 卡牌页脚 */}
-                <div className="pt-2 border-t border-stone-800 text-[10px] text-stone-500 flex items-center justify-between">
-                  <span>{activeTool.poster.footerInfo}</span>
-                  <span className="text-amber-400">● 实时渲染</span>
-                </div>
-
-              </div>
+              )}
             </div>
 
             {/* 右侧：文本框文字说明与快速操作区 (7列) */}
