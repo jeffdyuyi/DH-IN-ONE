@@ -1,64 +1,70 @@
+# 匕首心&爽博朋克in one (DH-IN-ONE)
+
 [![GPL-3.0 License](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
-[![GitHub Stars](https://img.shields.io/github/stars/RidRisR/DaggerHeart-CharacterSheet?style=social)](https://github.com/RidRisR/DaggerHeart-CharacterSheet/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/RidRisR/DaggerHeart-CharacterSheet?style=social)](https://github.com/RidRisR/DaggerHeart-CharacterSheet/network/members)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15.2.4-black)](https://nextjs.org/)
+[![Pure Client](https://img.shields.io/badge/Client--Side-Static%20Export-success)](https://github.com/jeffdyuyi/DH-IN-ONE)
 
-# DHSheet | 匕首之心车卡器
+> **匕首心&爽博朋克in one (DH-IN-ONE)** 是专为 TRPG 规则《匕首之心 (Daggerheart)》与赛博朋克扩展模组《爽博朋克》打造的免费开源一体化跑团工具箱。
+> 集成**爽博朋克赛博车卡器**、**卡牌工坊 V3（含官方 d60 灵感抽取器）**、**战役模组文档编辑器**以及**本地公共卡牌库中枢**。
 
-**✨ 轻松创建和管理你的DaggerHeart角色卡！**
+---
 
-**项目在线地址 / Project site:** [https://dhsheet.site/](https://dhsheet.site/)
+## 🌟 核心功能模块
 
-**DHSheet / 匕首之心车卡器** 是由 [RidRisR](https://github.com/RidRisR) 维护的免费开源、非官方 DaggerHeart 角色卡生成器。本仓库是项目源码与发布入口，推荐通过项目在线地址使用最新版本。
+1. **⚡ 爽博朋克赛博车卡器 (`/character`)**
+   - **5 大身体义体插槽**：头部神经、胸腔核心、左右机械臂、下肢腿部。
+   - **赛博神经压力与超载系统**：精准跟踪压力 (Stress)、过载阈值 (Overload) 与非法改造 (Illegal Mods)。
+   - **独家「霓虹隧道」配色与 A4 打印**：暗黑电光霓虹 UI，支持一键切换「浅色/无墨水打印预览」，直接导出 A4 竖版战术档案。
+   - **跨画风战利品直装**：官方奇幻战利品与消耗品直接编译装配入赛博身体槽位。
 
-这是一个基于 Critical Role《DaggerHeart》系统参考文档（SRD）的社区工具。旨在帮助玩家和游戏主持人（GM）快速、便捷地创建、编辑和管理 DaggerHeart 角色，让你的桌面角色扮演体验更加流畅。
+2. **🎲 卡牌工坊 V3 & 官方 d60 灵感抽取器 (`/workshop`)**
+   - 支持 33+ 种卡牌类别自定义设计与可视化实时预览。
+   - 内置 **官方 60 种战利品 & 60 种消耗品 d60 抽取器**，支持一键掷骰、一键复制与一键套用为卡牌草稿。
+   - 一键同步到本地公共卡牌库，支持导出标准卡包。
 
-## 🚀 快速开始
+3. **📜 战役模组文档编辑器 (`/campaign`)**
+   - 专为跑团主持人和创作者设计的章节排版引擎。
+   - **公共库卡牌一键插入**：直接从公共库挑选敌人、环境、战利品与赛博装备嵌入章节卡片。
+   - 支持导出标准 Markdown 格式文档，内置 DPCGL 社区游戏许可合规免责声明。
 
-### 🌐 在线访问
+4. **🗄️ 公共本地卡牌库中枢 (`/vault`)**
+   - 基于浏览器 IndexedDB 纯本地离线存储，数据永不上传云端，隐私安全。
+   - 预置 120 张官方核心战利品与消耗品种子卡。
+   - 支持全库分类检索、卡包导入与全量数据备份导出。
 
-无需安装，点击下方按钮即可立即使用我们的在线版本：
+---
 
-[![点我即刻使用](https://img.shields.io/badge/在线建卡-点击访问-success?logo=vercel)](https://dhsheet.site/)
+## 🤝 致谢与开源声明 (Credits & Acknowledgements)
 
-*   **在线版本:** [https://dhsheet.site/](https://dhsheet.site/)。
-*   **获取稳定版本:** 你也可以直接从 [GitHub Releases](https://github.com/RidRisR/DaggerHeart-CharacterSheet/releases) 下载最新的稳定版本文件。
+本项目遵循 **[GPL-3.0 开源许可证](https://opensource.org/licenses/GPL-3.0)** 进行二次开发与衍生。在开发过程中深度参考并继承了开源社区优秀创作者的代码架构与成果，在此致以最崇高的敬意：
 
-## 💻 本地部署（开发者模式）
+* **原版车卡器核心架构**：基于 [RidRisR/DaggerHeart-CharacterSheet](https://github.com/RidRisR) 及其贡献者团队（PolearmMaster、末楔、里予、一得）的开源项目衍生并深度重构。
+* **爽博朋克扩展规则**：致谢爽博朋克赛博朋克扩展规则的创作者与 TRPG 社区拓荒者。
+* **官方规则与版权**：Daggerheart 系统参考文档（SRD）及其文本版权归属 Critical Role Productions, LLC. 与 Darrington Press。
 
-如果你希望在本地运行此项目（例如进行开发、测试或离线使用），请按照以下步骤操作：
+---
 
-1.  **克隆仓库:**
-    ```bash
-    git clone https://github.com/RidRisR/DaggerHeart-CharacterSheet.git
-    cd DaggerHeart-CharacterSheet
-    ```
-2.  **安装依赖:**
-    ```bash
-    pnpm install
-    ```
-3.  **运行开发服务器:**
-    ```bash
-    pnpm dev
-    ```
-    项目将在本地启动，通常通过 `http://localhost:XXXX` (具体端口请查看命令行输出) 访问。
+## 💻 本地运行与部署
 
-## 🤝 贡献者
+本项目为纯前端客户端架构（零服务端依赖），支持离线使用与 GitHub Pages 静态托管：
 
-*   [▲ RidRisR](https://github.com/RidRisR) (项目发起人 & 主要开发者)
-*   [▣ PolearmMaster](https://github.com/PolearmMaster) (翻译及校对)
-*   [▣ 末楔](https://github.com/CissyOliviaCat) (翻译及校对)
-*   [▣ 里予](https://github.com/LiyuNodream) (翻译及校对)
-*   [▣ 一得](https://github.com/Milkyomeda) (翻译及校对)
+```bash
+# 1. 克隆仓库
+git clone https://github.com/jeffdyuyi/DH-IN-ONE.git
+cd DH-IN-ONE
 
-我们欢迎任何形式的贡献，包括但不限于提交Bug报告、功能建议、代码改进或文档编写。
+# 2. 安装依赖
+npm install
+
+# 3. 本地启动开发服务器
+npm run dev
+
+# 4. 静态打包（用于部署到 GitHub Pages）
+npm run build
+```
+
+---
 
 ## 📝 许可证
 
-本项目遵循 [GPL-3.0 许可证](https://opensource.org/licenses/GPL-3.0) 开源。详情请参见许可证文件。
-
-## ⚖️ 法律声明与版权信息
-
-© 2024 Darrington Press.
-
-Daggerheart系统参考文档（System Reference Document, SRD）及其所有文本内容是Critical Role Productions, LLC.的专属财产。
-本工具部分内容参考了 [Daggerheart SRD v1.0](https://darringtonpress.com/daggerheart) 中的公开信息。
+本项目遵循 [GPL-3.0 许可证](https://opensource.org/licenses/GPL-3.0)。

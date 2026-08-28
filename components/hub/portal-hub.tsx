@@ -1,19 +1,19 @@
-﻿"use client"
+"use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { 
   Sparkles, 
   Layers, 
   BookOpen, 
-  UserCheck, 
   Database, 
   ExternalLink, 
   Cpu, 
   ShieldCheck, 
   Dices,
   FileText,
-  ArrowRight
+  ArrowRight,
+  Heart
 } from 'lucide-react'
 
 export function PortalHub() {
@@ -46,7 +46,7 @@ export function PortalHub() {
       <header className="relative z-10 border-b border-white/10 backdrop-blur-md bg-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg shadow-lg ${
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shadow-lg ${
               themeMode === 'cyberpunk'
                 ? 'bg-gradient-to-br from-[#00FFA3] to-[#6C00FF] text-black shadow-[#6C00FF]/20'
                 : 'bg-gradient-to-br from-amber-400 to-amber-600 text-black shadow-amber-500/20'
@@ -54,8 +54,8 @@ export function PortalHub() {
               DH
             </div>
             <div>
-              <span className="font-extrabold tracking-wider text-lg">DH-IN-ONE</span>
-              <span className="ml-2 text-xs px-2 py-0.5 rounded-full border border-white/20 text-slate-400">
+              <span className="font-extrabold tracking-wider text-base sm:text-lg">匕首心&爽博朋克in one</span>
+              <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full border border-white/20 text-slate-400">
                 v1.0
               </span>
             </div>
@@ -99,7 +99,7 @@ export function PortalHub() {
               : 'border-amber-400/40 bg-amber-400/10 text-amber-300'
           }`}>
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Daggerheart 匕首之心 · 全流程全规则多合一中枢</span>
+            <span>匕首心 × 爽博朋克 · 本地一体化跑团工具箱</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6">
@@ -109,18 +109,18 @@ export function PortalHub() {
                 ? 'bg-gradient-to-r from-[#00FFA3] via-[#F5F500] to-[#FF007F]'
                 : 'bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500'
             }`}>
-              一体化本地跑团工作台
+              匕首心&爽博朋克in one
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-400 leading-relaxed">
-            数据 100% 留存在你的本地浏览器，零服务器依赖。卡牌工坊、战役文档编辑器、双规则车卡器与公共本地卡牌库无缝连携。
+            数据 100% 留存在你的本地浏览器，零服务器依赖。卡牌工坊、战役文档编辑器、爽博朋克车卡器与公共本地卡牌库无缝连携。
           </p>
         </div>
 
         {/* 四大模块入口卡片矩阵 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-16">
-          {/* 卡片 1: 角色卡与车卡器 */}
+          {/* 卡片 1: 爽博朋克赛博车卡器 */}
           <Link
             href="/character"
             className={`group relative p-8 rounded-2xl border transition-all duration-300 backdrop-blur-xl bg-white/[0.03] hover:bg-white/[0.06] flex flex-col justify-between overflow-hidden ${
@@ -134,21 +134,21 @@ export function PortalHub() {
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                   themeMode === 'cyberpunk' ? 'bg-[#00FFA3]/10 text-[#00FFA3]' : 'bg-amber-400/10 text-amber-400'
                 }`}>
-                  <UserCheck className="w-6 h-6" />
+                  <Cpu className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full border border-white/10 text-slate-400">
-                  标准 & 爽博双模式
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full border border-white/10 text-[#00FFA3] bg-[#00FFA3]/10">
+                  ⚡ 爽博朋克特化
                 </span>
               </div>
-              <h2 className="text-2xl font-bold mb-3 group-hover:text-white transition">角色卡构建与车卡器</h2>
+              <h2 className="text-2xl font-bold mb-3 group-hover:text-white transition">爽博朋克赛博车卡器</h2>
               <p className="text-sm text-slate-400 leading-relaxed mb-6">
-                包含标准 9 职业角色卡生成与《爽博朋克：渊边行者》专属义体改装车卡器。支持多存档本地管理、自动规则分流、装备自动计算与 A4 竖版 0 墨水打印。
+                《爽博朋克：渊边行者》专属赛博车卡器。支持身体 5 大区义体插槽装配、神经压力与超载判定、黑市非法改造、跨画风战利品直装与 A4 竖版 0 墨水线框打印。
               </p>
             </div>
             <div className={`flex items-center text-sm font-semibold transition-colors ${
               themeMode === 'cyberpunk' ? 'text-[#00FFA3] group-hover:text-white' : 'text-amber-400 group-hover:text-white'
             }`}>
-              <span>进入角色卡中心</span>
+              <span>进入赛博车卡器</span>
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
@@ -241,7 +241,7 @@ export function PortalHub() {
               </div>
               <h2 className="text-2xl font-bold mb-3 group-hover:text-white transition">公共本地卡牌库 (Vault)</h2>
               <p className="text-sm text-slate-400 leading-relaxed mb-6">
-                三合一系统的本地存储中枢。内置官方 60 战利品与 60 消耗品种子，提供跨应用卡牌检索、批量勾选打包导出卡包、全量数据一键备份与旧版数据吸纳。
+                四合一系统的本地存储中枢。内置官方 60 战利品与 60 消耗品种子，提供跨应用卡牌检索、批量勾选打包导出卡包、全量数据一键备份与旧版数据吸纳。
               </p>
             </div>
             <div className={`flex items-center text-sm font-semibold transition-colors ${
@@ -254,7 +254,7 @@ export function PortalHub() {
         </div>
 
         {/* 底部特性标语区 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md mb-12">
           <div className="flex items-center space-x-3">
             <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             <div className="text-xs">
@@ -277,38 +277,26 @@ export function PortalHub() {
             </div>
           </div>
         </div>
+
+        {/* 开源致敬与版权声明卡片 */}
+        <div className="p-6 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-md text-xs text-slate-400 leading-relaxed">
+          <div className="flex items-center space-x-2 text-slate-200 font-bold mb-2">
+            <Heart className="w-4 h-4 text-[#FF007F]" />
+            <span>开源致敬与免责声明 (Credits & Acknowledgement)</span>
+          </div>
+          <p className="mb-2">
+            本项目基于开源项目 <a href="https://github.com/RidRisR/DaggerHeart-CharacterSheet" target="_blank" rel="noreferrer" className="text-[#00FFA3] underline underline-offset-2">RidRisR/DaggerHeart-CharacterSheet</a> 进行深度重构与衍生开发，致敬原项目作者及贡献者团队。
+          </p>
+          <p>
+            Daggerheart 系统参考文档（SRD）及其所有文本版权归属于 Critical Role Productions, LLC. 与 Darrington Press。本项目遵循 GNU General Public License v3.0 (GPL-3.0) 与 Darrington Press Community Gaming License (DPCGL)。
+          </p>
+        </div>
       </main>
 
-      {/* 合规与开源致谢页脚 */}
-      <footer className="border-t border-white/10 bg-black/40 py-10 relative z-10 text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="text-slate-300 font-semibold mb-1">
-              DH-IN-ONE · Daggerheart 匕首之心多合一工具箱
-            </p>
-            <p className="text-slate-500">
-              开源协议：GNU General Public License v3.0 (GPL-3.0) · 本项目非官方产品，遵循 Darrington Press 社区许可 (DPCGL)。
-            </p>
-          </div>
-          <div className="flex items-center space-x-4 text-slate-400">
-            <a
-              href="https://github.com/jeffdyuyi/DH-IN-ONE"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-white transition underline underline-offset-4"
-            >
-              原创整合：jeffdyuyi
-            </a>
-            <span>•</span>
-            <a
-              href="https://darringtonpress.com/daggerheart/"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-white transition underline underline-offset-4"
-            >
-              Daggerheart 官方
-            </a>
-          </div>
+      {/* 页脚 */}
+      <footer className="border-t border-white/10 bg-black/40 py-8 relative z-10 text-xs text-slate-500 text-center">
+        <div className="max-w-7xl mx-auto px-4">
+          <p>匕首心&爽博朋克in one (DH-IN-ONE) · 免费开源 · 纯客户端离线运行</p>
         </div>
       </footer>
     </div>

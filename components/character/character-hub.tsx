@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -6,18 +6,12 @@ import { useRouter } from 'next/navigation'
 import { 
   UserPlus, 
   Cpu, 
-  Sparkles, 
   Trash2, 
   Copy, 
-  Edit3, 
-  Upload, 
-  Download, 
   ArrowLeft, 
   Clock, 
-  Shield, 
-  Zap,
   Layers,
-  FileJson
+  Sparkles
 } from 'lucide-react'
 import { 
   loadCharacterList, 
@@ -69,22 +63,18 @@ export function CharacterHub() {
     refreshList()
   }, [])
 
-  // 新建角色并分流
-  const handleCreateNew = async (mode: 'standard' | 'cyberpunk_abyss_walker') => {
+  // 新建爽博朋克赛博角色
+  const handleCreateNewCyberpunk = async () => {
     if (characterList.characters.length >= MAX_CHARACTERS) {
       alert(`角色数量已达上限（最多 ${MAX_CHARACTERS} 个角色）。请删除不需要的角色后再试。`)
       return
     }
 
     const newId = generateCharacterId()
-    const isCyber = mode === 'cyberpunk_abyss_walker'
-    const defaultName = isCyber ? '未命名边缘行者' : '未命名冒险者'
-    const saveName = isCyber ? '新赛博角色' : '新标准角色'
-
     const newSheet: SheetData = {
       ...defaultSheetData,
-      name: defaultName,
-      campaignMode: mode
+      name: '未命名边缘行者',
+      campaignMode: 'cyberpunk_abyss_walker'
     }
 
     // 保存至本地存储
@@ -92,7 +82,7 @@ export function CharacterHub() {
 
     const newMetadata: CharacterMetadata = {
       id: newId,
-      saveName: saveName,
+      saveName: '新赛博角色',
       lastModified: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       order: characterList.characters.length
@@ -106,33 +96,18 @@ export function CharacterHub() {
     }
 
     saveCharacterList(updatedList)
-
-    // 自动路由分流
-    if (isCyber) {
-      router.push(`/character/cyberpunk?id=${newId}`)
-    } else {
-      router.push(`/character/standard?id=${newId}`)
-    }
+    router.push(`/character/cyberpunk?id=${newId}`)
   }
 
-  // 点击已有角色卡自动分流
+  // 打开角色卡（统一进入爽博朋克车卡器）
   const handleOpenCharacter = (charId: string) => {
-    const detail = characterDetails[charId]
-    const isCyber = detail?.campaignMode === 'cyberpunk_abyss_walker'
-
-    // 设置为活动角色
     const updatedList: CharacterList = {
       ...characterList,
       activeCharacterId: charId,
       lastUpdated: new Date().toISOString()
     }
     saveCharacterList(updatedList)
-
-    if (isCyber) {
-      router.push(`/character/cyberpunk?id=${charId}`)
-    } else {
-      router.push(`/character/standard?id=${charId}`)
-    }
+    router.push(`/character/cyberpunk?id=${charId}`)
   }
 
   // 删除角色
@@ -170,7 +145,8 @@ export function CharacterHub() {
     const newSaveName = `${sourceMeta.saveName} (副本)`
     const newSheet: SheetData = {
       ...source,
-      name: `${source.name || '角色'} (副本)`
+      name: `${source.name || '角色'} (副本)`,
+      campaignMode: 'cyberpunk_abyss_walker'
     }
 
     await saveCharacterSheet(newId, newSheet)
@@ -211,7 +187,7 @@ export function CharacterHub() {
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00FFA3] to-[#6C00FF] flex items-center justify-center font-bold text-xs text-black">
                 DH
               </div>
-              <h1 className="font-extrabold text-base tracking-wider">角色卡中心与车卡调度中枢</h1>
+              <h1 className="font-extrabold text-base tracking-wider">爽博朋克角色卡中心</h1>
             </div>
           </div>
 
@@ -225,54 +201,33 @@ export function CharacterHub() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* 新建角色操作区 */}
         <div className="mb-10">
-          <h2 className="text-lg font-bold mb-4 flex items-center space-x-2">
-            <UserPlus className="w-5 h-5 text-[#00FFA3]" />
-            <span>创建新角色存档</span>
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* 按钮 1: 新建标准奇幻角色 */}
-            <button
-              onClick={() => handleCreateNew('standard')}
-              className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-amber-400/60 hover:shadow-[0_0_24px_rgba(245,158,11,0.15)] transition-all text-left flex items-center justify-between group"
-            >
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/30">
-                    标准规则
-                  </span>
-                  <span className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                    新建标准匕首之心角色
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  支持官方 9 职业、18 种族、9 社群、子职业、领域法术手牌与标准装备。
-                </p>
-              </div>
-              <Sparkles className="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform ml-4 flex-shrink-0" />
-            </button>
-
-            {/* 按钮 2: 新建爽博朋克角色 */}
-            <button
-              onClick={() => handleCreateNew('cyberpunk_abyss_walker')}
-              className="p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-[#00FFA3]/60 hover:shadow-[0_0_24px_rgba(0,255,163,0.15)] transition-all text-left flex items-center justify-between group"
-            >
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[#00FFA3]/10 text-[#00FFA3] border border-[#00FFA3]/30">
-                    爽博朋克特化
-                  </span>
-                  <span className="text-sm font-bold text-white group-hover:text-[#00FFA3] transition">
-                    新建《渊边行者》赛博角色
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  专属身体 5 大区义体插槽改造、非法黑市交易、赛博消耗品与 A4 打印线框化。
-                </p>
-              </div>
-              <Cpu className="w-6 h-6 text-[#00FFA3] group-hover:scale-110 transition-transform ml-4 flex-shrink-0" />
-            </button>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold flex items-center space-x-2">
+              <UserPlus className="w-5 h-5 text-[#00FFA3]" />
+              <span>快速创建角色</span>
+            </h2>
           </div>
+
+          {/* 新建爽博朋克角色大卡片 */}
+          <button
+            onClick={handleCreateNewCyberpunk}
+            className="w-full p-6 sm:p-8 rounded-2xl border border-[#00FFA3]/30 bg-gradient-to-r from-[#00FFA3]/10 via-[#6C00FF]/10 to-transparent hover:border-[#00FFA3]/80 hover:shadow-[0_0_30px_rgba(0,255,163,0.2)] transition-all text-left flex items-center justify-between group"
+          >
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-xs font-bold px-2.5 py-1 rounded bg-[#00FFA3] text-black shadow-sm">
+                  ⚡ 爽博朋克专属
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-white group-hover:text-[#00FFA3] transition">
+                  新建《渊边行者》赛博角色卡
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+                搭载 5 大身体义体槽位改造、神经压力与超载系统、黑市非法改造、官方战利品跨画风直装与 A4 打印优化。
+              </p>
+            </div>
+            <Cpu className="w-8 h-8 text-[#00FFA3] group-hover:scale-110 group-hover:rotate-6 transition-all ml-4 flex-shrink-0" />
+          </button>
         </div>
 
         {/* 角色存档列表 */}
@@ -280,7 +235,7 @@ export function CharacterHub() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold flex items-center space-x-2">
               <Layers className="w-5 h-5 text-[#6C00FF]" />
-              <span>我的本地角色存档 ({characterList.characters.length})</span>
+              <span>我的赛博角色档案 ({characterList.characters.length})</span>
             </h2>
           </div>
 
@@ -288,36 +243,27 @@ export function CharacterHub() {
             <div className="text-center py-20 border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
               <Layers className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <p className="text-sm text-slate-400 mb-2">当前暂无任何角色存档</p>
-              <p className="text-xs text-slate-500">点击上方按钮即可创建你的第一张角色卡！</p>
+              <p className="text-xs text-slate-500">点击上方按钮即可创建你的第一位赛博边缘行者！</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {characterList.characters.map((char) => {
                 const detail = characterDetails[char.id]
-                const isCyber = detail?.campaignMode === 'cyberpunk_abyss_walker'
-                const charName = detail?.name || '未命名角色'
-                const profession = detail?.profession || '未知职业'
+                const charName = detail?.name || '未命名边缘行者'
+                const profession = detail?.profession || '赛博佣兵'
                 const level = detail?.level || '1'
 
                 return (
                   <div
                     key={char.id}
                     onClick={() => handleOpenCharacter(char.id)}
-                    className={`group relative p-5 rounded-2xl border transition-all duration-300 backdrop-blur-md bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer flex flex-col justify-between ${
-                      isCyber
-                        ? 'border-white/10 hover:border-[#00FFA3]/60 hover:shadow-[0_0_20px_rgba(0,255,163,0.1)]'
-                        : 'border-white/10 hover:border-amber-400/60 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)]'
-                    }`}
+                    className="group relative p-5 rounded-2xl border border-white/10 hover:border-[#00FFA3]/60 hover:shadow-[0_0_20px_rgba(0,255,163,0.15)] transition-all duration-300 backdrop-blur-md bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer flex flex-col justify-between"
                   >
                     <div>
                       {/* 卡片头部标签 */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                          isCyber
-                            ? 'bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/30'
-                            : 'bg-amber-400/10 text-amber-300 border-amber-400/30'
-                        }`}>
-                          {isCyber ? '爽博朋克' : '标准规则'}
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/30">
+                          渊边行者
                         </span>
                         <div className="flex items-center space-x-1 text-slate-500">
                           <Clock className="w-3 h-3" />
@@ -340,7 +286,7 @@ export function CharacterHub() {
 
                     {/* 卡片底部操作栏 */}
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                      <span className="text-[11px] group-hover:underline">点击进入车卡器 ➔</span>
+                      <span className="text-[11px] group-hover:text-[#00FFA3] transition">进入车卡器 ➔</span>
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={(e) => handleDuplicate(char.id, e)}
