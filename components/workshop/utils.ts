@@ -192,6 +192,9 @@ export const getLibrary = (): LibraryItem[] => {
   }
 };
 
+import { vaultStorage } from '../../lib/vault/vault-storage';
+import { VaultCard, VAULT_SCHEMA_VERSION } from '../../lib/vault/vault-types';
+
 export const saveToLibrary = (card: CardData) => {
   if (typeof window === 'undefined') return;
   try {
@@ -206,6 +209,20 @@ export const saveToLibrary = (card: CardData) => {
     }
     
     localStorage.setItem(LIB_KEY, JSON.stringify(lib));
+
+    // 同步持久化写入公共卡牌库中枢 (VaultStorage)
+    const vaultCard: VaultCard = {
+      id: card.id,
+      schemaVersion: VAULT_SCHEMA_VERSION,
+      name: card.name || '未命名卡牌',
+      category: card.type as any,
+      sourceApp: 'workshop',
+      description: card.description || '',
+      data: card,
+      updatedAt: Date.now(),
+      createdAt: Date.now(),
+    };
+    vaultStorage.saveCard(vaultCard).catch(() => {});
   } catch (e) {
     // silent catch
   }
@@ -216,6 +233,7 @@ export const deleteFromLibrary = (id: string) => {
   try {
     const lib = getLibrary().filter(item => item.id !== id);
     localStorage.setItem(LIB_KEY, JSON.stringify(lib));
+    vaultStorage.deleteCard(id).catch(() => {});
   } catch (e) {
     // silent catch
   }

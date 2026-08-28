@@ -15,7 +15,7 @@ import {
   Folder, Clock, Save, Bold, Strikethrough,
   Quote, List, ListOrdered, Code, Split, Highlighter, Copy,
   ShieldCheck, Scale, Check, CheckCircle2, Sparkles, FileCheck,
-  Cpu
+  Cpu, Database
 } from 'lucide-react';
 import { 
   ProjectData, DynamicSection, DEFAULT_PROJECT,
@@ -30,6 +30,7 @@ import {
 import { SmartTextarea } from './components/SmartTextarea';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
 import { SavedLibraryModal, LIBRARY_STORAGE_KEY } from './components/SavedLibraryModal';
+import { VaultCardInsertModal } from './components/VaultCardInsertModal';
 
 // --- Constants & Styles ---
 
@@ -945,6 +946,31 @@ const MainContent = () => {
     });
   }, [setProjectData]);
 
+  const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+
+  const handleInsertVaultBlock = useCallback((sectionIndex: number, block: ContentBlock) => {
+    setProjectData((prev: any) => {
+      const sections = [...prev.sections];
+      if (sections.length === 0) {
+        const newSec: DynamicSection = {
+          id: generateId(),
+          title: "第一章：遭遇与战利品",
+          level: 3,
+          blocks: [block]
+        };
+        return { ...prev, sections: [newSec] };
+      }
+      const targetIdx = Math.min(Math.max(0, sectionIndex), sections.length - 1);
+      const updated = sections.map((s, idx) => {
+        if (idx === targetIdx) {
+          return { ...s, blocks: [...s.blocks, block] };
+        }
+        return s;
+      });
+      return { ...prev, sections: updated };
+    });
+  }, [setProjectData]);
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fdfcf8] text-stone-800 font-sans flex flex-col print:h-auto print:w-auto print:bg-white print:overflow-visible">
       <Navbar 
@@ -954,6 +980,7 @@ const MainContent = () => {
         updateField={updateField}
         loadProject={loadProject}
         onOpenLibrary={() => setIsLibraryOpen(true)}
+        onOpenVault={() => setIsVaultModalOpen(true)}
         onSaveCurrent={overwriteCurrent}
         lastAutoSaveTime={lastAutoSaveTime}
       />
@@ -973,6 +1000,13 @@ const MainContent = () => {
         onSaveCurrentAsNew={saveCurrentAsNew}
         onOverwriteCurrent={overwriteCurrent}
         lastAutoSaveTime={lastAutoSaveTime}
+      />
+
+      <VaultCardInsertModal
+        isOpen={isVaultModalOpen}
+        onClose={() => setIsVaultModalOpen(false)}
+        sections={projectData.sections || []}
+        onInsertBlock={handleInsertVaultBlock}
       />
 
       <div className="flex-1 flex overflow-hidden relative print:block print:h-auto print:overflow-visible">
@@ -1061,7 +1095,7 @@ export default CampaignEditorApp;
 
 // --- Layout Components ---
 
-const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, loadProject, onOpenLibrary, onSaveCurrent, lastAutoSaveTime }: any) => {
+const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, loadProject, onOpenLibrary, onOpenVault, onSaveCurrent, lastAutoSaveTime }: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1293,7 +1327,11 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
           {isMenuOpen && (
             <div className="absolute top-full left-0 mt-3 w-64 bg-white text-stone-800 rounded-xl shadow-2xl border border-stone-200 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="p-2 space-y-1">
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">作品库与存档</div>
+                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">作品库与连携</div>
+                    <button onClick={() => { onOpenVault?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                        <Database className="w-4 h-4 text-amber-500" />
+                        <span>从公共卡牌库插入 (Vault)</span>
+                    </button>
                     <button onClick={() => { onOpenLibrary(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
                         <Folder className="w-4 h-4 text-amber-600" />
                         <span>本地作品库 / 存档</span>
@@ -1349,11 +1387,21 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+         {/* Vault Button */}
+         <button 
+            onClick={onOpenVault}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+            title="从公共卡牌库 (Vault) 插入官方与工坊卡牌"
+         >
+            <Database className="w-4 h-4" />
+            <span className="hidden sm:inline">公共卡牌库</span>
+         </button>
+
          {/* Library Button */}
          <button 
             onClick={onOpenLibrary}
-            className="flex items-center gap-1.5 bg-amber-700/80 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-amber-600/50"
+            className="flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-stone-700"
             title="打开本地作品库 (按ID进行存档管理)"
          >
             <Folder className="w-4 h-4 text-amber-300" />
