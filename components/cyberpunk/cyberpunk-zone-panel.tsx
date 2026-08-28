@@ -80,14 +80,14 @@ export function CyberpunkZonePanel({ cyberpunkData, onChange }: CyberpunkZonePan
               className="p-3.5 rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] flex flex-col justify-between hover:border-[#6C00FF]/60 transition-all shadow-sm"
             >
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-[#6C00FF]/20 mb-2.5">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-xs text-white">{zone.name}</span>
-                    <span className="text-[10px] text-[#F5F500] font-mono">
+                <div className="flex items-center justify-between pb-2 border-b border-[#6C00FF]/20 mb-2.5 gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="font-bold text-xs text-white shrink-0">{zone.name}</span>
+                    <span className="text-[10px] text-[#F5F500] font-mono truncate" title={(zone as any).english || zone.suggestedTraits}>
                       {(zone as any).english || zone.suggestedTraits}
                     </span>
                   </div>
-                  <div className="text-xs font-mono">
+                  <div className="text-xs font-mono shrink-0 whitespace-nowrap">
                     <span className={usedSlots > maxSlotsPerZone ? 'text-[#FF007F] font-bold' : 'text-[#00FFA3] font-bold'}>
                       {usedSlots}
                     </span>
