@@ -295,9 +295,30 @@ export function validateCompatibility(data: SheetData): { compatible: boolean; w
  * 通用的角色数据验证和处理函数
  * 适用于JSON和HTML导入
  */
-export function validateAndProcessCharacterData(rawData: any, source: 'json' | 'html' = 'json'): ValidationResult {
+export function validateAndProcessCharacterData(rawInput: any, source: 'json' | 'html' = 'json'): ValidationResult {
   try {
     console.log(`[Data Validation] 开始验证${source.toUpperCase()}数据...`)
+
+    let rawData = rawInput
+    // 兼容 DH-CHARACTER-BUNDLE 标准解耦结构
+    if (rawInput && typeof rawInput === 'object' && rawInput.character) {
+      rawData = rawInput.character
+
+      // 自动将嵌入的自定义卡牌同步注册写入本地卡库
+      if (Array.isArray(rawInput.customCards) && rawInput.customCards.length > 0 && typeof window !== 'undefined') {
+        try {
+          const { saveToLibrary } = require('@/components/workshop/utils')
+          for (const card of rawInput.customCards) {
+            if (card && card.name) {
+              saveToLibrary(card)
+            }
+          }
+          console.log(`[Data Validation] 成功从角色数据包自动注册 ${rawInput.customCards.length} 张自定义卡牌到本地库`)
+        } catch (e) {
+          console.warn('[Data Validation] 自动入库自定义卡牌失败:', e)
+        }
+      }
+    }
 
     // 1. 外部导入只做原始结构粗校验；字段修正统一交给迁移管线处理。
     if (!validateRawImportCandidate(rawData)) {
