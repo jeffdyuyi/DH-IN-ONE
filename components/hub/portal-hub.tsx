@@ -18,14 +18,11 @@ import {
   ChevronRight,
   CheckCircle2,
   Share2,
-  Terminal,
   Zap,
   Globe,
   Compass,
   ArrowUpRight,
-  Flame,
-  FileCode,
-  Users
+  ChevronDown
 } from 'lucide-react'
 
 // --- Hero 海报数据（纯中文） ---
@@ -40,6 +37,8 @@ interface ToolShowcase {
   ctaLink: string
   badgeText: string
   themeColor: string
+  glowClass: string
+  btnColor: string
   poster: {
     category: string
     cardTitle: string
@@ -55,7 +54,7 @@ interface ToolShowcase {
 const SHOWCASE_LIST: ToolShowcase[] = [
   {
     id: 'cyberpunk',
-    name: '爽博朋克车卡器',
+    name: '爽博车卡器',
     tag: '赛博特化',
     title: '《爽博朋克：渊边行者》专属赛博车卡器',
     slogan: '身体 5 大区义体装配 · 神经压力超载判定 · 黑市非法改造',
@@ -64,6 +63,8 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     ctaLink: '/cyberpunk',
     badgeText: '推荐 · 爽博朋克特化',
     themeColor: 'cyan',
+    glowClass: 'from-cyan-500/20 via-blue-500/10 to-transparent',
+    btnColor: 'bg-cyan-500 hover:bg-cyan-400 text-stone-950 hover:shadow-[0_8px_28px_rgba(6,182,212,0.35)]',
     poster: {
       category: '赛博义体 · 植入件',
       cardTitle: '「超光子」神经超频突触',
@@ -82,7 +83,7 @@ const SHOWCASE_LIST: ToolShowcase[] = [
   },
   {
     id: 'workshop',
-    name: '匕首心卡牌工坊',
+    name: '卡牌工坊',
     tag: '33+模板',
     title: '匕首心卡牌工坊 V3',
     slogan: '33 种卡牌模板 · 官方 d60 灵感抽取 · 图片隐写导出',
@@ -91,6 +92,8 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     ctaLink: '/workshop',
     badgeText: '成熟 · 隐写术导出',
     themeColor: 'amber',
+    glowClass: 'from-amber-500/20 via-orange-500/10 to-transparent',
+    btnColor: 'bg-amber-500 hover:bg-amber-400 text-stone-950 hover:shadow-[0_8px_28px_rgba(245,158,11,0.35)]',
     poster: {
       category: '战斗敌人卡 · 精英遭遇',
       cardTitle: '荒原裂隙漫游者',
@@ -109,7 +112,7 @@ const SHOWCASE_LIST: ToolShowcase[] = [
   },
   {
     id: 'campaign',
-    name: '战役文档编辑器',
+    name: '战役文档',
     tag: '大纲模组',
     title: '匕首心战役文档编辑器',
     slogan: '多级大纲目录树 · 遭遇战斗板 · 环境险境 · 官方协议合规',
@@ -118,6 +121,8 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     ctaLink: '/campaign',
     badgeText: '全功能 · DPCGL合规',
     themeColor: 'emerald',
+    glowClass: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+    btnColor: 'bg-emerald-500 hover:bg-emerald-400 text-stone-950 hover:shadow-[0_8px_28px_rgba(16,185,129,0.35)]',
     poster: {
       category: '战役模组章节 · 第 2 章',
       cardTitle: '地下管道的伏击与抉择',
@@ -136,7 +141,7 @@ const SHOWCASE_LIST: ToolShowcase[] = [
   },
   {
     id: 'vault',
-    name: '公共本地卡牌库',
+    name: '公共卡牌库',
     tag: '中枢连携',
     title: '公共本地卡牌库 (Vault)',
     slogan: 'IndexedDB 本地中枢 · 120 官方种子 · 跨应用双向连携',
@@ -145,6 +150,8 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     ctaLink: '/vault',
     badgeText: '双向连携 · 全离线',
     themeColor: 'indigo',
+    glowClass: 'from-indigo-500/20 via-violet-500/10 to-transparent',
+    btnColor: 'bg-indigo-500 hover:bg-indigo-400 text-white hover:shadow-[0_8px_28px_rgba(99,102,241,0.35)]',
     poster: {
       category: '官方预装种子库 · d60 战利品',
       cardTitle: '回音共鸣水晶',
@@ -163,7 +170,7 @@ const SHOWCASE_LIST: ToolShowcase[] = [
   },
   {
     id: 'standard',
-    name: '标准奇幻车卡器',
+    name: '标准奇幻车卡',
     tag: '经典规则',
     title: 'Daggerheart 标准奇幻车卡器',
     slogan: '官方经典规则车卡 · 9大职业与子职 · 领域卡组装配',
@@ -172,6 +179,8 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     ctaLink: '/character/standard',
     badgeText: '官方核心 · 奇幻冒险',
     themeColor: 'rose',
+    glowClass: 'from-rose-500/20 via-pink-500/10 to-transparent',
+    btnColor: 'bg-rose-500 hover:bg-rose-400 text-white hover:shadow-[0_8px_28px_rgba(244,63,94,0.35)]',
     poster: {
       category: '核心职业卡 · 领域卡组',
       cardTitle: '利刃潜行者',
@@ -203,6 +212,13 @@ export function PortalHub() {
     }, 7000)
     return () => clearInterval(timer)
   }, [isAutoPlay])
+
+  const scrollToWorkflow = () => {
+    const el = document.getElementById('workflow-section')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0d0f17] text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950 relative overflow-x-hidden">
@@ -239,7 +255,7 @@ export function PortalHub() {
                 href="https://github.com/jeffdyuyi/DH-IN-ONE"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1 text-stone-300 hover:text-white transition-colors"
+                className="flex items-center gap-1 text-stone-300 hover:text-white transition-colors hover:underline active:scale-[0.98]"
               >
                 <span>GitHub 开源仓库</span>
                 <ExternalLink className="w-3 h-3" />
@@ -254,10 +270,10 @@ export function PortalHub() {
             
             <button
               onClick={() => setActiveIdx(0)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] active:scale-[0.98] cursor-pointer ${
                 activeIdx === 0
                   ? 'bg-cyan-500 text-stone-950 shadow-lg shadow-cyan-500/25 scale-105'
-                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800'
+                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800 hover:-translate-y-0.5'
               }`}
             >
               <Cpu className="w-4 h-4" />
@@ -266,10 +282,10 @@ export function PortalHub() {
 
             <button
               onClick={() => setActiveIdx(1)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] active:scale-[0.98] cursor-pointer ${
                 activeIdx === 1
                   ? 'bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/25 scale-105'
-                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800'
+                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800 hover:-translate-y-0.5'
               }`}
             >
               <Layers className="w-4 h-4" />
@@ -278,10 +294,10 @@ export function PortalHub() {
 
             <button
               onClick={() => setActiveIdx(2)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] active:scale-[0.98] cursor-pointer ${
                 activeIdx === 2
                   ? 'bg-emerald-500 text-stone-950 shadow-lg shadow-emerald-500/25 scale-105'
-                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800'
+                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800 hover:-translate-y-0.5'
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -290,10 +306,10 @@ export function PortalHub() {
 
             <button
               onClick={() => setActiveIdx(3)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] active:scale-[0.98] cursor-pointer ${
                 activeIdx === 3
                   ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 scale-105'
-                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800'
+                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800 hover:-translate-y-0.5'
               }`}
             >
               <Database className="w-4 h-4" />
@@ -302,10 +318,10 @@ export function PortalHub() {
 
             <button
               onClick={() => setActiveIdx(4)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] active:scale-[0.98] cursor-pointer ${
                 activeIdx === 4
                   ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/25 scale-105'
-                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800'
+                  : 'bg-stone-900/80 text-stone-300 hover:bg-stone-800 hover:text-white border border-stone-800 hover:-translate-y-0.5'
               }`}
             >
               <Sparkles className="w-4 h-4" />
@@ -326,27 +342,23 @@ export function PortalHub() {
 
         {/* 1. 海报滑动核心展区：左侧卡牌海报展示，右侧文本框说明 */}
         <section 
-          className="relative rounded-3xl border border-stone-800 bg-gradient-to-b from-stone-900/90 via-stone-950/90 to-[#0d0f17] p-6 sm:p-10 shadow-2xl overflow-hidden backdrop-blur-xl"
+          className="relative rounded-3xl border border-stone-800 bg-gradient-to-b from-stone-900/95 via-stone-950/95 to-[#0d0f17] p-6 sm:p-10 shadow-2xl overflow-hidden backdrop-blur-xl transition-all"
           onMouseEnter={() => setIsAutoPlay(false)}
           onMouseLeave={() => setIsAutoPlay(true)}
         >
-          {/* 背景光斑 */}
-          <div className={`absolute top-0 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none opacity-20 transition-all duration-500 ${
-            activeTool.themeColor === 'cyan' ? 'bg-cyan-500' :
-            activeTool.themeColor === 'amber' ? 'bg-amber-500' :
-            activeTool.themeColor === 'emerald' ? 'bg-emerald-500' :
-            activeTool.themeColor === 'indigo' ? 'bg-indigo-500' : 'bg-rose-500'
-          }`} />
+          {/* 背景光斑与渐变遮罩 */}
+          <div className={`absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none opacity-25 transition-all duration-700 bg-gradient-to-br ${activeTool.glowClass}`} />
+          <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0d0f17]/40 to-[#0d0f17]/80 pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
             
             {/* 左侧：实体卡片/海报视觉展示区 (5列) */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-md rounded-2xl border border-stone-700/80 bg-[#161822] shadow-[0_15px_40px_rgba(0,0,0,0.6)] p-6 space-y-4 relative group hover:border-amber-500/60 transition-all">
+              <div className="w-full max-w-md rounded-2xl border border-stone-700/80 bg-[#161822] shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-6 space-y-4 relative group hover:border-amber-500/70 hover:shadow-[0_20px_50px_rgba(245,158,11,0.15)] transition-all duration-300">
                 
                 {/* 卡牌顶栏 */}
                 <div className="flex items-center justify-between border-b border-stone-700/60 pb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700">
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-stone-800 text-amber-300 border border-stone-700 group-hover:scale-105 transition-transform">
                     {activeTool.poster.category}
                   </span>
                   <span className="text-[10px] text-stone-500 font-mono">
@@ -356,7 +368,7 @@ export function PortalHub() {
 
                 {/* 卡牌标题 */}
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-wide">
+                  <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors">
                     {activeTool.poster.cardTitle}
                   </h3>
                   <p className="text-[11px] font-mono text-amber-400/80 tracking-wider">
@@ -386,9 +398,10 @@ export function PortalHub() {
                 </div>
 
                 {/* 效果机制说明 */}
-                <div className="p-3 rounded-xl bg-stone-950/60 border border-stone-800/80 text-xs text-stone-300 leading-relaxed space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-stone-950/70 border border-stone-800/80 text-xs text-stone-300 leading-relaxed space-y-1.5">
                   <div className="font-bold text-amber-400 text-[11px] flex items-center gap-1">
-                    <span>⚡ 规则机制</span>
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>规则机制</span>
                   </div>
                   <p>{activeTool.poster.mechanics}</p>
                 </div>
@@ -410,7 +423,7 @@ export function PortalHub() {
             {/* 右侧：文本框文字说明与快速操作区 (7列) */}
             <div className="lg:col-span-7 space-y-6">
               
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-stone-300">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-stone-300">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>{activeTool.badgeText}</span>
               </div>
@@ -424,18 +437,19 @@ export function PortalHub() {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-stone-900/60 border border-stone-800 text-stone-300 text-sm leading-relaxed font-light">
+              {/* 增强对比度遮罩文本框 */}
+              <div className="p-5 rounded-2xl bg-stone-900/80 border border-stone-800 text-stone-300 text-sm leading-relaxed font-light backdrop-blur-md shadow-inner">
                 {activeTool.desc}
               </div>
 
-              {/* 行动按钮 */}
+              {/* 行动按钮群 */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link
                   href={activeTool.ctaLink}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-xl shadow-amber-500/20 hover:scale-105 transition-all"
+                  className={`inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm shadow-xl transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] min-h-[44px] cursor-pointer ${activeTool.btnColor}`}
                 >
                   <span>{activeTool.ctaText}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
                 <div className="flex items-center gap-2 text-xs text-stone-400">
@@ -451,8 +465,8 @@ export function PortalHub() {
                     <button
                       key={tool.id}
                       onClick={() => setActiveIdx(idx)}
-                      className={`h-2 rounded-full transition-all ${
-                        activeIdx === idx ? 'w-8 bg-amber-400' : 'w-2 bg-stone-700 hover:bg-stone-500'
+                      className={`h-2.5 rounded-full transition-all active:scale-95 cursor-pointer ${
+                        activeIdx === idx ? 'w-8 bg-amber-400' : 'w-2.5 bg-stone-700 hover:bg-stone-500'
                       }`}
                       title={tool.name}
                     />
@@ -462,14 +476,14 @@ export function PortalHub() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveIdx((prev) => (prev - 1 + SHOWCASE_LIST.length) % SHOWCASE_LIST.length)}
-                    className="p-2 rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 transition-colors"
+                    className="p-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                     title="上一个功能"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setActiveIdx((prev) => (prev + 1) % SHOWCASE_LIST.length)}
-                    className="p-2 rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 transition-colors"
+                    className="p-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                     title="下一个功能"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -480,10 +494,22 @@ export function PortalHub() {
             </div>
 
           </div>
+
+          {/* 首屏向下滚动引导提示 */}
+          <div className="mt-8 pt-4 flex justify-center">
+            <button
+              onClick={scrollToWorkflow}
+              className="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-amber-400 transition-colors animate-bounce cursor-pointer"
+              title="向下探索全生态双向连携流程"
+            >
+              <span>向下探索生态连携与指南</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </section>
 
-        {/* 2. 官方与自制双向连携链路展示（不重复放入口，只展示工作流逻辑） */}
-        <section className="p-8 rounded-3xl border border-stone-800 bg-stone-900/40 backdrop-blur-md space-y-6">
+        {/* 2. 官方与自制双向连携链路展示 */}
+        <section id="workflow-section" className="p-8 rounded-3xl border border-stone-800 bg-stone-900/40 backdrop-blur-md space-y-6">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
               <Zap className="w-5 h-5 text-amber-400" />
@@ -496,8 +522,9 @@ export function PortalHub() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
             
-            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2 hover:border-amber-500/40 transition-colors group">
               <div className="font-bold text-amber-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
                 <span>1. 卡牌工坊定制</span>
               </div>
               <p className="text-stone-400 text-[11px] leading-relaxed">
@@ -505,8 +532,9 @@ export function PortalHub() {
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2 hover:border-cyan-500/40 transition-colors group">
               <div className="font-bold text-cyan-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
                 <span>2. 角色卡一键直装</span>
               </div>
               <p className="text-stone-400 text-[11px] leading-relaxed">
@@ -514,8 +542,9 @@ export function PortalHub() {
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2 hover:border-emerald-500/40 transition-colors group">
               <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 group-hover:scale-125 transition-transform" />
                 <span>3. 战役模组引用</span>
               </div>
               <p className="text-stone-400 text-[11px] leading-relaxed">
@@ -523,8 +552,9 @@ export function PortalHub() {
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2">
+            <div className="p-4 rounded-2xl bg-stone-950/60 border border-stone-800 space-y-2 hover:border-indigo-500/40 transition-colors group">
               <div className="font-bold text-indigo-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-indigo-400 group-hover:scale-125 transition-transform" />
                 <span>4. 多格式无损导出</span>
               </div>
               <p className="text-stone-400 text-[11px] leading-relaxed">
@@ -535,7 +565,7 @@ export function PortalHub() {
           </div>
         </section>
 
-        {/* 3. 辅助指南与协议文档区（非重复功能入口，而是文档支持） */}
+        {/* 3. 辅助指南与协议文档区 */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-stone-300 flex items-center gap-2">
@@ -547,7 +577,7 @@ export function PortalHub() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <Link
               href="/seal-dice-guide"
-              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-cyan-500/40 transition-all flex items-center justify-between group"
+              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-cyan-500/40 transition-all flex items-center justify-between group active:scale-[0.98]"
             >
               <div className="space-y-1">
                 <h4 className="font-bold text-stone-200 group-hover:text-cyan-300 transition-colors">海豹骰格式指南</h4>
@@ -558,7 +588,7 @@ export function PortalHub() {
 
             <Link
               href="/card-pack-guide"
-              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-emerald-500/40 transition-all flex items-center justify-between group"
+              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-emerald-500/40 transition-all flex items-center justify-between group active:scale-[0.98]"
             >
               <div className="space-y-1">
                 <h4 className="font-bold text-stone-200 group-hover:text-emerald-300 transition-colors">自定义卡包指南</h4>
@@ -569,7 +599,7 @@ export function PortalHub() {
 
             <Link
               href="/about"
-              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-purple-500/40 transition-all flex items-center justify-between group"
+              className="p-4 rounded-2xl bg-stone-900/60 border border-stone-800 hover:border-purple-500/40 transition-all flex items-center justify-between group active:scale-[0.98]"
             >
               <div className="space-y-1">
                 <h4 className="font-bold text-stone-200 group-hover:text-purple-300 transition-colors">更新日志与致谢</h4>
@@ -621,7 +651,7 @@ export function PortalHub() {
                   href="https://ifdian.net/a/nogubird"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition-all active:scale-95"
                 >
                   <Heart className="w-3.5 h-3.5 fill-current" />
                   <span>为作者加油（爱发电）</span>
@@ -632,7 +662,7 @@ export function PortalHub() {
                   href="http://nogubird.top"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-semibold text-xs border border-stone-700 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-semibold text-xs border border-stone-700 transition-all active:scale-95"
                 >
                   <Globe className="w-3.5 h-3.5 text-cyan-400" />
                   <span>俱乐部官网 (nogubird.top)</span>

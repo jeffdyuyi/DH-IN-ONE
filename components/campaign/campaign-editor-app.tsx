@@ -1304,14 +1304,14 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
       
       {/* Left: Logo & Menu */}
       <div className="flex items-center gap-3">
-        <a 
+        <Link 
           href="/" 
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-all border border-stone-700"
           title="返回主站门户"
         >
           <span>🏠</span>
           <span className="hidden sm:inline">主站门户</span>
-        </a>
+        </Link>
 
         <div className="relative" ref={menuRef}>
           <button 

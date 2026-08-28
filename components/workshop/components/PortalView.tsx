@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Link from 'next/link';
 import { Library, Sun, Moon, ArrowRight, Home } from 'lucide-react';
 import { CardType, LibraryItem } from '../types';
 import { CATEGORY_CONFIG, TOOL_CATEGORIES, TOOL_CONFIG, CardCategory } from '../constants';
@@ -35,10 +36,10 @@ const PortalView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoToLib
               </p>
             </div>
             <div className="flex items-center gap-3">
-               <a href="/" className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white dark:bg-zinc-900 shadow-md border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:scale-105 transition-transform" title="返回主站门户">
+               <Link href="/" className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white dark:bg-zinc-900 shadow-md border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:scale-105 transition-transform" title="返回主站门户">
                  <Home size={18} />
                  <span className="hidden sm:inline">主站门户</span>
-               </a>
+               </Link>
                <button onClick={onGoToLibrary} className="p-3 rounded-full bg-white dark:bg-zinc-900 shadow-md border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:scale-105 transition-transform" title="本地库">
                  <Library size={24} />
                </button>
