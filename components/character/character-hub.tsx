@@ -223,7 +223,7 @@ export function CharacterHub() {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-                搭载 5 大身体义体槽位改造、神经压力与超载系统、黑市非法改造、官方战利品跨画风直装与 A4 打印优化。
+                搭载 5 大身体义体槽位改造、神经压力与超载系统、黑市非法改造、官方战利品直接装配与 A4 打印优化。
               </p>
             </div>
             <Cpu className="w-8 h-8 text-[#00FFA3] group-hover:scale-110 group-hover:rotate-6 transition-all ml-4 flex-shrink-0" />

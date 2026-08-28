@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect } from 'react'
 import type { CyberpunkAugmentation, CyberpunkBodyZoneKey } from '../../../types/cyberpunk'
@@ -70,7 +70,7 @@ export function InstallAugmentationModal({
       id: compiled.id,
       name: compiled.name,
       tier: (compiled.tier as any) || 'T1',
-      cyberType: (card.category === 'cyberware' ? (card.data as any)?.cyberType : '跨画风奇幻遗宝') || '植入体',
+      cyberType: (card.category === 'cyberware' ? (card.data as any)?.cyberType : '战利品') || '植入体',
       zone: zone,
       slots: compiled.slots || 1,
       restriction: (card.data as any)?.restriction || '',
@@ -123,7 +123,7 @@ export function InstallAugmentationModal({
               <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#6C00FF]/20 text-[#6C00FF] border border-[#6C00FF]/40">
                 {zoneName}
               </span>
-              <h3 className="font-bold text-base text-white">安装义体 / 跨界装配战利品</h3>
+              <h3 className="font-bold text-base text-white">安装义体 / 战利品</h3>
             </div>
             <p className="text-xs text-slate-400 mt-1">
               当前部位可用槽位：<span className="text-[#00FFA3] font-bold">{availableSlots}</span>

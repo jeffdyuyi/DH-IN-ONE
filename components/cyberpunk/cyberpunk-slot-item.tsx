@@ -22,11 +22,6 @@ export function CyberpunkSlotItem({ aug, onUninstall }: CyberpunkSlotItemProps) 
           <span className="text-[10px] text-slate-300 font-mono">
             {aug.cyberType} ({aug.slots}槽)
           </span>
-          {isOriginalLoot && (
-            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#00FFA3]/15 text-[#00FFA3] border border-[#00FFA3]/40">
-              奇幻遗宝跨界
-            </span>
-          )}
         </div>
 
         <h4 className="font-bold text-xs text-white group-hover:text-[#00FFA3] transition truncate">

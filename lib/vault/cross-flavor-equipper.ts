@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DH-IN-ONE CrossFlavorEquipper (跨画风装备与义体编译器)
  */
 
@@ -128,10 +128,10 @@ export function compileLootToCyberware(
     zone: isCyber && cyberData?.zone ? cyberData.zone : targetZone,
     slots: isCyber && cyberData?.slots ? Number(cyberData.slots) : customSlots,
     effect: effectText,
-    tag: cyberData?.tag || (!isCyber ? '【奇幻遗宝跨界】' : undefined),
+    tag: cyberData?.tag || undefined,
     compCost: cyberData?.compCost,
     surgCost: cyberData?.surgCost,
-    isOriginalLoot: !isCyber,
+    isOriginalLoot: false,
     sourceCardId: card.id
   };
 }

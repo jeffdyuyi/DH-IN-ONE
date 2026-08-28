@@ -59,7 +59,7 @@ const SHOWCASE_LIST: ToolShowcase[] = [
     tag: '扩展规则',
     title: '爽博朋克车卡器',
     slogan: '5大区义体装配 · 压力与超载·非法改造',
-    desc: '《爽博朋克：渊边行者》规则支持。义体插槽装配、战利品跨界直装、消耗品堆叠记录与 A4 线框打印。',
+    desc: '《爽博朋克：渊边行者》规则支持。义体插槽装配、战利品一键装配、消耗品堆叠记录与 A4 线框打印。',
     ctaText: '进入车卡器',
     ctaLink: '/cyberpunk',
     badgeText: '爽博朋克扩展',
