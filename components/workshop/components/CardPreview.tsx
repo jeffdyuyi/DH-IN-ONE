@@ -1096,6 +1096,7 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
     return (
       <div
         id={elementId || "card-preview"}
+        data-card-type="cyberware"
         className="relative w-[340px] min-h-[440px] bg-[#0D0D0D] text-white border-2 border-[#1F2229] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
         style={{
           clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',

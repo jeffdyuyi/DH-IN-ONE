@@ -12,8 +12,8 @@ const isDarkMode = () => {
 
 /**
  * Robust canvas generation helper.
- * Clones the target element and appends it to body to bypass CSS layout issues
- * (like position: sticky, overflow, or flexbox alignment) that confuse html2canvas.
+ * Clones the target element and applies real polygon/rounded clipping path
+ * to guarantee exported PNG matches live preview (including cyberpunk cut-corners and bottom text).
  */
 const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | null> => {
   const originalElement = document.getElementById(elementId);
@@ -25,49 +25,101 @@ const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | nu
   // 1. Clone the node
   const clone = originalElement.cloneNode(true) as HTMLElement;
 
-  // 2. Set styles to ensure it renders correctly off-screen
-  // We explicitly set width/height to match the original to prevent reflow issues
+  // 2. Set styles to ensure it renders correctly off-screen with full natural height
   const rect = originalElement.getBoundingClientRect();
+  const naturalWidth = rect.width || 380;
+  
   clone.style.position = 'fixed';
   clone.style.top = '-10000px';
   clone.style.left = '-10000px';
   clone.style.zIndex = '-1000';
-  clone.style.width = `${rect.width}px`;
-  clone.style.height = `${rect.height}px`;
-  clone.style.transform = 'none'; // Remove any transforms
+  clone.style.width = `${naturalWidth}px`;
+  clone.style.height = 'auto'; // allow natural expansion
+  clone.style.transform = 'none';
   clone.style.margin = '0';
-  
-  // Remove shadows during capture if they cause artifacts (optional, keeping for now)
-  // clone.style.boxShadow = 'none';
+  clone.style.boxShadow = 'none';
 
-  // 3. Append to body so it can be rendered
+  // 3. Append to body so it can compute full layout
   document.body.appendChild(clone);
-
-  // 4. Match background color
-  const bgColor = isDarkMode() ? '#09090b' : '#ffffff';
+  
+  const fullHeight = Math.max(clone.offsetHeight, rect.height);
+  const scaleFactor = 3; // Ultra-crisp export
 
   try {
-    // 5. Capture
-    const canvas = await html2canvas(clone, {
-      scale: 3, // High quality
-      backgroundColor: bgColor,
+    // 4. Capture raw canvas with transparent background
+    const rawCanvas = await html2canvas(clone, {
+      scale: scaleFactor,
+      backgroundColor: null, // Transparent background for cut corners
       useCORS: true,
       logging: false,
-      allowTaint: true, // Allow unsafe images if necessary (though we prefer CORS)
-      width: rect.width,
-      height: rect.height,
+      allowTaint: true,
+      width: naturalWidth,
+      height: fullHeight,
       windowWidth: document.documentElement.offsetWidth,
       windowHeight: document.documentElement.offsetHeight,
       onclone: (clonedDoc) => {
-         // Fix for potential SVG/Font loading issues in clone
-         const clonedEl = clonedDoc.getElementById(elementId);
-         if (clonedEl) {
-             clonedEl.style.display = 'block';
-         }
+        const clonedEl = clonedDoc.getElementById(elementId);
+        if (clonedEl) {
+          clonedEl.style.display = 'block';
+          clonedEl.style.height = 'auto';
+          clonedEl.style.overflow = 'visible';
+        }
       }
     });
 
-    return canvas;
+    // 5. Post-process: Check if card has clip-path (e.g. Cyberware cut corners) or border radius
+    const computedStyle = window.getComputedStyle(originalElement);
+    const clipPathVal = originalElement.style.clipPath || computedStyle.clipPath || '';
+
+    // Check children as well (cyberware container inside preview)
+    const hasCyberCut = clipPathVal.includes('polygon') || 
+      originalElement.innerHTML.includes('calc(100% - 20px)') ||
+      originalElement.getAttribute('data-card-type') === 'cyberware';
+
+    // Create final cropped canvas
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = rawCanvas.width;
+    finalCanvas.height = rawCanvas.height;
+    const ctx = finalCanvas.getContext('2d');
+
+    if (!ctx) return rawCanvas;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    if (hasCyberCut) {
+      // Apply exact Cyberpunk polygon cut: Top-right 20px cut, Bottom-left 20px cut
+      const w = finalCanvas.width;
+      const h = finalCanvas.height;
+      const cut = 20 * scaleFactor;
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(w - cut, 0);
+      ctx.lineTo(w, cut);
+      ctx.lineTo(w, h);
+      ctx.lineTo(cut, h);
+      ctx.lineTo(0, h - cut);
+      ctx.closePath();
+      ctx.clip();
+    } else {
+      // Standard rounded card clipping if applicable
+      const borderRadius = parseFloat(computedStyle.borderRadius) || 0;
+      if (borderRadius > 0) {
+        const r = borderRadius * scaleFactor;
+        const w = finalCanvas.width;
+        const h = finalCanvas.height;
+        ctx.beginPath();
+        ctx.roundRect(0, 0, w, h, r);
+        ctx.closePath();
+        ctx.clip();
+      }
+    }
+
+    // Draw the rendered card content into the clipped canvas
+    ctx.drawImage(rawCanvas, 0, 0);
+
+    return finalCanvas;
   } catch (error) {
     console.error("html2canvas error:", error);
     return null;
