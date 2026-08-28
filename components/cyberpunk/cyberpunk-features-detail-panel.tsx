@@ -143,28 +143,11 @@ export function CyberpunkFeaturesDetailPanel() {
                   </button>
                 </div>
 
-                <h4 className="font-bold text-xs text-white truncate">{item.name}</h4>
+                <h4 className="font-bold text-xs text-white mb-2">{item.name}</h4>
 
-                <div className="text-[11px] text-slate-300 leading-relaxed mt-1.5 line-clamp-3">
+                <div className="text-xs text-slate-300 leading-relaxed space-y-1.5">
                   <CardMarkdown>{item.desc}</CardMarkdown>
                 </div>
-              </div>
-
-              <div className="mt-2 pt-1 border-t border-[#6C00FF]/20 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveModalCard({
-                      title: item.title,
-                      name: item.name,
-                      card: item.card,
-                      text: item.desc,
-                    })
-                  }
-                  className="text-[10px] text-[#00FFA3] hover:text-white transition-colors"
-                >
-                  阅读全文 ↗
-                </button>
               </div>
             </div>
           ))}

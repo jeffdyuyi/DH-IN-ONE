@@ -96,10 +96,10 @@ export function CyberpunkDomainDeck({
             return (
               <div
                 key={card.id || `domain_active_${idx}`}
-                className="flex h-36 flex-col justify-between rounded-lg border border-[#00FFA3]/40 bg-[#0B0320] p-2.5 transition-all hover:border-[#00FFA3] shadow-sm"
+                className="flex min-h-[160px] flex-col justify-between rounded-lg border border-[#00FFA3]/40 bg-[#0B0320] p-3 transition-all hover:border-[#00FFA3] shadow-sm"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-1 text-[10px]">
+                  <div className="flex items-center justify-between gap-1 text-[10px] mb-1.5">
                     <span className="rounded bg-[#6C00FF]/30 px-1.5 py-0.5 font-bold text-[#F5F500] border border-[#6C00FF]/40">
                       LV.{levelNum} · {domainName}
                     </span>
@@ -123,14 +123,14 @@ export function CyberpunkDomainDeck({
                     </div>
                   </div>
 
-                  <h4 className="mt-1.5 font-bold text-xs text-white truncate">{card.name}</h4>
+                  <h4 className="font-bold text-xs text-white">{card.name}</h4>
 
-                  <p className="mt-1 text-[11px] text-slate-300 leading-snug line-clamp-3">
-                    {card.description || '无描述'}
-                  </p>
+                  <div className="mt-1 text-xs text-slate-300 leading-relaxed">
+                    <CardMarkdown>{card.description || '无描述'}</CardMarkdown>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] text-slate-400 border-t border-[#6C00FF]/20 pt-1">
+                <div className="flex justify-between items-center text-[10px] text-slate-400 border-t border-[#6C00FF]/20 pt-1.5 mt-2">
                   <span>卡槽 #{idx + 1}</span>
                   <button
                     type="button"

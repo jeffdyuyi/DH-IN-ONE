@@ -49,8 +49,8 @@ export function CyberpunkCharacterSheet() {
   // 卡牌数据库 store
   const cardStore = useCardStore()
 
-  // 浅色/极简黑白打印预览状态
-  const [isLightPreview, setIsLightPreview] = useState(false)
+  // 默认使用极简浅色/黑白灰主题 (按用户要求默认开启)
+  const [isLightPreview, setIsLightPreview] = useState(true)
   const [saveToast, setSaveToast] = useState(false)
 
   // 移动端检测

@@ -166,7 +166,7 @@ export function CyberpunkTopBar({
             </Link>
           </div>
 
-          {/* 浅色打印预览切换 (极简黑白灰) */}
+          {/* 浅色/深色主题切换 (极简黑白灰默认) */}
           <button
             type="button"
             onClick={onToggleLightPreview}
@@ -175,10 +175,10 @@ export function CyberpunkTopBar({
                 ? 'border-slate-400 bg-slate-200 text-slate-900 shadow-sm'
                 : 'border-[#6C00FF]/40 bg-[#12072B] text-slate-300 hover:border-[#F5F500] hover:text-[#F5F500]'
             }`}
-            title="切换极简黑白打印预览模式"
+            title="切换极简浅色 / 深色霓虹主题"
           >
             {isLightPreview ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5 text-[#F5F500]" />}
-            <span>{isLightPreview ? '极简浅色 (ON)' : '浅色打印预览'}</span>
+            <span>{isLightPreview ? '极简浅色 (默认)' : '切换深色霓虹'}</span>
           </button>
 
           {/* A4 打印按钮 */}
