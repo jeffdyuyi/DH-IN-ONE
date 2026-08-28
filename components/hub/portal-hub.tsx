@@ -122,7 +122,7 @@ export function PortalHub() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-16">
           {/* 卡片 1: 爽博朋克赛博车卡器 */}
           <Link
-            href="/character"
+            href="/cyberpunk"
             className={`group relative p-8 rounded-2xl border transition-all duration-300 backdrop-blur-xl bg-white/[0.03] hover:bg-white/[0.06] flex flex-col justify-between overflow-hidden ${
               themeMode === 'cyberpunk'
                 ? 'border-white/10 hover:border-[#00FFA3]/60 hover:shadow-[0_0_30px_rgba(0,255,163,0.15)]'

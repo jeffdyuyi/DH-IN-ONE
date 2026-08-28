@@ -1,9 +1,10 @@
 "use client"
 
 import React from 'react'
+import Link from 'next/link'
 import type { CyberpunkSheetExtension } from '@/types/cyberpunk'
 import { CYBERPUNK_TIER_SLOTS } from '@/lib/cyberpunk/tier-constants'
-import { Shield, Coins, Sparkles, FolderOpen, Sun, Moon, Printer, Save, Award } from 'lucide-react'
+import { Shield, Coins, Sparkles, FolderOpen, Sun, Moon, Printer, Save, Award, Home, LayoutGrid } from 'lucide-react'
 
 interface CyberpunkTopBarProps {
   cyberpunkData: CyberpunkSheetExtension
@@ -56,8 +57,20 @@ export function CyberpunkTopBar({
   return (
     <header className="sticky top-0 z-30 rounded-xl border border-[#6C00FF]/40 bg-[#0B0320]/95 backdrop-blur-md p-3 shadow-[0_4px_20px_rgba(11,3,32,0.8)] font-sans transition-colors">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* 左侧：角色身份、存档与位阶 */}
+        {/* 左侧：返回主页、角色身份、存档与位阶 */}
         <div className="flex items-center gap-3">
+          {/* 返回主站 Hub */}
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 rounded-lg border border-[#6C00FF]/40 bg-[#12072B] px-2.5 py-1 text-xs text-slate-300 hover:border-[#00FFA3] hover:text-[#00FFA3] transition-colors"
+            title="返回 匕首心&爽博朋克in one 主页门户"
+          >
+            <Home className="h-3.5 w-3.5" />
+            <span>主站</span>
+          </Link>
+
+          <span className="text-slate-600">|</span>
+
           {/* 角色与存档 */}
           <div className="flex items-center gap-2">
             <span className="rounded bg-[#6C00FF] px-2 py-0.5 text-xs font-bold text-white shadow-[0_0_8px_rgba(108,0,255,0.6)]">
@@ -126,6 +139,31 @@ export function CyberpunkTopBar({
               onChange={(e) => handleStreetCredChange(parseInt(e.target.value, 10) || 0)}
               className="w-10 bg-transparent text-right font-mono font-bold text-[#00FFA3] focus:outline-none"
             />
+          </div>
+
+          {/* 快捷工具入口 */}
+          <div className="hidden sm:flex items-center gap-1 border-r border-[#6C00FF]/30 pr-2 mr-1">
+            <Link
+              href="/workshop"
+              className="rounded px-2 py-1 text-[11px] text-slate-300 hover:text-[#F5F500] hover:bg-[#6C00FF]/20 transition-colors"
+              title="前往 卡牌工坊 V3"
+            >
+              工坊
+            </Link>
+            <Link
+              href="/campaign"
+              className="rounded px-2 py-1 text-[11px] text-slate-300 hover:text-[#FF007F] hover:bg-[#6C00FF]/20 transition-colors"
+              title="前往 战役编辑器"
+            >
+              战役
+            </Link>
+            <Link
+              href="/vault"
+              className="rounded px-2 py-1 text-[11px] text-slate-300 hover:text-[#00FFA3] hover:bg-[#6C00FF]/20 transition-colors"
+              title="前往 公共卡牌库 (Vault)"
+            >
+              卡牌库
+            </Link>
           </div>
 
           {/* 浅色打印预览切换 (极简黑白灰) */}
