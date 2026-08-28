@@ -29,28 +29,15 @@ export function CyberpunkConsumablesBar({
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTag, setFilterTag] = useState<string>('all')
 
-  // 默认至少提供 2 个空条目供填写
-  const items: CyberpunkConsumable[] = useMemo(() => {
-    if (consumables && consumables.length > 0) {
-      return consumables
+  // 严格使用传入的消耗品列表，允许完全清空为空数组
+  const items: CyberpunkConsumable[] = Array.isArray(consumables) ? consumables : []
+
+  const handleClearAll = () => {
+    if (items.length === 0) return
+    if (confirm('确定要清空随身携带的所有消耗品吗？')) {
+      onChange([])
     }
-    return [
-      {
-        id: 'cons_default_1',
-        name: '神经兴奋剂',
-        effect: '清除 2 点压力，下一次灵巧检定获得优势。',
-        quantity: 1,
-        used: false,
-      },
-      {
-        id: 'cons_default_2',
-        name: '小型战术凝胶',
-        effect: '立即恢复 1d4 生命点。',
-        quantity: 1,
-        used: false,
-      },
-    ]
-  }, [consumables])
+  }
 
   const handleToggleUsed = (idx: number) => {
     const updated = [...items]
@@ -157,6 +144,18 @@ export function CyberpunkConsumablesBar({
         </div>
 
         <div className="flex items-center gap-2">
+          {items.length > 0 && (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-red-400 bg-black/20 hover:bg-red-500/10 px-2 py-1 rounded border border-slate-700 hover:border-red-500/40 transition-colors"
+              title="一键清空所有消耗品"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>清空</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleAddNewItem}
