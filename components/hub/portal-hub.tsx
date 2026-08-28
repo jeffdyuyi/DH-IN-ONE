@@ -278,18 +278,74 @@ export function PortalHub() {
           </div>
         </div>
 
-        {/* 开源致敬与版权声明卡片 */}
-        <div className="p-6 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-md text-xs text-slate-400 leading-relaxed">
-          <div className="flex items-center space-x-2 text-slate-200 font-bold mb-2">
+        {/* 开源致敬、作者信息与社群卡片 */}
+        <div className="p-6 sm:p-8 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md text-xs text-slate-400 leading-relaxed space-y-4">
+          <div className="flex items-center space-x-2 text-slate-200 font-bold text-sm">
             <Heart className="w-4 h-4 text-[#FF007F]" />
-            <span>开源致敬与免责声明 (Credits & Acknowledgement)</span>
+            <span>开源致敬、作者信息与交流社区 (Credits & Community)</span>
           </div>
-          <p className="mb-2">
-            本项目基于开源项目 <a href="https://github.com/RidRisR/DaggerHeart-CharacterSheet" target="_blank" rel="noreferrer" className="text-[#00FFA3] underline underline-offset-2">RidRisR/DaggerHeart-CharacterSheet</a> 进行深度重构与衍生开发，致敬原项目作者及贡献者团队。
-          </p>
-          <p>
-            Daggerheart 系统参考文档（SRD）及其所有文本版权归属于 Critical Role Productions, LLC. 与 Darrington Press。本项目遵循 GNU General Public License v3.0 (GPL-3.0) 与 Darrington Press Community Gaming License (DPCGL)。
-          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {/* 左侧：爽博朋克作者与联系方式 */}
+            <div className="p-4 rounded-xl border border-[#00FFA3]/20 bg-[#00FFA3]/5 space-y-2">
+              <div className="font-bold text-slate-200 text-xs flex items-center space-x-1.5">
+                <span className="text-[#00FFA3]">⚡</span>
+                <span>爽博朋克战役框架作者：不咕鸟（哈基米德）</span>
+              </div>
+              <p className="text-slate-400 text-[11px]">
+                欢迎直接联系或者加群讨论模组、规则以及造轮子、修 BUG：
+              </p>
+              <div className="space-y-1 text-slate-300 text-[11px]">
+                <div>• 联系电话/微信：<span className="text-[#00FFA3] font-mono font-bold">13308009593</span></div>
+                <div>• 不咕鸟创作交流群：<span className="text-[#F5F500] font-mono font-bold">261751459</span></div>
+                <div>• 成都秘密基地TRPG俱乐部群：<span className="text-[#F5F500] font-mono font-bold">691707475</span></div>
+                <div>
+                  • 俱乐部官网：
+                  <a href="http://nogubird.top" target="_blank" rel="noreferrer" className="text-[#00FFA3] underline ml-1 hover:text-white">
+                    nogubird.top
+                  </a>
+                </div>
+              </div>
+              <div className="pt-2">
+                <a
+                  href="https://ifdian.net/a/nogubird"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center space-x-1 px-3 py-1 rounded-lg bg-[#FF007F]/20 text-[#FF007F] border border-[#FF007F]/40 hover:bg-[#FF007F] hover:text-white transition font-semibold text-[11px]"
+                >
+                  <span>❤️ 为作者加油（爱发电）</span>
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </a>
+              </div>
+            </div>
+
+            {/* 右侧：底层开源项目与官方版权 */}
+            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] space-y-2 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="font-bold text-slate-200 text-xs flex items-center space-x-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>开源致谢：原版车卡器贡献团队</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  车卡器核心基于 <a href="https://github.com/RidRisR/DaggerHeart-CharacterSheet" target="_blank" rel="noreferrer" className="text-[#00FFA3] underline underline-offset-2 hover:text-white font-semibold">DHSheet 开源项目</a> 衍生重构。感谢原团队的开拓与翻译贡献：
+                </p>
+                <div className="text-[11px] text-slate-300 grid grid-cols-2 gap-1 py-1">
+                  <div>• 发起与开发：<a href="https://github.com/RidRisR" target="_blank" rel="noreferrer" className="text-amber-300 hover:underline">RidRisR</a></div>
+                  <div>• 翻译/校对：<a href="https://github.com/PolearmMaster" target="_blank" rel="noreferrer" className="hover:underline text-slate-300">PolearmMaster</a></div>
+                  <div>• 翻译/校对：<a href="https://github.com/CissyOliviaCat" target="_blank" rel="noreferrer" className="hover:underline text-slate-300">末楔</a></div>
+                  <div>• 翻译/校对：<a href="https://github.com/LiyuNodream" target="_blank" rel="noreferrer" className="hover:underline text-slate-300">里予</a></div>
+                  <div>• 翻译/校对：<a href="https://github.com/Milkyomeda" target="_blank" rel="noreferrer" className="hover:underline text-slate-300">一得</a></div>
+                  <div>• 原作主页：<a href="https://dhsheet.site/" target="_blank" rel="noreferrer" className="text-[#00FFA3] hover:underline">dhsheet.site</a></div>
+                </div>
+                <p className="text-slate-500 text-[10px]">
+                  Daggerheart 系统参考文档（SRD）版权归 Critical Role Productions, LLC. 与 Darrington Press 所有。本项目遵循 GPL-3.0 与 DPCGL 社区游戏许可。
+                </p>
+              </div>
+              <div className="text-[10px] text-slate-500 pt-1">
+                开源协议：GNU General Public License v3.0
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 

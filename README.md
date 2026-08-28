@@ -38,8 +38,20 @@
 
 本项目遵循 **[GPL-3.0 开源许可证](https://opensource.org/licenses/GPL-3.0)** 进行二次开发与衍生。在开发过程中深度参考并继承了开源社区优秀创作者的代码架构与成果，在此致以最崇高的敬意：
 
-* **原版车卡器核心架构**：基于 [RidRisR/DaggerHeart-CharacterSheet](https://github.com/RidRisR) 及其贡献者团队（PolearmMaster、末楔、里予、一得）的开源项目衍生并深度重构。
-* **爽博朋克扩展规则**：致谢爽博朋克赛博朋克扩展规则的创作者与 TRPG 社区拓荒者。
+* **原版车卡器核心架构与贡献团队**：基于 [RidRisR/DaggerHeart-CharacterSheet](https://github.com/RidRisR/DaggerHeart-CharacterSheet) 衍生重构。感谢原项目开发与翻译校对团队的杰出贡献：
+  * [▲ RidRisR](https://github.com/RidRisR) (原项目发起人 & 主要开发者)
+  * [▣ PolearmMaster](https://github.com/PolearmMaster) (翻译及校对)
+  * [▣ 末楔](https://github.com/CissyOliviaCat) (翻译及校对)
+  * [▣ 里予](https://github.com/LiyuNodream) (翻译及校对)
+  * [▣ 一得](https://github.com/Milkyomeda) (翻译及校对)
+  * 原项目在线主页：[https://dhsheet.site/](https://dhsheet.site/)
+* **爽博朋克战役框架作者**：**不咕鸟（哈基米德）**
+  * 欢迎直接联系或者加群讨论模组、规则以及造轮子、修 BUG。
+  * 联系方式：`13308009593`
+  * 不咕鸟创作交流群：`261751459`
+  * 成都秘密基地 TRPG 俱乐部群：`691707475`
+  * 成都秘密基地 TRPG 俱乐部网址：[nogubird.top](http://nogubird.top)
+  * 为作者加油（爱发电）：[https://ifdian.net/a/nogubird](https://ifdian.net/a/nogubird)
 * **官方规则与版权**：Daggerheart 系统参考文档（SRD）及其文本版权归属 Critical Role Productions, LLC. 与 Darrington Press。
 
 ---
