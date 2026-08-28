@@ -50,13 +50,13 @@ export function CyberpunkTopBar({
               onClick={onToggleLightPreview}
               className={`flex items-center space-x-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${
                 isLightPreview
-                  ? 'bg-amber-400 text-black border-amber-400 font-bold'
+                  ? 'bg-black text-white border-black font-bold'
                   : 'border-white/10 hover:bg-white/10 text-slate-300 hover:text-white'
               }`}
               title="切换浅色模式以预览 A4 打印版面"
             >
               {isLightPreview ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              <span>{isLightPreview ? '浅色打印预览中' : '🌓 浅色打印预览'}</span>
+              <span>{isLightPreview ? '极简黑白打印预览' : '🌓 浅色打印预览'}</span>
             </button>
           )}
 

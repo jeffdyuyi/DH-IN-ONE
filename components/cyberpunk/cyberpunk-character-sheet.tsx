@@ -15,6 +15,7 @@ import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkFeaturesDetailPanel } from './cyberpunk-features-detail-panel'
 import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import { CyberpunkEquipActivation } from './cyberpunk-equip-activation'
+import './cyberpunk-light-minimal.css'
 
 export function CyberpunkCharacterSheet() {
   const [formData, setFormData] = useState<SheetData>(defaultSheetData)
@@ -74,7 +75,7 @@ export function CyberpunkCharacterSheet() {
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 ${
       isLightPreview
-        ? 'bg-slate-100 text-slate-900 selection:bg-amber-400 selection:text-black'
+        ? 'cyberpunk-light-mode bg-white text-slate-900 selection:bg-slate-300 selection:text-black'
         : 'bg-[#0B0320] text-slate-100 selection:bg-[#FF007F] selection:text-white'
     }`}>
       {/* 顶部主导航栏 */}
