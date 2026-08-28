@@ -715,9 +715,17 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     }}
                     className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
                   >
-                    {presetTypes.map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
+                    <optgroup label="外置装备">
+                      <option value="外置设备">外置设备</option>
+                    </optgroup>
+                    <optgroup label="身体义体改造">
+                      <option value="植入体">植入体</option>
+                      <option value="仿生件">仿生件</option>
+                      <option value="时尚件">时尚件</option>
+                    </optgroup>
+                    <optgroup label="消耗品">
+                      <option value="消耗品">消耗品</option>
+                    </optgroup>
                     <option value="__custom__">自定义...</option>
                   </select>
                   <input
@@ -744,14 +752,18 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     }}
                     className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
                   >
-                    <option value="主武器">主武器</option>
-                    <option value="副武器">副武器</option>
-                    <option value="护甲">护甲</option>
-                    <option value="外置设备">外置设备</option>
-                    <option value="头部">头部</option>
-                    <option value="躯干">躯干</option>
-                    <option value="上肢">上肢</option>
-                    <option value="下肢">下肢</option>
+                    <optgroup label="外置装备挂载">
+                      <option value="主武器">主武器</option>
+                      <option value="副武器">副武器</option>
+                      <option value="护甲">护甲</option>
+                      <option value="外置设备">外置设备</option>
+                    </optgroup>
+                    <optgroup label="身体义体插槽">
+                      <option value="头部">头部</option>
+                      <option value="躯干">躯干</option>
+                      <option value="上肢">上肢</option>
+                      <option value="下肢">下肢</option>
+                    </optgroup>
                     <option value="">无 (留空)</option>
                     <option value="__custom__">自定义...</option>
                   </select>

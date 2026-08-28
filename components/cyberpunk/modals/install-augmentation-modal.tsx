@@ -43,13 +43,24 @@ export function InstallAugmentationModal({
           setLoading(true)
           await vaultStorage.initialize()
           const categories = filterType === 'all' 
-            ? ['cyberware', 'loot', 'weapon', 'armor'] as any
+            ? ['cyberware', 'loot'] as any
             : [filterType] as any
           const result = await vaultStorage.queryCards({
             category: categories,
             keyword: searchKeyword
           })
-          setVaultCards(result)
+          // 仅展示身体义体（植入体、仿生件、时尚件及通用战利品），排除外置装备与作战武器/护甲
+          const filtered = result.filter((card) => {
+            if (card.category === 'weapon' || card.category === 'armor') return false
+            const data = (card.data || {}) as Record<string, any>
+            const type = (data.cyberType || '').toLowerCase()
+            const cardZone = (data.zone || '').toLowerCase()
+            if (type.includes('外置') || cardZone.includes('武器') || cardZone.includes('护甲') || cardZone.includes('外置')) {
+              return false
+            }
+            return true
+          })
+          setVaultCards(filtered)
         } catch (e) {
           console.error('Failed to load vault items:', e)
         } finally {
