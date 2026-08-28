@@ -173,10 +173,12 @@ export default function RootLayout({
             <Toaster />
             <FadeNotificationContainer />
             {/* 水印 */}
-            <div className="fixed bottom-2 left-2 text-gray-500 text-xs opacity-75 pointer-events-none">
+            <div className="fixed bottom-2 left-2 text-gray-500 text-[11px] leading-tight opacity-75 pointer-events-none select-none z-30 font-sans print:hidden">
               本作品完全开源且免费
               <br />
-              作者：RidRisR
+              赛博扩展/工坊/战役/整合：不咕鸟（QQ：442348584）
+              <br />
+              核心车卡器原作者：RidRisR
               <br />
               翻译及校对：PolearmMaster, 末楔, 里予, 一得, RisRisR
             </div>
