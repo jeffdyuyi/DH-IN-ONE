@@ -302,6 +302,15 @@ export interface CyberwareData extends BaseCardData {
   tag: string;           // 特殊标签 (如【故障隐患】)
   compCost: string;      // 元件费用
   surgCost: string;      // 手术费用
+  // 战术与作战属性 (外置武器/护甲扩展)
+  trait?: string;        // 属性要求 (敏捷/力量/灵巧/本能/风度/知识)
+  damage?: string;       // 伤害骰 (如 d10+6)
+  range?: string;        // 射程 (近战/邻近/近距离/远距离/极远)
+  burden?: string;       // 占用 (单手/双手)
+  damageType?: string;   // 伤害类型 (物理/魔法/能量)
+  armorScore?: string | number; // 护甲值
+  majorThreshold?: string | number; // 重度阈值加成
+  severeThreshold?: string | number; // 严重阈值加成
 }
 
 // Union type for all card data

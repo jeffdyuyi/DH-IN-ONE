@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DH-IN-ONE Shared Card Vault (公共本地卡牌库) 核心数据契约
  * 统一标准: 规范 v1.0
  */
@@ -60,13 +60,22 @@ export interface VaultArmorData {
 export interface VaultCyberwareData {
   tier: string;           // 位阶: T1, T2, T3, T4...
   cyberType: string;      // 植入体 / 仿生件 / 时尚件 / 外置设备 / 消耗品
-  zone: 'head' | 'torso' | 'arms' | 'legs' | 'external' | string; // 身体部位
+  zone: 'head' | 'torso' | 'arms' | 'legs' | 'external' | string; // 身体部位 / 挂载位置
   slots: number;          // 占用插槽数 (默认1)
   restriction?: string;   // 限制/前置条件
   effect: string;         // 机制效果说明
   tag?: string;           // 特殊标签 (如: 【故障隐患】)
   compCost?: string;      // 元件费用
   surgCost?: string;      // 手术费用
+  // 战术武器与护甲作战属性 (可选)
+  trait?: string;
+  damage?: string;
+  range?: string;
+  burden?: string;
+  damageType?: string;
+  armorScore?: number;
+  majorThreshold?: number;
+  severeThreshold?: number;
 }
 
 export interface VaultEnemyTrait {

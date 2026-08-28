@@ -70,6 +70,38 @@ export interface CyberpunkIllegalModData {
   bonus?: string
 }
 
+// 外置装备数据结构 (武器/护甲/副手/无人机/挂载等，具有激活限制)
+export interface CyberpunkExternalGear {
+  id: string
+  name: string
+  tier?: string
+  cyberType?: string // "外置设备", "战术挂载", "无人机", etc.
+  zone?: string // "主武器", "副武器", "战术护甲", "外置挂载", etc.
+  slots?: number // 占用激活槽位 (默认 1)
+  slotCost?: number
+  active: boolean // 是否激活并占用位阶激活槽
+  restriction?: string
+  effect?: string
+  description?: string
+  tag?: string
+  compCost?: string
+  surgCost?: string
+  // 作战属性 (如果是武器或护甲)
+  weaponStats?: {
+    trait?: string // 敏捷, 力量, 灵巧, 本能, 风度, 知识
+    damage?: string // 如 d10+6
+    range?: string // 近战, 邻近, 近距离, 远距离, 极远
+    burden?: string // 单手, 双手
+    damageType?: string // 物理, 魔法, 能量
+  }
+  armorStats?: {
+    armorScore?: number
+    majorThreshold?: number
+    severeThreshold?: number
+  }
+  sourceCardId?: string
+}
+
 // 身体槽位组
 export interface CyberpunkZoneSlotGroup {
   augmentations: CyberpunkAugmentation[]
@@ -81,6 +113,7 @@ export interface CyberpunkSheetExtension {
   streetFame?: number
   streetCred?: number
   zones?: Partial<Record<CyberpunkBodyZoneKey, CyberpunkZoneSlotGroup>>
+  externalGear?: CyberpunkExternalGear[]
   illegalMods?: CyberpunkIllegalModData[] | CyberpunkIllegalModData
   illegalModifications?: any
   activeEquipmentIds?: any

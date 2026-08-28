@@ -669,7 +669,15 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
       case CardType.CYBERWARE: {
         const cw = data as CyberwareData;
         const presetTypes = ["植入体 (Implant)", "仿生件 (Bionic)", "时尚件 (Fashionware)", "外置设备 (External)", "消耗品 (Consumable)"];
-        const presetZones = ["上肢 (Arms)", "下肢 (Legs)", "躯干 (Torso)", "头部 (Head)", "全身 (Full Body)", ""];
+        const presetZones = ["主武器", "副武器", "战术护甲", "外置挂载", "上肢 (Arms)", "下肢 (Legs)", "躯干 (Torso)", "头部 (Head)", "全身 (Full Body)", ""];
+
+        const isCombatMode = Boolean(
+          cw.zone?.includes('武器') ||
+          cw.zone?.includes('护甲') ||
+          cw.cyberType?.includes('外置') ||
+          cw.damage ||
+          cw.armorScore
+        );
 
         return (
           <>
@@ -725,7 +733,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     value={cw.cyberType || ''}
                     onChange={e => handleChange('cyberType', e.target.value)}
                     className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                    placeholder="类型名称 (如: 植入体 / 消耗品)"
+                    placeholder="类型名称 (如: 植入体 / 外置设备)"
                   />
                 </div>
               </div>
@@ -733,7 +741,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">安装部位 (Zone, 可留空)</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">安装部位 / 挂载位置 (Zone)</label>
                 <div className="flex gap-2">
                   <select
                     value={presetZones.includes(cw.zone || '') ? (cw.zone || '') : '__custom__'}
@@ -744,6 +752,10 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     }}
                     className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
                   >
+                    <option value="主武器">主武器</option>
+                    <option value="副武器">副武器</option>
+                    <option value="战术护甲">战术护甲</option>
+                    <option value="外置挂载">外置挂载</option>
                     <option value="上肢 (Arms)">上肢 (Arms)</option>
                     <option value="下肢 (Legs)">下肢 (Legs)</option>
                     <option value="躯干 (Torso)">躯干 (Torso)</option>
@@ -774,11 +786,47 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               </div>
             </div>
 
+            {/* 作战/外置武器护甲扩展属性 */}
+            <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 rounded border border-zinc-200 dark:border-zinc-700 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-yellow-600 dark:text-yellow-400">
+                  ⚔️ 作战参数 (外置武器 / 护甲扩展 - 可选)
+                </span>
+                <span className="text-[11px] text-zinc-500">填写后将在卡片中渲染战术数值条并被车卡器自动识别</span>
+              </div>
+
+              {/* 武器属性 */}
+              <div className="grid grid-cols-4 gap-2">
+                <Input label="主属性要求" value={cw.trait || ''} onChange={v => handleChange('trait', v)} placeholder="如: 敏捷/力量" />
+                <Input label="伤害骰" value={cw.damage || ''} onChange={v => handleChange('damage', v)} placeholder="如: d10+6" />
+                <Input label="射程" value={cw.range || ''} onChange={v => handleChange('range', v)} placeholder="如: 近战/近距离" />
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">占用形式</label>
+                  <select
+                    value={cw.burden || '单手'}
+                    onChange={e => handleChange('burden', e.target.value)}
+                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
+                  >
+                    <option value="单手">单手</option>
+                    <option value="双手">双手</option>
+                    <option value="副手">副手</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 护甲属性 */}
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-zinc-200 dark:border-zinc-700/60">
+                <Input label="护甲点数 (Score)" value={cw.armorScore !== undefined ? String(cw.armorScore) : ''} onChange={v => handleChange('armorScore', v)} placeholder="如: 3" />
+                <Input label="重度阈值加成 (+Major)" value={cw.majorThreshold !== undefined ? String(cw.majorThreshold) : ''} onChange={v => handleChange('majorThreshold', v)} placeholder="如: 2" />
+                <Input label="严重阈值加成 (+Severe)" value={cw.severeThreshold !== undefined ? String(cw.severeThreshold) : ''} onChange={v => handleChange('severeThreshold', v)} placeholder="如: 4" />
+              </div>
+            </div>
+
             <Input label="限制与前置条件 (Restrictions)" value={cw.restriction || ''} onChange={v => handleChange('restriction', v)} placeholder="例如: 需要灵巧 +1 以上" full />
             
             <TextArea label="机制效果说明 (Effect)" value={cw.effect || ''} onChange={v => handleChange('effect', v)} placeholder="卡牌的核心效果机制..." />
             
-            <Input label="特殊标签 (可选，如【故障隐患】或【人情债务】)" value={cw.tag || ''} onChange={v => handleChange('tag', v)} placeholder="例如: 【故障隐患】" full />
+            <Input label="特殊标签 (可选，如【故障隐患】或【军规级】)" value={cw.tag || ''} onChange={v => handleChange('tag', v)} placeholder="例如: 【故障隐患】" full />
 
             <div className="grid grid-cols-2 gap-4 col-span-2">
               <Input label="元件基础价 (Component Cost)" value={cw.compCost || ''} onChange={v => handleChange('compCost', v)} placeholder="例如: 1.5w 信用点" />

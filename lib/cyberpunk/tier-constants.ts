@@ -121,6 +121,7 @@ export const defaultCyberpunkSheetData: CyberpunkSheetExtension = {
     upper_limb: { augmentations: [] },
     lower_limb: { augmentations: [] },
   },
+  externalGear: [],
   activeEquipmentIds: [],
   consumables: [],
   illegalModifications: {

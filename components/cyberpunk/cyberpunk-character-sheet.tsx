@@ -16,7 +16,9 @@ import { CyberpunkConsumablesBar } from './cyberpunk-consumables-bar'
 import { CyberpunkZonePanel } from './cyberpunk-zone-panel'
 import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkEquipActivation } from './cyberpunk-equip-activation'
+import { CyberpunkExternalGearPanel } from './cyberpunk-external-gear-panel'
 import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
+import type { CyberpunkExternalGear } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
 // 核心车卡器模态框与通用组件
@@ -217,6 +219,60 @@ export function CyberpunkCharacterSheet() {
   const handleArmorSelect = (input: ArmorSelectionInput) => {
     selectArmorSlot(input)
     setArmorModalOpen(false)
+  }
+
+  // 将外置装备快速挂载到作战主手/副手武器插槽
+  const handleEquipExternalToCombatWeapon = (slot: 'primary' | 'secondary', gear: CyberpunkExternalGear) => {
+    const traitMap: Record<string, string> = {
+      '敏捷': 'agility',
+      '力量': 'strength',
+      '灵巧': 'finesse',
+      '本能': 'instinct',
+      '风度': 'presence',
+      '知识': 'knowledge',
+    }
+    const resolvedTrait = traitMap[gear.weaponStats?.trait || ''] || gear.weaponStats?.trait || 'agility'
+
+    selectWeapon(
+      { slotType: slot },
+      {
+        type: 'custom',
+        draft: {
+          name: gear.name,
+          tier: (gear.tier as any) || 'T1',
+          weaponType: slot,
+          trait: resolvedTrait as any,
+          damageType: (gear.weaponStats?.damageType === '魔法' ? 'magic' : 'physical') as any,
+          range: (gear.weaponStats?.range === '近战' ? 'melee' : gear.weaponStats?.range || 'melee') as any,
+          burden: (gear.weaponStats?.burden === '双手' ? 'twoHanded' : 'oneHanded') as any,
+          damage: gear.weaponStats?.damage || 'd8',
+          featureName: gear.name,
+          description: gear.effect || gear.description || '',
+          modifierContributions: [],
+        },
+      }
+    )
+    handleQuickSave()
+  }
+
+  // 将外置装备快速挂载到战术护甲插槽
+  const handleEquipExternalToCombatArmor = (gear: CyberpunkExternalGear) => {
+    selectArmorSlot({
+      type: 'custom',
+      draft: {
+        name: gear.name,
+        tier: (gear.tier as any) || 'T1',
+        baseArmorMax: gear.armorStats?.armorScore ?? 3,
+        baseThresholds: {
+          minor: gear.armorStats?.majorThreshold ?? 6,
+          major: gear.armorStats?.severeThreshold ?? 13,
+        },
+        featureName: gear.name,
+        description: gear.effect || gear.description || '',
+        modifierContributions: [],
+      },
+    })
+    handleQuickSave()
   }
 
   // 快速导入 HTML
@@ -433,7 +489,7 @@ export function CyberpunkCharacterSheet() {
         {/* 5. 身份特性与能力详情展示面板（职业专精、子职、种族一/二、社群全文阅读） */}
         <CyberpunkFeaturesDetailPanel />
 
-        {/* 6. 装备专区 (主手、副手、护甲) */}
+        {/* 6. 作战装备专区 (主手、副手、护甲) */}
         <CyberpunkEquipActivation
           equipment={formData?.equipment}
           onOpenWeaponModal={(slot) => {
@@ -441,6 +497,14 @@ export function CyberpunkCharacterSheet() {
             setWeaponModalOpen(true)
           }}
           onOpenArmorModal={() => setArmorModalOpen(true)}
+        />
+
+        {/* 6.5 独立外置装备与战术挂载面板 (带位阶激活槽位限制) */}
+        <CyberpunkExternalGearPanel
+          cyberpunkData={cyberpunkData}
+          onChange={handleCyberpunkChange}
+          onEquipToCombatWeapon={handleEquipExternalToCombatWeapon}
+          onEquipToCombatArmor={handleEquipExternalToCombatArmor}
         />
 
         {/* 7. 中部：义体改造四大区、可选非法改造与消耗品 */}

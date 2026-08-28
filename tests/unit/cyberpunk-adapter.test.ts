@@ -6,6 +6,12 @@ import {
   mapCyberType,
   extractThresholdBonusFromEffect,
 } from '@/lib/cyberpunk/workshop-v3-adapter'
+import {
+  compileVaultToExternalGear,
+  compileVaultToWeapon,
+  compileVaultToArmor,
+} from '@/lib/vault/cross-flavor-equipper'
+import { VaultCard } from '@/lib/vault/vault-types'
 
 describe('卡牌工坊 V3 数据适配器', () => {
   it('正确映射部位文本至标准 Key', () => {
@@ -78,4 +84,40 @@ describe('卡牌工坊 V3 数据适配器', () => {
     expect(converted.maxQuantity).toBe(5)
     expect(converted.costCredits).toBe(3000)
   })
+
+  it('正确解析赛博外置武器卡片 (如 红丸武士刀)', () => {
+    const redBladeCard: VaultCard = {
+      id: 'cw_red_blade',
+      name: '红丸',
+      category: 'cyberware',
+      description: '无耻地从并不知道名字的赤鬼帮的小头目身上抢夺的武士刀',
+      data: {
+        tier: 'T2',
+        cyberType: '外置设备',
+        zone: '主武器',
+        slots: 1,
+        restriction: '——',
+        effect: '敏捷 近战 d10+6 双手；激活时伤害提升至d12+6',
+      },
+      sourceApp: 'workshop',
+      schemaVersion: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+
+    const compiledGear = compileVaultToExternalGear(redBladeCard)
+    expect(compiledGear.name).toBe('红丸')
+    expect(compiledGear.slots).toBe(1)
+    expect(compiledGear.weaponStats).toBeDefined()
+    expect(compiledGear.weaponStats?.trait).toBe('敏捷')
+    expect(compiledGear.weaponStats?.damage).toBe('d10+6')
+    expect(compiledGear.weaponStats?.range).toBe('近战')
+    expect(compiledGear.weaponStats?.burden).toBe('双手')
+
+    const compiledWeapon = compileVaultToWeapon(redBladeCard)
+    expect(compiledWeapon.trait).toBe('agility')
+    expect(compiledWeapon.damage).toBe('d10+6')
+    expect(compiledWeapon.burden).toBe('twoHanded')
+  })
 })
+
