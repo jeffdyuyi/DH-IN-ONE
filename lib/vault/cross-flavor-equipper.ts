@@ -150,42 +150,57 @@ export function compileVaultToWeapon(card: VaultCard): CompiledWeaponItem {
     '知识': 'knowledge'
   };
 
-  // 1. 尝试从结构化字段读取
+  // 1. 优先从正文或结构化字段提取属性要求
   let trait = anyData.trait;
-  let damage = anyData.damage;
-  let range = anyData.range;
-  let burden = anyData.burden;
-  let damageType = anyData.damageType;
+  if (!trait || isCyber) {
+    const traitMatch = textToScan.match(/(敏捷|力量|灵巧|本能|风度|知识)/);
+    if (traitMatch) trait = traitMatch[1];
+  }
 
-  // 2. 如果是赛博卡片且字段不全，从文本智能解析
-  if (isCyber || !damage) {
-    if (!trait) {
-      const traitMatch = textToScan.match(/(敏捷|力量|灵巧|本能|风度|知识)/);
-      if (traitMatch) trait = traitMatch[1];
-    }
-    if (!damage) {
-      const damageMatch = textToScan.match(/(d\d+(?:\s*[+-]\s*\d+)?)/i);
-      if (damageMatch) damage = damageMatch[1].replace(/\s+/g, '');
-    }
-    if (!range) {
-      const rangeMatch = textToScan.match(/(近战|邻近|近距离|远距离|极远)/);
-      if (rangeMatch) range = rangeMatch[1];
-    }
-    if (!burden) {
-      if (textToScan.includes('双手') || textToScan.includes('twoHanded')) burden = 'twoHanded';
-      else burden = 'oneHanded';
-    }
+  // 2. 提取伤害骰 (如 d10+6)
+  let damage = anyData.damage;
+  if (!damage || isCyber) {
+    const damageMatch = textToScan.match(/(d\d+(?:\s*[+-]\s*\d+)?)/i);
+    if (damageMatch) damage = damageMatch[1].replace(/\s+/g, '');
+  }
+
+  // 3. 提取射程
+  let range = anyData.range;
+  if (!range || isCyber) {
+    const rangeMatch = textToScan.match(/(近战|邻近|近距离|远距离|极远)/);
+    if (rangeMatch) range = rangeMatch[1];
+  }
+
+  // 4. 提取单双手/副手占用 (正文明确包含双手时严格优先双手)
+  let burden = anyData.burden;
+  if (textToScan.includes('双手') || textToScan.includes('twoHanded') || textToScan.includes('双持')) {
+    burden = 'twoHanded';
+  } else if (textToScan.includes('副手') || textToScan.includes('offHand')) {
+    burden = 'offHand';
+  } else if (textToScan.includes('单手') || textToScan.includes('oneHanded')) {
+    burden = 'oneHanded';
+  } else if (anyData.burden === '双手' || anyData.burden === 'twoHanded') {
+    burden = 'twoHanded';
+  } else if (anyData.burden === '副手' || anyData.burden === 'offHand') {
+    burden = 'offHand';
+  } else {
+    burden = 'oneHanded';
+  }
+
+  let damageType = anyData.damageType;
+  if (!damageType && (textToScan.includes('魔法') || textToScan.includes('法术') || textToScan.includes('能量'))) {
+    damageType = 'magic';
   }
 
   const resolvedTrait = traitMap[trait] || trait || 'agility';
-  const resolvedBurden = (burden === '双手' || burden === 'twoHanded') ? 'twoHanded' : 'oneHanded';
+  const resolvedBurden = burden === 'twoHanded' ? 'twoHanded' : 'oneHanded';
 
   return {
     id: card.id,
     name: card.name,
     tier: anyData.tier || 'T1',
     trait: resolvedTrait,
-    damageType: damageType === '魔法' || damageType === 'magical' ? 'magical' : 'physical',
+    damageType: damageType === '魔法' || damageType === 'magical' || damageType === 'magic' ? 'magical' : 'physical',
     range: range || 'melee',
     burden: resolvedBurden,
     damage: damage || 'd8',
@@ -266,19 +281,19 @@ export function compileVaultToExternalGear(
   const anyData = (card.data || {}) as Record<string, any>;
   const textToScan = `${card.description || ''} ${anyData.effect || ''} ${anyData.feature || ''}`;
 
-  // 检查是否具备武器特征
+  // 1. 检查是否为武器
   const isWeapon = card.category === 'weapon' ||
     anyData.damage ||
     anyData.zone === '主武器' ||
     anyData.zone === '副武器' ||
-    textToScan.match(/(敏捷|力量|灵巧|本能|风度|知识).*(d\d+)/i);
+    textToScan.match(/(敏捷|力量|灵巧|本能|风度|知识)/i) && textToScan.match(/d\d+/i);
 
-  // 检查是否具备护甲特征
+  // 2. 检查是否为护甲
   const isArmor = card.category === 'armor' ||
     anyData.score ||
     anyData.armorScore ||
-    anyData.zone === '战术护甲' ||
     anyData.zone === '护甲' ||
+    anyData.zone === '战术护甲' ||
     textToScan.match(/护甲[值]?\s*[+＋:：]?\s*(\d+)/i);
 
   let weaponStats: any = undefined;
@@ -305,12 +320,24 @@ export function compileVaultToExternalGear(
 
   const slotCount = Number(anyData.slots) || (anyData.slotCost ? Number(anyData.slotCost) : 1);
 
+  // 判定规范分类
+  let resolvedZone = anyData.zone;
+  if (!resolvedZone) {
+    if (isWeapon) resolvedZone = anyData.zone === '副武器' ? '副武器' : '主武器';
+    else if (isArmor) resolvedZone = '护甲';
+    else resolvedZone = '外置设备';
+  } else if (resolvedZone === '战术护甲') {
+    resolvedZone = '护甲';
+  } else if (resolvedZone === '外置挂载') {
+    resolvedZone = '外置设备';
+  }
+
   return {
     id: `ext_gear_${card.id}_${Date.now()}`,
     name: customAlias && customAlias.trim() !== '' ? customAlias.trim() : card.name,
     tier: anyData.tier || 'T1',
-    cyberType: anyData.cyberType || (card.category === 'cyberware' ? '外置设备' : '战术外挂'),
-    zone: anyData.zone || (isWeapon ? '主武器' : isArmor ? '战术护甲' : '外置设备'),
+    cyberType: anyData.cyberType || (card.category === 'cyberware' ? '外置设备' : '外置设备'),
+    zone: resolvedZone,
     slots: isNaN(slotCount) || slotCount < 1 ? 1 : slotCount,
     active: true,
     restriction: anyData.restriction || '',

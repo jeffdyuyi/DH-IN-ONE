@@ -119,5 +119,30 @@ describe('卡牌工坊 V3 数据适配器', () => {
     expect(compiledWeapon.damage).toBe('d10+6')
     expect(compiledWeapon.burden).toBe('twoHanded')
   })
+
+  it('即使数据字段存在默认单手，正文双手依然严格优先识别为双手', () => {
+    const cardWithDefaultedBurden: VaultCard = {
+      id: 'cw_heavy_hammer',
+      name: '动力重锤',
+      category: 'cyberware',
+      description: '',
+      data: {
+        cyberType: '外置设备',
+        zone: '主武器',
+        burden: '单手', // 模拟被表单默认值污染的情况
+        effect: '力量 近战 d12+4 双手',
+      },
+      sourceApp: 'workshop',
+      schemaVersion: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+
+    const compiledGear = compileVaultToExternalGear(cardWithDefaultedBurden)
+    expect(compiledGear.weaponStats?.burden).toBe('双手')
+
+    const compiledWeapon = compileVaultToWeapon(cardWithDefaultedBurden)
+    expect(compiledWeapon.burden).toBe('twoHanded')
+  })
 })
 

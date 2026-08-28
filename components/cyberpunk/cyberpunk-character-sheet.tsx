@@ -244,7 +244,7 @@ export function CyberpunkCharacterSheet() {
           trait: resolvedTrait as any,
           damageType: (gear.weaponStats?.damageType === '魔法' ? 'magic' : 'physical') as any,
           range: (gear.weaponStats?.range === '近战' ? 'melee' : gear.weaponStats?.range || 'melee') as any,
-          burden: (gear.weaponStats?.burden === '双手' ? 'twoHanded' : 'oneHanded') as any,
+          burden: (gear.weaponStats?.burden === '双手' ? 'twoHanded' : gear.weaponStats?.burden === '副手' ? 'offHand' : 'oneHanded') as any,
           damage: gear.weaponStats?.damage || 'd8',
           featureName: gear.name,
           description: gear.effect || gear.description || '',

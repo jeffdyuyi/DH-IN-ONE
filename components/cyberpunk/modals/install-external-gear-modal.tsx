@@ -34,14 +34,14 @@ export function InstallExternalGearModal({
   // 自定义装备表单
   const [customName, setCustomName] = useState('')
   const [customType, setCustomType] = useState('外置设备')
-  const [customZone, setCustomZone] = useState('外置挂载')
+  const [customZone, setCustomZone] = useState('主武器')
   const [customSlots, setCustomSlots] = useState('1')
   const [customEffect, setCustomEffect] = useState('')
   const [customRestriction, setCustomRestriction] = useState('')
   const [customTrait, setCustomTrait] = useState('')
   const [customDamage, setCustomDamage] = useState('')
   const [customRange, setCustomRange] = useState('')
-  const [customBurden, setCustomBurden] = useState('单手')
+  const [customBurden, setCustomBurden] = useState('')
   const [customArmor, setCustomArmor] = useState('')
   const [customMinor, setCustomMinor] = useState('')
   const [customMajor, setCustomMajor] = useState('')
@@ -128,8 +128,20 @@ export function InstallExternalGearModal({
     if (!customName.trim()) return
 
     const slotCount = parseInt(customSlots, 10) || 1
-    const hasWeapon = Boolean(customDamage || customTrait)
-    const hasArmor = Boolean(customArmor || customMinor || customMajor)
+    const textToScan = `${customName} ${customEffect}`
+    const isExplicitWeapon = customZone === '主武器' || customZone === '副武器' || Boolean(customDamage || customTrait)
+    const isExplicitArmor = customZone === '护甲' || Boolean(customArmor || customMinor || customMajor)
+
+    let resolvedBurden = customBurden
+    if (!resolvedBurden) {
+      if (textToScan.includes('双手') || textToScan.includes('双持')) resolvedBurden = '双手'
+      else if (textToScan.includes('副手')) resolvedBurden = '副手'
+      else resolvedBurden = '单手'
+    }
+
+    const resolvedTrait = customTrait || textToScan.match(/(敏捷|力量|灵巧|本能|风度|知识)/)?.[1] || '敏捷'
+    const resolvedDamage = customDamage || textToScan.match(/(d\d+(?:\s*[+-]\s*\d+)?)/i)?.[1]?.replace(/\s+/g, '') || 'd8'
+    const resolvedRange = customRange || textToScan.match(/(近战|邻近|近距离|远距离|极远)/)?.[1] || '近战'
 
     const newGear: CyberpunkExternalGear = {
       id: `custom_ext_${Date.now()}`,
@@ -141,14 +153,14 @@ export function InstallExternalGearModal({
       active: true,
       effect: customEffect,
       restriction: customRestriction,
-      weaponStats: hasWeapon ? {
-        trait: customTrait || '敏捷',
-        damage: customDamage || 'd8',
-        range: customRange || '近战',
-        burden: customBurden || '单手',
-        damageType: '物理'
+      weaponStats: isExplicitWeapon ? {
+        trait: resolvedTrait,
+        damage: resolvedDamage,
+        range: resolvedRange,
+        burden: resolvedBurden,
+        damageType: textToScan.includes('魔法') ? '魔法' : '物理'
       } : undefined,
-      armorStats: hasArmor ? {
+      armorStats: isExplicitArmor ? {
         armorScore: parseInt(customArmor, 10) || 0,
         majorThreshold: parseInt(customMinor, 10) || 0,
         severeThreshold: parseInt(customMajor, 10) || 0,
@@ -348,7 +360,7 @@ export function InstallExternalGearModal({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-slate-300 block mb-1">挂载形式 / 部位</label>
+                <label className="text-[11px] font-bold text-slate-300 block mb-1">部位 / 分类</label>
                 <select
                   value={customZone}
                   onChange={(e) => setCustomZone(e.target.value)}
@@ -356,10 +368,12 @@ export function InstallExternalGearModal({
                 >
                   <option value="主武器">主武器</option>
                   <option value="副武器">副武器</option>
-                  <option value="战术护甲">战术护甲</option>
-                  <option value="外置挂载">外置挂载</option>
-                  <option value="战术目镜">战术目镜</option>
-                  <option value="战术无人机">战术无人机</option>
+                  <option value="护甲">护甲</option>
+                  <option value="外置设备">外置设备</option>
+                  <option value="头部">头部</option>
+                  <option value="躯干">躯干</option>
+                  <option value="上肢">上肢</option>
+                  <option value="下肢">下肢</option>
                 </select>
               </div>
             </div>
@@ -390,7 +404,7 @@ export function InstallExternalGearModal({
 
             {/* 作战参数 (可选) */}
             <div className="p-3 rounded-lg border border-[#00FFA3]/30 bg-[#12072B]/60 space-y-2">
-              <span className="text-xs font-bold text-[#F5F500] block">作战属性 (如果是武器或护甲，可填写)</span>
+              <span className="text-xs font-bold text-slate-200 block">作战属性 (主武器 / 副武器 / 护甲 - 可选)</span>
               <div className="grid grid-cols-4 gap-2">
                 <input
                   type="text"
@@ -418,6 +432,7 @@ export function InstallExternalGearModal({
                   onChange={(e) => setCustomBurden(e.target.value)}
                   className="p-1.5 bg-[#0B0320] border border-white/10 rounded text-xs text-white"
                 >
+                  <option value="">自动识别</option>
                   <option value="单手">单手</option>
                   <option value="双手">双手</option>
                   <option value="副手">副手</option>
