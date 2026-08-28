@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "../components/cyberpunk/cyberpunk-light-minimal.css";
+
 :root {
   --font-serif: Georgia, serif;
   --font-sans: Arial, Helvetica, sans-serif;

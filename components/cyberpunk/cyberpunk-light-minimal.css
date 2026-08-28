@@ -1,174 +1,284 @@
 /* ==========================================================================
-   爽博朋克：黑白灰极简打印与浅色模式样式表 (Cyberpunk Minimal Mono Theme)
+   爽博朋克：黑白灰极简打印与浅色模式样式表 (Cyberpunk Minimal Mono / Light Theme)
    ========================================================================== */
 
-/* 强制基础背景与文字颜色 */
-.cyberpunk-light-mode,
-body.print-preview {
-  background-color: #FFFFFF !important;
+/* 1. 强制基础页面背景与文本主色 */
+.cyberpunk-light-mode {
+  background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
-/* 顶部导航栏在浅色下纯白黑边 */
-.cyberpunk-light-mode header {
-  background-color: #FFFFFF !important;
-  border-bottom: 1px solid #000000 !important;
+/* 2. 边框统一切换为 Slate 浅灰/中灰，彻底去除霓虹发光与阴影 */
+.cyberpunk-light-mode div,
+.cyberpunk-light-mode section,
+.cyberpunk-light-mode header,
+.cyberpunk-light-mode nav {
+  border-color: #CBD5E1 !important;
 }
 
-/* 所有卡片和面板统一为白底、纯黑或深黑灰清晰边框 */
-.cyberpunk-light-mode .backdrop-blur-md,
-.cyberpunk-light-mode [class*="bg-white/["],
-.cyberpunk-light-mode [class*="bg-black/"],
+/* 3. 顶部导航与所有外层容器面板全部纯白底，带清晰细边框 */
+.cyberpunk-light-mode header,
 .cyberpunk-light-mode .rounded-2xl,
-.cyberpunk-light-mode .rounded-xl {
+.cyberpunk-light-mode .rounded-xl,
+.cyberpunk-light-mode [class*="bg-[#0B0320]"],
+.cyberpunk-light-mode [class*="bg-[#12072B]"],
+.cyberpunk-light-mode [class*="bg-[#160a36]"],
+.cyberpunk-light-mode [class*="bg-[#0d0d1a]"],
+.cyberpunk-light-mode [class*="bg-[#0f0f22]"],
+.cyberpunk-light-mode [class*="bg-black"],
+.cyberpunk-light-mode [class*="bg-white/"] {
   background-color: #FFFFFF !important;
   border-color: #CBD5E1 !important;
-  border-width: 1px !important;
-  box-shadow: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 面板高亮边框 */
-.cyberpunk-light-mode .border-white\/10 {
-  border-color: #CBD5E1 !important;
+/* 4. 嵌套的次级子卡片、槽位使用淡浅灰底 #F8FAFC */
+.cyberpunk-light-mode .rounded-xl .rounded-lg,
+.cyberpunk-light-mode .rounded-2xl .rounded-lg,
+.cyberpunk-light-mode .rounded-lg .rounded-lg {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
 }
 
 .cyberpunk-light-mode .border-b {
   border-bottom-color: #E2E8F0 !important;
 }
 
-/* 所有文字全部强制深色/纯黑，彻底解决看不清的问题 */
+.cyberpunk-light-mode .border-t {
+  border-top-color: #E2E8F0 !important;
+}
+
+/* 5. 标题与正文文字颜色统一规范（深炭灰 #0F172A 与次级说明灰 #475569） */
+.cyberpunk-light-mode div,
+.cyberpunk-light-mode span,
+.cyberpunk-light-mode p,
 .cyberpunk-light-mode h1,
 .cyberpunk-light-mode h2,
 .cyberpunk-light-mode h3,
 .cyberpunk-light-mode h4,
+.cyberpunk-light-mode h5,
+.cyberpunk-light-mode h6,
+.cyberpunk-light-mode strong,
 .cyberpunk-light-mode .text-white,
 .cyberpunk-light-mode [class*="text-slate-100"],
 .cyberpunk-light-mode [class*="text-slate-200"],
-.cyberpunk-light-mode .font-black,
-.cyberpunk-light-mode .font-extrabold,
-.cyberpunk-light-mode .font-bold {
+.cyberpunk-light-mode [class*="text-slate-300"],
+.cyberpunk-light-mode [class*="text-[#00FFA3]"],
+.cyberpunk-light-mode [class*="text-[#F5F500]"],
+.cyberpunk-light-mode [class*="text-[#FF007F]"],
+.cyberpunk-light-mode [class*="text-[#6C00FF]"],
+.cyberpunk-light-mode [class*="text-[#00F0FF]"],
+.cyberpunk-light-mode [class*="text-cyan-"],
+.cyberpunk-light-mode [class*="text-purple-"],
+.cyberpunk-light-mode [class*="text-emerald-"] {
   color: #0F172A !important;
 }
 
-/* 次级说明文字为清晰深灰 */
-.cyberpunk-light-mode p,
-.cyberpunk-light-mode [class*="text-slate-300"],
+.cyberpunk-light-mode label,
 .cyberpunk-light-mode [class*="text-slate-400"],
-.cyberpunk-light-mode [class*="text-slate-500"],
-.cyberpunk-light-mode label {
+.cyberpunk-light-mode [class*="text-slate-500"] {
   color: #475569 !important;
 }
 
-/* 消除荧光绿、黄色和粉色的刺眼/看不清，全部转换为黑白灰极简配色 */
-.cyberpunk-light-mode .text-\[\#00FFA3\],
-.cyberpunk-light-mode .text-\[\#F5F500\],
-.cyberpunk-light-mode .text-\[\#FF007F\],
-.cyberpunk-light-mode .text-\[\#6C00FF\] {
-  color: #0F172A !important;
-  font-weight: 700 !important;
-}
-
-.cyberpunk-light-mode [class*="bg-\[\#00FFA3\]"],
-.cyberpunk-light-mode [class*="bg-\[\#F5F500\]"],
-.cyberpunk-light-mode [class*="bg-\[\#FF007F\]"],
-.cyberpunk-light-mode [class*="bg-\[\#6C00FF\]"] {
-  background-color: #F1F5F9 !important;
-  border-color: #94A3B8 !important;
-  color: #0F172A !important;
-}
-
-/* 标签 Badge 转换为经典白底黑边极简风 */
+/* 6. 标签 Badge / 徽章统一转换为浅灰底白边深灰字 */
 .cyberpunk-light-mode span.rounded,
-.cyberpunk-light-mode span[class*="px-1.5"] {
-  background-color: #F8FAFC !important;
-  border-color: #64748B !important;
+.cyberpunk-light-mode span[class*="rounded"] {
+  background-color: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
+  box-shadow: none !important;
 }
 
-/* 输入框在浅色下为白底黑字、清晰细黑灰边 */
-.cyberpunk-light-mode input,
+/* 7. 所有输入框（文本框、数字框）：纯白底、深黑字、清晰细边框 */
+.cyberpunk-light-mode input[type="text"],
+.cyberpunk-light-mode input[type="number"],
 .cyberpunk-light-mode textarea,
 .cyberpunk-light-mode select {
   background-color: #FFFFFF !important;
-  border: 1px solid #94A3B8 !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+/* 透明内联输入框 (如属性微调数字、信用点数字等) */
+.cyberpunk-light-mode input.bg-transparent,
+.cyberpunk-light-mode input[type="number"].bg-transparent {
+  background-color: transparent !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
 }
 
 .cyberpunk-light-mode input:focus,
 .cyberpunk-light-mode textarea:focus,
 .cyberpunk-light-mode select:focus {
-  border-color: #000000 !important;
+  border-color: #0F172A !important;
   outline: none !important;
 }
 
-/* 义体安装按钮与交互框 */
+/* 8. 按钮与操作控件美化 */
+.cyberpunk-light-mode button {
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+.cyberpunk-light-mode button:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+  border-color: #94A3B8 !important;
+}
+
+/* 特殊功能按钮在浅色下的专业着色 */
+.cyberpunk-light-mode button:has(.lucide-printer),
+.cyberpunk-light-mode button[title*="A4 打印"] {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+  border-color: #0F172A !important;
+}
+
+.cyberpunk-light-mode button:has(.lucide-printer) svg,
+.cyberpunk-light-mode button[title*="A4 打印"] svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+.cyberpunk-light-mode button:has(.lucide-printer):hover,
+.cyberpunk-light-mode button[title*="A4 打印"]:hover {
+  background-color: #334155 !important;
+}
+
+.cyberpunk-light-mode button:has(.lucide-save) {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  border-color: #1D4ED8 !important;
+}
+
+.cyberpunk-light-mode button:has(.lucide-save) svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+.cyberpunk-light-mode button:has(.lucide-save):hover {
+  background-color: #1D4ED8 !important;
+}
+
+/* 位阶按钮激活状态 */
+.cyberpunk-light-mode button[class*="bg-[#F5F500]"],
+.cyberpunk-light-mode button[class*="bg-[#00FFA3]"],
+.cyberpunk-light-mode button[class*="bg-[#00F0FF]"] {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+  border-color: #0F172A !important;
+}
+
+/* 虚线添加槽位按钮 */
 .cyberpunk-light-mode button[class*="border-dashed"] {
   background-color: #F8FAFC !important;
-  border-color: #94A3B8 !important;
-  color: #0F172A !important;
+  border: 2px dashed #CBD5E1 !important;
+  color: #64748B !important;
 }
 
 .cyberpunk-light-mode button[class*="border-dashed"]:hover {
-  background-color: #E2E8F0 !important;
-  border-color: #000000 !important;
-}
-
-/* 消耗品圆圈标记状态 */
-.cyberpunk-light-mode svg.lucide-circle {
-  stroke: #0F172A !important;
-}
-
-.cyberpunk-light-mode svg.lucide-check-circle2 {
-  stroke: #64748B !important;
-  fill: #CBD5E1 !important;
-}
-
-/* 属性加减微调按钮 */
-.cyberpunk-light-mode button[class*="bg-white/5"] {
   background-color: #F1F5F9 !important;
-  border: 1px solid #CBD5E1 !important;
+  border-color: #0F172A !important;
   color: #0F172A !important;
 }
 
-.cyberpunk-light-mode button[class*="bg-white/5"]:hover {
-  background-color: #E2E8F0 !important;
-  color: #000000 !important;
+/* 9. 生命点 (HP) 圆圈指示器适配 */
+.cyberpunk-light-mode button[class*="rounded-full"] {
+  border: 1.5px solid #0F172A !important;
 }
 
-/* 模态弹窗与下拉框黑白灰化 */
-.cyberpunk-light-mode .fixed.inset-0 .bg-\[\#0B0320\],
-.cyberpunk-light-mode .fixed.inset-0 .bg-black\/80 {
-  background-color: rgba(0, 0, 0, 0.4) !important;
+.cyberpunk-light-mode button[class*="rounded-full"][class*="bg-[#00FFA3]"] {
+  background-color: #0F172A !important;
+  box-shadow: none !important;
 }
 
+.cyberpunk-light-mode button[class*="rounded-full"]:not([class*="bg-[#00FFA3]"]) {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* 10. 压力点 (Stress) 方块指示器适配 */
+.cyberpunk-light-mode button[class*="rounded-md"] {
+  border: 1.5px solid #0F172A !important;
+}
+
+.cyberpunk-light-mode button[class*="rounded-md"][class*="bg-[#FF007F]"] {
+  background-color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+.cyberpunk-light-mode button[class*="rounded-md"]:not([class*="bg-[#FF007F]"]) {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* 11. 希望点 (Hope) 菱形指示器适配 */
+.cyberpunk-light-mode div.rotate-45 {
+  border: 1.5px solid #0F172A !important;
+}
+
+.cyberpunk-light-mode div.rotate-45[class*="bg-[#00FFA3]"],
+.cyberpunk-light-mode div.rotate-45[class*="bg-[#00F0FF]"] {
+  background-color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+.cyberpunk-light-mode div.rotate-45:not([class*="bg-[#00FFA3]"]):not([class*="bg-[#00F0FF]"]) {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* 12. 图标颜色统一直观 */
+.cyberpunk-light-mode svg:not(button:has(.lucide-printer) svg):not(button:has(.lucide-save) svg) {
+  color: #334155 !important;
+}
+
+/* 13. 模态弹窗与遮罩层 */
+.cyberpunk-light-mode .fixed.inset-0 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+.cyberpunk-light-mode .fixed.inset-0 .rounded-xl,
 .cyberpunk-light-mode .fixed.inset-0 .rounded-2xl {
   background-color: #FFFFFF !important;
-  border: 1px solid #475569 !important;
+  border: 1px solid #94A3B8 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 打印机实际出纸时的极致线框化 */
+/* 14. 打印机出纸时的极致黑白线框排版优化 */
 @media print {
-  body {
+  body,
+  .cyberpunk-light-mode {
     background: #FFFFFF !important;
     color: #000000 !important;
   }
-  
-  header, 
+
+  header,
   .no-print,
-  button {
+  button,
+  .bottom-dock {
     display: none !important;
   }
 
-  main {
+  main,
+  .max-w-7xl {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
   .rounded-2xl,
-  .rounded-xl {
+  .rounded-xl,
+  .rounded-lg {
     border-radius: 4px !important;
     border: 1px solid #000000 !important;
     page-break-inside: avoid;
+    box-shadow: none !important;
   }
 }
