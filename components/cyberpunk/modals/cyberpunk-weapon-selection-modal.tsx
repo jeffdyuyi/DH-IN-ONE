@@ -1,15 +1,17 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   CYBERPUNK_STARTER_PRIMARY_WEAPONS,
   CYBERPUNK_STARTER_SECONDARY_WEAPONS,
   type CyberpunkStarterWeapon,
 } from '@/lib/cyberpunk/cyberpunk-starter-equipment'
 import type { WeaponSelectionInput } from '@/lib/sheet-store'
-import { X, Search, Shield, Crosshair, Sparkles, RefreshCw } from 'lucide-react'
+import { X, Search, Crosshair, RefreshCw, Box, ShieldAlert } from 'lucide-react'
 import { WeaponSelectionModal } from '@/components/modals/weapon-selection-modal'
 import { CyberpunkSquareIcon } from '../cyberpunk-square-icon'
+import { vaultStorage, type VaultCard } from '@/lib/vault/vault-storage'
+import { compileVaultToWeapon } from '@/lib/vault/cross-flavor-equipper'
 
 interface CyberpunkWeaponModalProps {
   isOpen: boolean
@@ -26,11 +28,68 @@ export function CyberpunkWeaponSelectionModal({
   title,
   weaponSlotType,
 }: CyberpunkWeaponModalProps) {
-  // 模式：'cyberpunk' (渊边行者初始军备) | 'standard' (标准奇幻装备)
   const [activeTab, setActiveTab] = useState<'cyberpunk' | 'standard'>('cyberpunk')
   const [searchTerm, setSearchTerm] = useState('')
   const [traitFilter, setTraitFilter] = useState<string>('all')
   const [damageTypeFilter, setDamageTypeFilter] = useState<'all' | '物理' | '能量'>('all')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'starter' | 'custom'>('all')
+
+  // 本地/工坊外置武器卡牌
+  const [customVaultWeapons, setCustomVaultWeapons] = useState<VaultCard[]>([])
+  const [loadingVault, setLoadingVault] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    const fetchVaultWeapons = async () => {
+      try {
+        setLoadingVault(true)
+        await vaultStorage.initialize()
+        const cards = await vaultStorage.queryCards({
+          category: ['cyberware', 'weapon'] as any,
+        })
+
+        // 筛选符合当前主副手槽位的外置装备
+        const matched = cards.filter((card) => {
+          const data = (card.data || {}) as Record<string, any>
+          const type = (data.cyberType || '').toLowerCase()
+          const zone = (data.zone || '').toLowerCase()
+          const text = `${card.name} ${card.description || ''} ${data.effect || ''} ${data.feature || ''}`
+
+          if (weaponSlotType === 'primary') {
+            // 主武器：明确标注主武器、或者武器类且非副手
+            if (zone.includes('副手') || zone.includes('副武器') || type.includes('副武器')) {
+              return false
+            }
+            return (
+              card.category === 'weapon' ||
+              zone.includes('主武器') ||
+              type.includes('主武器') ||
+              Boolean(data.damage && !text.includes('副手') && !text.includes('offHand'))
+            )
+          } else {
+            // 副武器：明确标注副武器、副手、或者武器类
+            return (
+              zone.includes('副手') ||
+              zone.includes('副武器') ||
+              type.includes('副武器') ||
+              text.includes('副手') ||
+              text.includes('offHand') ||
+              card.category === 'weapon' ||
+              Boolean(data.damage)
+            )
+          }
+        })
+
+        setCustomVaultWeapons(matched)
+      } catch (e) {
+        console.error('Failed to load custom weapons from vault:', e)
+      } finally {
+        setLoadingVault(false)
+      }
+    }
+
+    fetchVaultWeapons()
+  }, [isOpen, weaponSlotType])
 
   const starterList: CyberpunkStarterWeapon[] = useMemo(() => {
     return weaponSlotType === 'secondary'
@@ -38,7 +97,9 @@ export function CyberpunkWeaponSelectionModal({
       : CYBERPUNK_STARTER_PRIMARY_WEAPONS
   }, [weaponSlotType])
 
-  const filteredWeapons = useMemo(() => {
+  // 过滤官方军备
+  const filteredStarters = useMemo(() => {
+    if (sourceFilter === 'custom') return []
     return starterList.filter((wp) => {
       if (searchTerm.trim() !== '') {
         const term = searchTerm.toLowerCase()
@@ -51,11 +112,45 @@ export function CyberpunkWeaponSelectionModal({
       if (damageTypeFilter !== 'all' && wp.damageType !== damageTypeFilter) return false
       return true
     })
-  }, [starterList, searchTerm, traitFilter, damageTypeFilter])
+  }, [starterList, searchTerm, traitFilter, damageTypeFilter, sourceFilter])
+
+  // 过滤自制/工坊外置武器
+  const filteredCustomWeapons = useMemo(() => {
+    if (sourceFilter === 'starter') return []
+    return customVaultWeapons.filter((card) => {
+      const data = (card.data || {}) as Record<string, any>
+      const compiled = compileVaultToWeapon(card)
+      if (searchTerm.trim() !== '') {
+        const term = searchTerm.toLowerCase()
+        const matchName = card.name.toLowerCase().includes(term)
+        const matchDesc = (card.description || '').toLowerCase().includes(term)
+        const matchFeature = (data.effect || '').toLowerCase().includes(term)
+        if (!matchName && !matchDesc && !matchFeature) return false
+      }
+      if (traitFilter !== 'all') {
+        const traitNameMap: Record<string, string> = {
+          agility: '敏捷',
+          strength: '力量',
+          finesse: '灵巧',
+          instinct: '本能',
+          presence: '风度',
+          knowledge: '知识',
+        }
+        const cardTraitName = traitNameMap[compiled.trait] || compiled.trait
+        if (cardTraitName !== traitFilter) return false
+      }
+      if (damageTypeFilter !== 'all') {
+        const isMagic = compiled.damageType === 'magical'
+        if (damageTypeFilter === '能量' && !isMagic) return false
+        if (damageTypeFilter === '物理' && isMagic) return false
+      }
+      return true
+    })
+  }, [customVaultWeapons, searchTerm, traitFilter, damageTypeFilter, sourceFilter])
 
   if (!isOpen) return null
 
-  // 若用户切换到“标准奇幻装备”，直接渲染原版标准装备模态框
+  // 切换至标准奇幻库
   if (activeTab === 'standard') {
     return (
       <div className="relative z-50">
@@ -69,7 +164,6 @@ export function CyberpunkWeaponSelectionModal({
           title={title || (weaponSlotType === 'primary' ? '选择主武器' : '选择副武器')}
           weaponSlotType={weaponSlotType}
         />
-        {/* 浮动返回按钮 */}
         <div className="fixed top-4 right-4 z-[60]">
           <button
             type="button"
@@ -84,6 +178,7 @@ export function CyberpunkWeaponSelectionModal({
     )
   }
 
+  // 选择官方军备
   const handleSelectStarter = (wp: CyberpunkStarterWeapon) => {
     onSelect({
       type: 'custom',
@@ -104,174 +199,255 @@ export function CyberpunkWeaponSelectionModal({
     onClose()
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 font-sans">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+  // 选择工坊/自制外置武器
+  const handleSelectCustomVault = (card: VaultCard) => {
+    const compiled = compileVaultToWeapon(card)
+    onSelect({
+      type: 'custom',
+      draft: {
+        name: compiled.name,
+        tier: (compiled.tier as any) || 'T1',
+        weaponType: weaponSlotType,
+        trait: compiled.trait as any,
+        damageType: compiled.damageType === 'magical' ? 'magic' : 'physical',
+        range: compiled.range as any,
+        burden: compiled.burden as any,
+        damage: compiled.damage,
+        featureName: compiled.featureName || compiled.name,
+        description: compiled.description,
+        modifierContributions: (compiled.modifierContributions as any) || [],
+      },
+    })
+    onClose()
+  }
 
-      <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border-2 border-[#00FFA3]/60 bg-[#0B0320] text-slate-100 shadow-[0_0_50px_rgba(0,255,163,0.25)]">
-        {/* 弹窗头部 */}
-        <div className="flex items-center justify-between border-b border-[#6C00FF]/30 bg-[#12072B] px-5 py-4">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#0D0D0D] border-2 border-[#1F2229] rounded-2xl shadow-[0_0_50px_rgba(252,238,10,0.15)] flex flex-col overflow-hidden text-white">
+        {/* 顶部 Header */}
+        <div className="p-4 px-6 bg-[#15181E] border-b border-[#2B313D] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#FCEE0A] flex items-center justify-center text-black font-black text-sm">
-              {weaponSlotType === 'primary' ? '主' : '副'}
+            <div className="w-9 h-9 rounded-lg bg-[#FCEE0A] text-black flex items-center justify-center font-bold">
+              <Crosshair className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black tracking-wide text-white">
-                  {title || (weaponSlotType === 'primary' ? '选择主武器' : '选择副武器')}
-                </h2>
-                <span className="rounded bg-[#00FFA3]/15 px-2 py-0.5 text-[11px] font-bold text-[#00FFA3] border border-[#00FFA3]/30">
-                  渊边行者初始军备
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-mono">
-                依《爽博朋克：渊边行者》官方规则库定义，共 {starterList.length} 款战备枪械与冷兵器
+              <h3 className="text-base font-black text-white">
+                {title || (weaponSlotType === 'primary' ? '选择主手战术武器' : '选择副手/备用武器')}
+              </h3>
+              <p className="text-xs text-slate-400 font-mono mt-0.5">
+                支持《爽博朋克》官方军备与工坊自制外置武器 · 自动同步伤害与规则特性
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* 切换到标准奇幻装备 */}
             <button
               type="button"
               onClick={() => setActiveTab('standard')}
-              className="flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white bg-[#6C00FF]/20 hover:bg-[#6C00FF]/40 border border-[#6C00FF]/40 px-3 py-1.5 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#00F0FF]/40 text-[#00F0FF] bg-[#00F0FF]/10 hover:bg-[#00F0FF]/25 transition-colors flex items-center gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>切换奇幻装备库</span>
+              切换奇幻装备库
             </button>
-
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* 筛选与搜索工具条 */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#6C00FF]/20 bg-[#0B0320] px-5 py-3">
-          {/* 搜索框 */}
-          <div className="relative flex-1 min-w-[200px] max-w-md">
+        {/* 过滤控制栏 */}
+        <div className="p-3.5 px-6 bg-[#0E1015] border-b border-[#1F2229] flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
+              placeholder="搜索武器名称、特性或描述..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索武器名称、属性或特性关键词..."
-              className="w-full rounded-lg border border-slate-700 bg-[#12072B] pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-[#00FFA3] focus:outline-none"
+              className="w-full bg-[#15181E] border border-[#2B313D] rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FCEE0A]"
             />
           </div>
 
-          {/* 属性过滤 */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 text-[11px]">关联属性:</span>
-            <select
-              value={traitFilter}
-              onChange={(e) => setTraitFilter(e.target.value)}
-              className="rounded bg-[#12072B] border border-slate-700 px-2 py-1 text-xs text-slate-200 focus:border-[#00FFA3] focus:outline-none"
+          {/* 来源切换 */}
+          <div className="flex items-center gap-1 bg-[#15181E] p-1 rounded-lg border border-[#2B313D] text-xs">
+            <button
+              type="button"
+              onClick={() => setSourceFilter('all')}
+              className={`px-2.5 py-1 rounded font-bold transition-colors ${
+                sourceFilter === 'all' ? 'bg-[#FCEE0A] text-black' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <option value="all">全部属性</option>
-              <option value="敏捷">敏捷</option>
-              <option value="力量">力量</option>
-              <option value="灵巧">灵巧</option>
-              <option value="本能">本能</option>
-              <option value="风度">风度</option>
-              <option value="知识">知识</option>
-            </select>
-
-            <span className="text-slate-400 text-[11px] ml-2">伤害类型:</span>
-            <select
-              value={damageTypeFilter}
-              onChange={(e) => setDamageTypeFilter(e.target.value as any)}
-              className="rounded bg-[#12072B] border border-slate-700 px-2 py-1 text-xs text-slate-200 focus:border-[#00FFA3] focus:outline-none"
+              全部 ({filteredStarters.length + filteredCustomWeapons.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSourceFilter('starter')}
+              className={`px-2.5 py-1 rounded font-bold transition-colors ${
+                sourceFilter === 'starter' ? 'bg-[#FCEE0A] text-black' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <option value="all">全部类型</option>
-              <option value="物理">物理</option>
-              <option value="能量">能量</option>
-            </select>
+              官方初始 ({filteredStarters.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSourceFilter('custom')}
+              className={`px-2.5 py-1 rounded font-bold transition-colors ${
+                sourceFilter === 'custom' ? 'bg-[#FCEE0A] text-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              自制外置 ({filteredCustomWeapons.length})
+            </button>
           </div>
+
+          {/* 属性过滤 */}
+          <select
+            value={traitFilter}
+            onChange={(e) => setTraitFilter(e.target.value)}
+            className="bg-[#15181E] border border-[#2B313D] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#FCEE0A]"
+          >
+            <option value="all">全部属性</option>
+            <option value="敏捷">敏捷</option>
+            <option value="力量">力量</option>
+            <option value="灵巧">灵巧</option>
+            <option value="本能">本能</option>
+            <option value="风度">风度</option>
+            <option value="知识">知识</option>
+          </select>
+
+          {/* 伤害类型过滤 */}
+          <select
+            value={damageTypeFilter}
+            onChange={(e) => setDamageTypeFilter(e.target.value as any)}
+            className="bg-[#15181E] border border-[#2B313D] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#FCEE0A]"
+          >
+            <option value="all">全部伤害类型</option>
+            <option value="物理">物理伤害</option>
+            <option value="能量">能量伤害</option>
+          </select>
         </div>
 
-        {/* 军备列表网格 */}
-        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {filteredWeapons.map((wp) => (
-              <div
-                key={wp.id}
-                onClick={() => handleSelectStarter(wp)}
-                className="group relative flex flex-col justify-between rounded-xl border border-slate-800 bg-[#12072B]/80 hover:border-[#00FFA3] hover:bg-[#12072B] p-4 transition-all duration-200 cursor-pointer shadow-md hover:shadow-[0_0_20px_rgba(0,255,163,0.2)]"
-              >
-                <div>
-                  {/* 武器头部 */}
-                  <div className="flex items-start justify-between gap-3 mb-2.5">
-                    <div className="flex items-center gap-3">
-                      <CyberpunkSquareIcon name={wp.name} size="md" theme="weapon" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-black text-sm text-white group-hover:text-[#00FFA3] transition-colors">
-                            {wp.name}
-                          </h3>
-                          <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                              wp.damageType === '能量'
-                                ? 'bg-cyan-950 text-cyan-400 border border-cyan-700/50'
-                                : 'bg-slate-800 text-slate-300'
-                            }`}
-                          >
-                            {wp.damageType}
+        {/* 武器列表区 */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          {/* 1. 自制与工坊外置武器 */}
+          {filteredCustomWeapons.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#00F0FF] border-b border-[#00F0FF]/20 pb-1">
+                <Box className="w-3.5 h-3.5" />
+                <span>工坊与卡库外置武器 ({filteredCustomWeapons.length})</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {filteredCustomWeapons.map((card) => {
+                  const data = (card.data || {}) as Record<string, any>
+                  const compiled = compileVaultToWeapon(card)
+                  return (
+                    <div
+                      key={card.id}
+                      onClick={() => handleSelectCustomVault(card)}
+                      className="group relative bg-[#12151D] border border-[#2B313D] hover:border-[#00F0FF] p-3.5 rounded-xl cursor-pointer transition-all hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] flex items-start gap-3"
+                    >
+                      <CyberpunkSquareIcon
+                        name={card.name}
+                        icon={data.icon}
+                        image={data.image}
+                        size="md"
+                        theme="weapon"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-black text-sm text-white group-hover:text-[#00F0FF] transition-colors truncate">
+                            {card.name}
+                          </h4>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 font-bold">
+                            自制外置
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          {wp.burden} · {wp.range}射程
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-[#00F0FF] text-[10px] font-bold">
+                            {compiled.trait === 'agility' ? '敏捷' : compiled.trait === 'strength' ? '力量' : compiled.trait === 'finesse' ? '灵巧' : '属性'}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40 text-[10px] font-mono font-bold">
+                            {compiled.damage}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-zinc-300 text-[10px]">
+                            {compiled.range === 'melee' ? '近战' : compiled.range}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-zinc-300 text-[10px]">
+                            {compiled.burden === 'twoHanded' ? '双手' : compiled.burden === 'offHand' ? '副手' : '单手'}
+                          </span>
+                        </div>
+                        {compiled.description && (
+                          <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                            {compiled.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 2. 官方初始军备 */}
+          {filteredStarters.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#FCEE0A] border-b border-[#FCEE0A]/20 pb-1">
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>《爽博朋克：渊边行者》官方初始武器 ({filteredStarters.length})</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {filteredStarters.map((wp) => (
+                  <div
+                    key={wp.name}
+                    onClick={() => handleSelectStarter(wp)}
+                    className="group relative bg-[#12151D] border border-[#2B313D] hover:border-[#FCEE0A] p-3.5 rounded-xl cursor-pointer transition-all hover:shadow-[0_0_20px_rgba(252,238,10,0.15)] flex items-start gap-3"
+                  >
+                    <CyberpunkSquareIcon name={wp.name} size="md" theme="weapon" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-black text-sm text-white group-hover:text-[#FCEE0A] transition-colors truncate">
+                          {wp.name}
+                        </h4>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1F2430] text-slate-300">
+                          {wp.tier} · {wp.category}
                         </span>
                       </div>
-                    </div>
-
-                    {/* 伤害与属性大徽章 */}
-                    <div className="text-right shrink-0">
-                      <div className="font-mono font-black text-sm text-[#FCEE0A]">
-                        {wp.damage}
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        <span className="px-1.5 py-0.5 rounded bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 text-[10px] font-bold">
+                          {wp.trait}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40 text-[10px] font-mono font-bold">
+                          {wp.damage}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-zinc-300 text-[10px]">
+                          {wp.range}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-zinc-300 text-[10px]">
+                          {wp.burden}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#1F2430] text-zinc-400 text-[10px]">
+                          {wp.damageType}
+                        </span>
                       </div>
-                      <div className="text-[10px] font-bold text-slate-400">
-                        {wp.trait}
-                      </div>
+                      {wp.feature && wp.feature !== '——' && (
+                        <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                          {wp.feature}
+                        </p>
+                      )}
                     </div>
                   </div>
-
-                  {/* 特性描述 */}
-                  <div className="rounded-lg bg-[#0B0320] p-2.5 border border-slate-800 text-xs text-slate-300 leading-relaxed font-sans min-h-[42px]">
-                    {wp.feature !== '——' ? (
-                      <span>{wp.feature}</span>
-                    ) : (
-                      <span className="text-slate-600">标准无额外被动特性</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 底部一键装配按钮 */}
-                <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80 text-xs">
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    初始装备 · 不占外置激活槽位
-                  </span>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1 px-3 py-1 rounded bg-[#00FFA3]/15 group-hover:bg-[#00FFA3] text-[#00FFA3] group-hover:text-black font-bold text-xs transition-colors"
-                  >
-                    <span>装配此武器</span>
-                    <span>➔</span>
-                  </button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          {filteredWeapons.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-              <Crosshair className="w-10 h-10 mb-2 opacity-40" />
-              <p className="text-sm">未找到匹配的军备武器</p>
+          {filteredStarters.length === 0 && filteredCustomWeapons.length === 0 && (
+            <div className="text-center py-12 text-slate-500 text-xs">
+              未找到匹配的战术武器，请尝试更改搜索词或过滤器。
             </div>
           )}
         </div>

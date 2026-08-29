@@ -1,10 +1,12 @@
-﻿/**
+/**
  * DH-IN-ONE VaultStorage (公共卡牌库本地存储引擎)
  * 基于 IndexedDB 存储，表名: dh_v1_vault_cards
  */
 
 import { VaultCard, VaultQueryFilter, VAULT_SCHEMA_VERSION } from './vault-types';
 import { ALL_BUILTIN_SEEDS } from './seeds';
+
+export type { VaultCard, VaultQueryFilter };
 
 const DB_NAME = 'dh_vault_cards_db';
 const DB_VERSION = 1;
