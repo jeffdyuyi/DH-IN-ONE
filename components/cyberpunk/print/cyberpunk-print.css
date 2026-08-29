@@ -1,0 +1,122 @@
+/* ==========================================================================
+   爽博朋克：A4 专业战术印刷样式表 (Cyberpunk Dedicated A4 Print Stylesheet)
+   “所见不说得”——独立于屏幕 UI 的毫米级高保真实体印刷与卡牌裁切排版
+   ========================================================================== */
+
+/* 屏幕预览下默认隐藏打印专属 DOM */
+.cyberpunk-print-root {
+  display: none;
+}
+
+@media print {
+  /* 1. 页面设置 */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 2. 隐藏屏幕端交互控件 */
+  .cyberpunk-screen-ui,
+  .no-print,
+  header,
+  nav,
+  button,
+  .bottom-dock,
+  .fixed,
+  .toast,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  /* 3. 激活打印专属根容器 */
+  .cyberpunk-print-root {
+    display: block !important;
+    width: 210mm !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  /* 4. A4 单页容器（精准锁定 210mm × 297mm，绝对单页不溢出） */
+  .a4-print-page {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 9mm 10mm !important;
+    box-sizing: border-box !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+    position: relative !important;
+  }
+
+  .a4-print-page.last-page {
+    page-break-after: auto !important;
+  }
+
+  /* 5. 省墨高对比线框 */
+  .a4-print-page * {
+    box-sizing: border-box !important;
+  }
+
+  .print-border {
+    border: 1.2px solid #000000 !important;
+  }
+
+  .print-border-thin {
+    border: 0.8px solid #333333 !important;
+  }
+
+  .print-bg-light {
+    background-color: #F3F4F6 !important;
+  }
+
+  .print-bg-dark {
+    background-color: #1F2430 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* 6. 九宫格标准实体卡牌（63.5mm × 88.9mm） */
+  .print-card-grid-3x3 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 63.5mm) !important;
+    grid-template-rows: repeat(3, 88.9mm) !important;
+    gap: 0 !important;
+    justify-content: center !important;
+    align-content: center !important;
+    width: 190.5mm !important;
+    height: 266.7mm !important;
+    margin: 0 auto !important;
+  }
+
+  .print-cut-card {
+    width: 63.5mm !important;
+    height: 88.9mm !important;
+    max-width: 63.5mm !important;
+    max-height: 88.9mm !important;
+    border: 1px dashed #666666 !important;
+    padding: 2.5mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    page-break-inside: avoid !important;
+    position: relative !important;
+  }
+}

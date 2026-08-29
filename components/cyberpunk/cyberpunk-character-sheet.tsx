@@ -27,6 +27,8 @@ import { InstallAugmentationModal } from './modals/install-augmentation-modal'
 import { InstallExternalGearModal } from './modals/install-external-gear-modal'
 import { CyberpunkWeaponSelectionModal } from './modals/cyberpunk-weapon-selection-modal'
 import { CyberpunkArmorSelectionModal } from './modals/cyberpunk-armor-selection-modal'
+import { CyberpunkPrintRenderer, type CyberpunkPrintOptions } from './print/cyberpunk-print-renderer'
+import { CyberpunkPrintModal } from './modals/cyberpunk-print-modal'
 import type { CyberpunkExternalGear, CyberpunkAugmentation, CyberpunkBodyZoneKey } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
@@ -207,6 +209,22 @@ export function CyberpunkCharacterSheet() {
   const [activeWeaponSlot, setActiveWeaponSlot] = useState<'primary' | 'secondary'>('primary')
   const [armorModalOpen, setArmorModalOpen] = useState(false)
 
+  // 5. A4 实体印刷与战术卡牌导出状态
+  const [printModalOpen, setPrintModalOpen] = useState(false)
+  const [printOptions, setPrintOptions] = useState<CyberpunkPrintOptions>({
+    includeDossier: true,
+    includeGearCards: true,
+    includeDomainCards: true,
+    includeCompanionStory: Boolean(formData?.companionName),
+  })
+
+  const handleTriggerPrint = (opts: CyberpunkPrintOptions) => {
+    setPrintOptions(opts)
+    setTimeout(() => {
+      window.print()
+    }, 60)
+  }
+
   // 处理通用卡牌库选择（种族/职业/社群/子职业）
   const handleGenericCardSelect = (cardId: string, field?: string) => {
     const card = cardStore.getCardById(cardId)
@@ -364,26 +382,29 @@ export function CyberpunkCharacterSheet() {
   const currentSaveName = currentArchiveMeta?.saveName || formData?.name || '默认存档'
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-200 ${
-        isLightPreview
-          ? 'cyberpunk-light-mode bg-white text-slate-900'
-          : 'bg-[#0B0320] text-slate-100'
-      } p-3 sm:p-5 font-sans pb-36`}
-    >
-      <div className="mx-auto max-w-7xl space-y-4">
-        {/* 1. 顶部控制 HUD (角色身份、位阶、经济、浅色预览与 A4 打印) */}
-        <CyberpunkTopBar
-          cyberpunkData={cyberpunkData}
-          characterName={formData?.name || '未命名角色'}
-          saveName={currentSaveName}
-          level={formData?.level || '1'}
-          onChange={handleCyberpunkChange}
-          onOpenCharacterManagement={openCharacterManagementModal}
-          isLightPreview={isLightPreview}
-          onToggleLightPreview={() => setIsLightPreview(!isLightPreview)}
-          onSave={handleQuickSave}
-        />
+    <>
+      {/* 1. 屏幕端交互 UI (打印时自动隐藏) */}
+      <div
+        className={`cyberpunk-screen-ui min-h-screen transition-colors duration-200 ${
+          isLightPreview
+            ? 'cyberpunk-light-mode bg-white text-slate-900'
+            : 'bg-[#0B0320] text-slate-100'
+        } p-3 sm:p-5 font-sans pb-36`}
+      >
+        <div className="mx-auto max-w-7xl space-y-4">
+          {/* 顶部控制 HUD (角色身份、位阶、经济、浅色预览与 A4 打印) */}
+          <CyberpunkTopBar
+            cyberpunkData={cyberpunkData}
+            characterName={formData?.name || '未命名角色'}
+            saveName={currentSaveName}
+            level={formData?.level || '1'}
+            onChange={handleCyberpunkChange}
+            onOpenCharacterManagement={openCharacterManagementModal}
+            isLightPreview={isLightPreview}
+            onToggleLightPreview={() => setIsLightPreview(!isLightPreview)}
+            onSave={handleQuickSave}
+            onOpenPrintModal={() => setPrintModalOpen(true)}
+          />
 
         {/* 保存成功提示 */}
         {saveToast && (
@@ -827,5 +848,21 @@ export function CyberpunkCharacterSheet() {
         onRenameCharacter={renameCharacterHandler}
       />
     </div>
+
+    {/* 2. 专用 A4 实体印刷与战术卡牌导出渲染器 (仅在 @media print 触发时渲染) */}
+    <CyberpunkPrintRenderer
+      sheetData={formData}
+      cyberpunkData={cyberpunkData}
+      options={printOptions}
+    />
+
+    {/* 3. A4 实体印刷与卡牌导出配置模态框 */}
+    <CyberpunkPrintModal
+      isOpen={printModalOpen}
+      onClose={() => setPrintModalOpen(false)}
+      onTriggerPrint={handleTriggerPrint}
+      hasCompanion={Boolean(formData?.companionName)}
+    />
+  </>
   )
 }

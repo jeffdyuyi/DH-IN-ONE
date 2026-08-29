@@ -16,6 +16,7 @@ interface CyberpunkTopBarProps {
   isLightPreview?: boolean
   onToggleLightPreview?: () => void
   onSave?: () => void
+  onOpenPrintModal?: () => void
 }
 
 export function CyberpunkTopBar({
@@ -28,6 +29,7 @@ export function CyberpunkTopBar({
   isLightPreview,
   onToggleLightPreview,
   onSave,
+  onOpenPrintModal,
 }: CyberpunkTopBarProps) {
   const currentTier = cyberpunkData?.tier || 'T1'
   const credits = typeof cyberpunkData?.credits === 'number' ? cyberpunkData.credits : 0
@@ -184,9 +186,9 @@ export function CyberpunkTopBar({
           {/* A4 打印按钮 */}
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={onOpenPrintModal || (() => window.print())}
             className="flex items-center gap-1 rounded-lg border border-[#00FFA3]/50 bg-[#00FFA3]/15 px-2.5 py-1 text-xs font-bold text-[#00FFA3] hover:bg-[#00FFA3] hover:text-black transition-all shadow-[0_0_10px_rgba(0,255,163,0.2)]"
-            title="调用系统打印，适配 A4 纸张排版"
+            title="调用 A4 战术实体印刷与卡牌导出"
           >
             <Printer className="h-3.5 w-3.5" />
             <span>A4 打印</span>
