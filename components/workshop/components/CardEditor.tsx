@@ -668,19 +668,28 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
       }
       case CardType.CYBERWARE: {
         const cw = data as CyberwareData;
-        const presetTypes = ["外置设备", "植入体", "仿生件", "时尚件", "消耗品"];
-        const presetZones = ["主武器", "副武器", "护甲", "头部", "躯干", "上肢", "下肢", "外置设备", ""];
+        const presetTypes = [
+          "外置装备 - 主武器",
+          "外置装备 - 副武器",
+          "外置装备 - 护甲",
+          "外置装备 - 通用",
+          "植入体",
+          "仿生件",
+          "时尚件",
+          "消耗品",
+        ];
+        const presetZones = ["主武器", "副武器", "护甲", "通用挂载", "头部", "躯干", "上肢", "下肢", ""];
 
         return (
           <>
-            {/* 元件专属正方形图标 (Icon) */}
+            {/* 元件专属正方形图标 */}
             <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 border border-slate-300 dark:border-zinc-700 rounded-lg flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 {/* 实时图标预览 */}
                 <div className="w-12 h-12 rounded-lg border-2 border-yellow-400 bg-black flex items-center justify-center overflow-hidden shrink-0 shadow">
                   {cw.icon ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cw.icon} alt="Icon Preview" className="w-full h-full object-cover" />
+                    <img src={cw.icon} alt="图标预览" className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-[11px] font-black font-mono text-yellow-400 text-center leading-tight">
                       {(cw.name || '赛博元件').slice(0, 4)}
@@ -690,7 +699,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
                 <div>
                   <label className="text-xs font-bold text-slate-800 dark:text-zinc-200 block">
-                    元件图标 (正方形 Icon)
+                    元件图标
                   </label>
                   <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block">
                     {cw.icon ? '已上传自定义图标' : '留空将自动提取名称前 4 字生成赛博汉字印章'}
@@ -730,7 +739,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-1">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">位阶 (Tier, 可留空)</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">位阶</label>
                 <div className="flex gap-2">
                   <select
                     value={["T1", "T2", "T3", "T4", ""].includes(cw.tier || '') ? (cw.tier || '') : '__custom__'}
@@ -759,7 +768,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               </div>
 
               <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">类型 (Type)</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">类型</label>
                 <div className="flex gap-2">
                   <select
                     value={presetTypes.includes(cw.cyberType || '') ? cw.cyberType : '__custom__'}
@@ -770,8 +779,11 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     }}
                     className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
                   >
-                    <optgroup label="外置装备">
-                      <option value="外置设备">外置设备</option>
+                    <optgroup label="外置战备装备">
+                      <option value="外置装备 - 主武器">外置装备 - 主武器</option>
+                      <option value="外置装备 - 副武器">外置装备 - 副武器</option>
+                      <option value="外置装备 - 护甲">外置装备 - 护甲</option>
+                      <option value="外置装备 - 通用">外置装备 - 通用</option>
                     </optgroup>
                     <optgroup label="身体义体改造">
                       <option value="植入体">植入体</option>
@@ -788,7 +800,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     value={cw.cyberType || ''}
                     onChange={e => handleChange('cyberType', e.target.value)}
                     className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                    placeholder="如: 外置设备 / 植入体"
+                    placeholder="如: 外置装备 - 主武器"
                   />
                 </div>
               </div>
@@ -796,7 +808,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">部位 / 分类 (Zone / Category)</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">部位 / 分类</label>
                 <div className="flex gap-2">
                   <select
                     value={presetZones.includes(cw.zone || '') ? (cw.zone || '') : '__custom__'}
@@ -811,7 +823,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                       <option value="主武器">主武器</option>
                       <option value="副武器">副武器</option>
                       <option value="护甲">护甲</option>
-                      <option value="外置设备">外置设备</option>
+                      <option value="通用挂载">通用挂载</option>
                     </optgroup>
                     <optgroup label="身体义体插槽">
                       <option value="头部">头部</option>
@@ -839,7 +851,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                   value={cw.slots || ''}
                   onChange={e => handleChange('slots', e.target.value)}
                   className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                  placeholder="例如: 1"
+                  placeholder="留空/0/- 表示不占槽"
                 />
               </div>
             </div>

@@ -515,20 +515,21 @@ export function CyberpunkEquipmentHud({
             <div className="flex items-center justify-between border-b border-[#FF007F]/20 pb-1 mb-2">
               <span className="text-[10px] text-[#FF007F] font-bold">外置挂载模块</span>
               <span className="text-[9px] text-slate-400 font-mono">
-                {externalGears.length}/{getZoneCapacity('external')}
+                {externalGears.reduce((sum, g) => sum + (g.slots !== undefined ? g.slots : 1), 0)}/{getZoneCapacity('external')} 槽
               </span>
             </div>
 
             <div className="flex flex-wrap gap-2 items-center">
               {externalGears.map((gear, idx) => {
                 const isPinned = pinnedItem?.id === gear.id
+                const slotCost = gear.slots !== undefined ? gear.slots : 1
                 const itemDetail: ActiveItemDetail = {
                   id: gear.id || `external-${idx}`,
                   name: gear.name,
                   icon: gear.icon,
                   image: gear.image,
                   tier: gear.tier || currentTier,
-                  typeLabel: gear.cyberType || '外置设备',
+                  typeLabel: gear.cyberType || '外置装备',
                   rulesText: gear.effect || gear.description,
                   onReplace: () => onOpenSelectModal('external', undefined, idx),
                   onRemove: () => handleRemoveGear(idx),
@@ -537,7 +538,7 @@ export function CyberpunkEquipmentHud({
                 return (
                   <div
                     key={gear.id || idx}
-                    className="cursor-pointer"
+                    className="relative cursor-pointer"
                     onMouseEnter={() => setHoveredItem(itemDetail)}
                     onMouseLeave={() => setHoveredItem(null)}
                     onClick={() => setPinnedItem(isPinned ? null : itemDetail)}
@@ -550,11 +551,16 @@ export function CyberpunkEquipmentHud({
                       theme="external"
                       className={`${isPinned ? 'ring-2 ring-[#FF007F]' : ''}`}
                     />
+                    {slotCost > 1 && (
+                      <span className="absolute -top-1.5 -right-1.5 px-1 py-0.2 rounded-full bg-[#FF007F] text-white font-mono font-bold text-[8px] border border-black shadow">
+                        {slotCost}槽
+                      </span>
+                    )}
                   </div>
                 )
               })}
 
-              {externalGears.length < getZoneCapacity('external') && (
+              {externalGears.reduce((sum, g) => sum + (g.slots !== undefined ? g.slots : 1), 0) < getZoneCapacity('external') && (
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('external')}

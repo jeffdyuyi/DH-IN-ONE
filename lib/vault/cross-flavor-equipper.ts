@@ -318,27 +318,36 @@ export function compileVaultToExternalGear(
     };
   }
 
-  const slotCount = Number(anyData.slots) || (anyData.slotCost ? Number(anyData.slotCost) : 1);
+  // 解析槽位：不填、-、——、0 均解析为 0 (不占外置激活槽位)
+  let rawSlots = anyData.slots ?? anyData.slotCost;
+  let slotCount = 0;
+  if (rawSlots !== undefined && rawSlots !== null && String(rawSlots).trim() !== '') {
+    const clean = String(rawSlots).trim();
+    if (clean !== '-' && clean !== '——' && clean !== '0' && clean !== '0槽' && clean !== '无') {
+      const match = clean.match(/\d+/);
+      if (match) slotCount = parseInt(match[0], 10) || 0;
+    }
+  }
 
   // 判定规范分类
   let resolvedZone = anyData.zone;
   if (!resolvedZone) {
     if (isWeapon) resolvedZone = anyData.zone === '副武器' ? '副武器' : '主武器';
     else if (isArmor) resolvedZone = '护甲';
-    else resolvedZone = '外置设备';
+    else resolvedZone = '通用挂载';
   } else if (resolvedZone === '战术护甲') {
     resolvedZone = '护甲';
-  } else if (resolvedZone === '外置挂载') {
-    resolvedZone = '外置设备';
+  } else if (resolvedZone === '外置设备' || resolvedZone === '外置挂载') {
+    resolvedZone = '通用挂载';
   }
 
   return {
     id: `ext_gear_${card.id}_${Date.now()}`,
     name: customAlias && customAlias.trim() !== '' ? customAlias.trim() : card.name,
     tier: anyData.tier || 'T1',
-    cyberType: anyData.cyberType || (card.category === 'cyberware' ? '外置设备' : '外置设备'),
+    cyberType: anyData.cyberType || (card.category === 'cyberware' ? '外置装备' : '外置装备'),
     zone: resolvedZone,
-    slots: isNaN(slotCount) || slotCount < 1 ? 1 : slotCount,
+    slots: slotCount,
     active: true,
     restriction: anyData.restriction || '',
     effect: anyData.effect || anyData.feature || card.description || '',

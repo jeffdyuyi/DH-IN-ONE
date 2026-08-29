@@ -25,14 +25,14 @@ import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
 import { CyberpunkCompanionTab } from './cyberpunk-companion-tab'
 import { InstallAugmentationModal } from './modals/install-augmentation-modal'
 import { InstallExternalGearModal } from './modals/install-external-gear-modal'
+import { CyberpunkWeaponSelectionModal } from './modals/cyberpunk-weapon-selection-modal'
+import { CyberpunkArmorSelectionModal } from './modals/cyberpunk-armor-selection-modal'
 import type { CyberpunkExternalGear, CyberpunkAugmentation, CyberpunkBodyZoneKey } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
 // 核心车卡器模态框与通用组件
 import { GenericCardSelectionModal } from '@/components/modals/generic-card-selection-modal'
 import { CardSelectionModal } from '@/components/modals/card-selection-modal'
-import { WeaponSelectionModal } from '@/components/modals/weapon-selection-modal'
-import { ArmorSelectionModal } from '@/components/modals/armor-selection-modal'
 import { CharacterManagementModal } from '@/components/modals/character-management-modal'
 import { CharacterCreationGuide } from '@/components/guide/character-creation-guide'
 import { FloatingNotebook } from '@/components/notebook'
@@ -703,8 +703,8 @@ export function CyberpunkCharacterSheet() {
         />
       )}
 
-      {/* 武器选择模态框 */}
-      <WeaponSelectionModal
+      {/* 爽博朋克专属武器选择模态框 (默认渊边行者初始军备，支持切换奇幻装备) */}
+      <CyberpunkWeaponSelectionModal
         isOpen={weaponModalOpen}
         onClose={() => setWeaponModalOpen(false)}
         weaponSlotType={activeWeaponSlot}
@@ -712,12 +712,12 @@ export function CyberpunkCharacterSheet() {
         title={activeWeaponSlot === 'primary' ? '选择主手武器' : '选择副手/备用武器'}
       />
 
-      {/* 护甲选择模态框 */}
-      <ArmorSelectionModal
+      {/* 爽博朋克专属护甲选择模态框 (默认渊边行者初始护甲，支持切换奇幻护甲) */}
+      <CyberpunkArmorSelectionModal
         isOpen={armorModalOpen}
         onClose={() => setArmorModalOpen(false)}
         onSelect={handleArmorSelect}
-        title="选择护甲"
+        title="选择战术护甲"
       />
 
       {/* 义体安装模态框 */}
