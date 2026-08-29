@@ -1,6 +1,5 @@
-"use client"
-
 import { useState } from "react"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,8 +21,6 @@ import {
   FileText,
   FileType,
   FolderOpen,
-  Github,
-  HeartHandshake,
   Home,
   Cpu,
   Info,
@@ -34,12 +31,12 @@ import {
   Plus,
   Sparkles,
   Upload,
+  Globe,
+  ExternalLink,
 } from "lucide-react"
 import { navigateToPage, cn } from "@/lib/utils"
 import { DualPageToggle } from "@/components/ui/dual-page-toggle"
 import { MAX_CHARACTERS } from "@/lib/multi-character-storage"
-
-export const DAGGERHEART_SUPPORT_URL = "https://zhongchou.modian.com/item/159038.html"
 
 // 模式类型
 type BottomDockMode = 'main' | 'preview'
@@ -326,16 +323,27 @@ function MainModeContent(props: MainModeProps) {
               </p>
             </TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="end" side="top" className={cn("w-56", isMobile && "text-base")}>
+          <DropdownMenuContent align="end" side="top" className={cn("w-52", isMobile && "text-base")}>
             <DropdownMenuItem onClick={() => navigateToPage("/")} className={cn(isMobile && "py-3 px-4", "font-bold text-amber-500")}>
               <Home className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-              <span>返回主站门户 (Hub)</span>
+              <span>主站门户</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigateToPage("/cyberpunk")} className={cn(isMobile && "py-3 px-4", "font-bold text-cyan-400")}>
-              <Cpu className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-              <span>切换至爽博朋克车卡器</span>
-            </DropdownMenuItem>
+
+            {/* 智能互切：爽博朋克 ⇄ 标准奇幻 */}
+            {typeof window !== 'undefined' && window.location.pathname.includes('cyberpunk') ? (
+              <DropdownMenuItem onClick={() => navigateToPage("/character/standard")} className={cn(isMobile && "py-3 px-4", "font-bold text-amber-400")}>
+                <Layers className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+                <span>切换至标准奇幻车卡器</span>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => navigateToPage("/character/cyberpunk")} className={cn(isMobile && "py-3 px-4", "font-bold text-cyan-400")}>
+                <Cpu className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+                <span>切换至爽博朋克车卡器</span>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem onClick={props.onOpenAnnouncements} className={cn(isMobile && "py-3 px-4")}>
               <Megaphone className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
               <span>更新公告</span>
@@ -343,32 +351,24 @@ function MainModeContent(props: MainModeProps) {
                 <span className="ml-auto text-xs font-semibold italic text-red-600">NEW!</span>
               )}
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+
             <DropdownMenuItem onClick={() => navigateToPage("/about")} className={cn(isMobile && "py-3 px-4")}>
               <Info className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-              关于本站
+              <span>关于本站</span>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className={cn(isMobile && "py-3 px-4")}>
-              <a
-                href="https://github.com/RidRisR/DaggerHeart-CharacterSheet"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-                GitHub 项目 / 下载
-              </a>
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem asChild className={cn(isMobile && "py-3 px-4")}>
               <a
-                href={DAGGERHEART_SUPPORT_URL}
+                href="https://nogubird.top"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="支持正版：前往摩点众筹页面（新窗口打开）"
+                className="flex items-center text-sky-400 font-medium cursor-pointer"
               >
-                <HeartHandshake className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-                <span>匕首心众筹</span>
-                <span className="ml-auto text-xs font-semibold italic text-red-600">HOT!</span>
+                <Globe className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+                <span>nogubird.top</span>
+                <ExternalLink className="ml-auto w-3.5 h-3.5 opacity-70" />
               </a>
             </DropdownMenuItem>
           </DropdownMenuContent>
