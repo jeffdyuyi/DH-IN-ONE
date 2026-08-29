@@ -206,6 +206,80 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* 14. 赛博工坊原生全量卡片样式隔离（彻底免除浅色反色与按钮破坏） */
+.cyberpunk-light-mode .cyberpunk-card-isolated,
+.cyberpunk-card-isolated {
+  background-color: #0D0D0D !important;
+  color: #FFFFFF !important;
+  border-color: #1F2229 !important;
+  box-shadow: 0 0 35px rgba(0, 255, 163, 0.3) !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated div,
+.cyberpunk-light-mode .cyberpunk-card-isolated section {
+  border-color: #1F2229 !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#FCEE0A\],
+.cyberpunk-card-isolated div.bg-\[\#FCEE0A\] {
+  background-color: #FCEE0A !important;
+  color: #0D0D0D !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#15181E\],
+.cyberpunk-card-isolated div.bg-\[\#15181E\] {
+  background-color: #15181E !important;
+  border-color: #2B313D !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#13161F\],
+.cyberpunk-card-isolated div.bg-\[\#13161F\] {
+  background-color: #13161F !important;
+  border-color: #2B313D !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#0A0A0A\],
+.cyberpunk-card-isolated div.bg-\[\#0A0A0A\] {
+  background-color: #0A0A0A !important;
+  border-color: #1F2229 !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button,
+.cyberpunk-card-isolated button {
+  box-shadow: none !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-red-950"],
+.cyberpunk-card-isolated button[class*="bg-red-950"] {
+  background-color: rgba(69, 10, 10, 0.5) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-red-950"]:hover,
+.cyberpunk-card-isolated button[class*="bg-red-950"]:hover {
+  background-color: rgba(127, 29, 29, 0.8) !important;
+  color: #FFFFFF !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"],
+.cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"] {
+  background-color: rgba(0, 255, 163, 0.15) !important;
+  color: #00FFA3 !important;
+  border: 1px solid rgba(0, 255, 163, 0.4) !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"]:hover,
+.cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"]:hover {
+  background-color: rgba(0, 255, 163, 0.3) !important;
+  color: #00FFA3 !important;
+}
+
+.cyberpunk-light-mode .cyberpunk-card-isolated button svg,
+.cyberpunk-card-isolated button svg {
+  color: inherit !important;
+}
+
 /* 14. 打印机出纸时的极致黑白线框排版优化 */
 @media print {
   body,
