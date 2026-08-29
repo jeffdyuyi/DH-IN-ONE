@@ -140,22 +140,18 @@ export function CyberpunkDomainDeck({
                     {card.name}
                   </h4>
 
-                  {/* 卡牌效果正文 */}
-                  <div className="mt-1 text-[11px] text-slate-300 leading-relaxed max-h-[90px] overflow-y-auto pr-0.5 custom-scrollbar">
+                  {/* 卡牌效果正文：无截断全量展示 */}
+                  <div className="mt-1.5 text-[11px] text-slate-300 leading-relaxed space-y-1">
                     <CardMarkdown>{card.description || '无描述'}</CardMarkdown>
                   </div>
                 </div>
 
-                {/* 底部重要信息栏（替代原“卡槽#1”鸡肋文案） */}
-                <div className="flex justify-between items-center text-[10px] border-t border-[#6C00FF]/20 pt-1.5 mt-2">
-                  <span className="font-mono text-[#00FFA3] font-bold flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-[#F5F500]" />
-                    <span>回想费用: {recallCost}</span>
-                  </span>
+                {/* 底部操作栏（去除了重复的RC，仅保留更换操作） */}
+                <div className="flex justify-end items-center text-[10px] border-t border-[#6C00FF]/20 pt-1.5 mt-2.5">
                   <button
                     type="button"
                     onClick={() => onSelectSlot(actualIndex, false)}
-                    className="text-[#00FFA3] hover:underline font-bold"
+                    className="text-[#00FFA3] hover:underline font-bold text-xs"
                   >
                     更换 ⇄
                   </button>
@@ -223,13 +219,9 @@ export function CyberpunkDomainDeck({
                       </div>
 
                       <h4 className="font-bold text-xs text-white truncate">{card.name}</h4>
-                      <div className="mt-1 text-[11px] text-slate-300 line-clamp-3 leading-relaxed">
+                      <div className="mt-1.5 text-[11px] text-slate-300 leading-relaxed space-y-1">
                         <CardMarkdown>{card.description || '无描述'}</CardMarkdown>
                       </div>
-                    </div>
-
-                    <div className="flex justify-between items-center text-[10px] border-t border-[#6C00FF]/20 pt-1.5 mt-2">
-                      <span className="font-mono text-[#00FFA3]">回想费用: {recallCost}</span>
                     </div>
                   </div>
                 )
