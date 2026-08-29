@@ -18,7 +18,7 @@ import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
 import { CyberpunkStoryTab } from './cyberpunk-story-tab'
 import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
-import CharacterSheetPageThree from '@/components/character-sheet-page-ranger-companion'
+import { CyberpunkCompanionTab } from './cyberpunk-companion-tab'
 import type { CyberpunkExternalGear } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
@@ -589,11 +589,7 @@ export function CyberpunkCharacterSheet() {
 
         {/* ===================== 第四页：战斗伙伴 (Companion) ===================== */}
         {activeTab === 'companion' && (
-          <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md text-slate-900">
-            <div className="rounded-lg bg-white p-2">
-              <CharacterSheetPageThree currentCharacterId={currentCharacterId} />
-            </div>
-          </div>
+          <CyberpunkCompanionTab currentCharacterId={currentCharacterId} />
         )}
 
         {/* ===================== 第五页：速记收纳 (Quick Notebook & Drawers) ===================== */}
