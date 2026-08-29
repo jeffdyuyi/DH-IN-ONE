@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import type { CyberpunkExternalGear, CyberpunkSheetExtension } from '../../types/cyberpunk'
 import { CYBERPUNK_TIER_EQUIP_SLOTS } from '../../lib/cyberpunk/tier-constants'
 import { InstallExternalGearModal } from './modals/install-external-gear-modal'
-import { Radio, Plus, Trash2, Power, Shield, Sword, Eye, AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Radio, Plus, Trash2, Power, Shield, Sword, Eye, AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Crosshair } from 'lucide-react'
 
 interface CyberpunkExternalGearPanelProps {
   cyberpunkData: CyberpunkSheetExtension
@@ -268,7 +268,7 @@ export function CyberpunkExternalGearPanel({
                         <button
                           type="button"
                           disabled={!gear.active}
-                          onClick={() => onEquipToCombatWeapon?.(gear, 'primary')}
+                          onClick={() => onEquipToCombatWeapon?.('primary', gear)}
                           title={gear.active ? '设为主手' : '需激活后使用'}
                           className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
                         >
@@ -278,7 +278,7 @@ export function CyberpunkExternalGearPanel({
                         <button
                           type="button"
                           disabled={!gear.active}
-                          onClick={() => onEquipToCombatWeapon?.(gear, 'secondary')}
+                          onClick={() => onEquipToCombatWeapon?.('secondary', gear)}
                           title={gear.active ? '设为副手' : '需激活后使用'}
                           className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >

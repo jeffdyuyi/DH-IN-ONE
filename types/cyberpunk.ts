@@ -119,4 +119,7 @@ export interface CyberpunkSheetExtension {
   activeEquipmentIds?: any
   consumables?: CyberpunkConsumable[]
   isLightPreview?: boolean
+  portrait?: string
+  portraitScale?: number
+  portraitPosition?: { x: number; y: number }
 }
