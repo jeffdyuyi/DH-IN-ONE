@@ -122,4 +122,17 @@ export interface CyberpunkSheetExtension {
   portrait?: string
   portraitScale?: number
   portraitPosition?: { x: number; y: number }
+  // 角色故事精细档案
+  story?: {
+    gender?: string           // 性别
+    age?: string              // 年龄
+    appearance?: string       // 外貌特征 / 仿生外观
+    personality?: string      // 性格
+    ideals?: string           // 理想 / 动机
+    flaws?: string            // 缺陷 / 赛博精神风险
+    relationships?: string    // 人际关系 / 街头联系人
+    catchphrase?: string      // 口头禅 / 标志性台词
+    backstory?: string        // 背景故事 / 传记
+    contacts?: Array<{ id: string; name: string; role: string; attitude: string; notes: string }> // 街头人际名录
+  }
 }

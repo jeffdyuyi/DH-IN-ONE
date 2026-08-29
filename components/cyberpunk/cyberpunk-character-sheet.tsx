@@ -16,6 +16,9 @@ import { CyberpunkConsumablesBar } from './cyberpunk-consumables-bar'
 import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
+import { CyberpunkStoryTab } from './cyberpunk-story-tab'
+import CharacterSheetPageThree from '@/components/character-sheet-page-ranger-companion'
+import CharacterSheetPageAdventureNotes from '@/components/character-sheet-page-adventure-notes'
 import type { CyberpunkExternalGear } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
@@ -33,7 +36,7 @@ import { BottomDock } from '@/components/layout/bottom-dock'
 import { useCharacterManagement } from '@/hooks/use-character-management'
 import { useExportHandlers } from '@/hooks/use-export-handlers'
 import { announcements, isLatestAnnouncementRead, markLatestAnnouncementRead } from '@/lib/announcements'
-import { User, CheckCircle2, Shield, UserCheck, Cpu } from 'lucide-react'
+import { User, CheckCircle2, Shield, UserCheck, Cpu, BookOpen, Bot, ScrollText } from 'lucide-react'
 
 export function CyberpunkCharacterSheet() {
   // Store 状态与动作
@@ -46,8 +49,8 @@ export function CyberpunkCharacterSheet() {
   const selectWeapon = useSheetStore((state) => state.selectWeapon)
   const selectArmorSlot = useSheetStore((state) => state.selectArmorSlot)
 
-  // 双分页控制：'profile' (第1页：档案与特性) | 'loadout' (第2页：装配与义体)
-  const [activeTab, setActiveTab] = useState<'profile' | 'loadout'>('profile')
+  // 多分页控制：'profile' (档案与特性) | 'loadout' (装配与义体) | 'story' (角色故事) | 'companion' (战斗伙伴) | 'notes' (笔记)
+  const [activeTab, setActiveTab] = useState<'profile' | 'loadout' | 'story' | 'companion' | 'notes'>('profile')
 
   // 卡牌数据库 store
   const cardStore = useCardStore()
@@ -344,32 +347,71 @@ export function CyberpunkCharacterSheet() {
           </div>
         )}
 
-        {/* 顶部二级分页标签栏 (Tab 1: 角色档案与特性 | Tab 2: 装配与义体 HUD) */}
-        <div className="flex items-center gap-2 border-b border-[#6C00FF]/30 pb-1">
+        {/* 顶部多分页标签栏 (档案与特性 | 装配与义体 | 角色故事 | 战斗伙伴 | 笔记) */}
+        <div className="flex items-center gap-1.5 border-b border-[#6C00FF]/30 pb-1 overflow-x-auto custom-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-bold text-xs transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-t-lg font-bold text-xs whitespace-nowrap transition-all ${
               activeTab === 'profile'
                 ? 'bg-[#12072B] text-[#00FFA3] border-t-2 border-x border-[#6C00FF]/50 border-t-[#00FFA3] shadow-[0_-4px_12px_rgba(0,255,163,0.15)]'
                 : 'text-slate-400 hover:text-white hover:bg-[#12072B]/50'
             }`}
           >
-            <UserCheck className="w-3.5 h-3.5" />
-            <span>第一页：角色档案与特性</span>
+            <UserCheck className="w-3.5 h-3.5 shrink-0" />
+            <span>档案与特性</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('loadout')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-bold text-xs transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-t-lg font-bold text-xs whitespace-nowrap transition-all ${
               activeTab === 'loadout'
                 ? 'bg-[#12072B] text-[#00FFA3] border-t-2 border-x border-[#6C00FF]/50 border-t-[#00FFA3] shadow-[0_-4px_12px_rgba(0,255,163,0.15)]'
                 : 'text-slate-400 hover:text-white hover:bg-[#12072B]/50'
             }`}
           >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>第二页：装配与义体 (HUD)</span>
+            <Cpu className="w-3.5 h-3.5 shrink-0" />
+            <span>装配与义体 (HUD)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('story')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-t-lg font-bold text-xs whitespace-nowrap transition-all ${
+              activeTab === 'story'
+                ? 'bg-[#12072B] text-[#00FFA3] border-t-2 border-x border-[#6C00FF]/50 border-t-[#00FFA3] shadow-[0_-4px_12px_rgba(0,255,163,0.15)]'
+                : 'text-slate-400 hover:text-white hover:bg-[#12072B]/50'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 shrink-0" />
+            <span>角色故事</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('companion')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-t-lg font-bold text-xs whitespace-nowrap transition-all ${
+              activeTab === 'companion'
+                ? 'bg-[#12072B] text-[#00FFA3] border-t-2 border-x border-[#6C00FF]/50 border-t-[#00FFA3] shadow-[0_-4px_12px_rgba(0,255,163,0.15)]'
+                : 'text-slate-400 hover:text-white hover:bg-[#12072B]/50'
+            }`}
+          >
+            <Bot className="w-3.5 h-3.5 shrink-0" />
+            <span>战斗伙伴</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('notes')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-t-lg font-bold text-xs whitespace-nowrap transition-all ${
+              activeTab === 'notes'
+                ? 'bg-[#12072B] text-[#00FFA3] border-t-2 border-x border-[#6C00FF]/50 border-t-[#00FFA3] shadow-[0_-4px_12px_rgba(0,255,163,0.15)]'
+                : 'text-slate-400 hover:text-white hover:bg-[#12072B]/50'
+            }`}
+          >
+            <ScrollText className="w-3.5 h-3.5 shrink-0" />
+            <span>笔记</span>
           </button>
         </div>
 
@@ -579,6 +621,33 @@ export function CyberpunkCharacterSheet() {
             }}
             onOpenArmorModal={() => setArmorModalOpen(true)}
           />
+        )}
+
+        {/* ===================== 第三页：角色故事 (人物精细档案与传记) ===================== */}
+        {activeTab === 'story' && (
+          <CyberpunkStoryTab
+            cyberpunkData={cyberpunkData}
+            onChangeCyberpunk={handleCyberpunkChange}
+            onSyncRootFormData={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+          />
+        )}
+
+        {/* ===================== 第四页：战斗伙伴 (Companion) ===================== */}
+        {activeTab === 'companion' && (
+          <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md text-slate-900">
+            <div className="rounded-lg bg-white p-2">
+              <CharacterSheetPageThree currentCharacterId={currentCharacterId} />
+            </div>
+          </div>
+        )}
+
+        {/* ===================== 第五页：笔记 (Adventure Notes) ===================== */}
+        {activeTab === 'notes' && (
+          <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md text-slate-900">
+            <div className="rounded-lg bg-white p-2">
+              <CharacterSheetPageAdventureNotes currentCharacterId={currentCharacterId} />
+            </div>
+          </div>
         )}
       </div>
 
