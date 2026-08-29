@@ -496,6 +496,18 @@ export const convertToCCPack = (
             }
             effectsMarkdown += `${raw.description || ''}`;
             break;
+          case CardType.CYBERWARE:
+            effectsMarkdown = `***位阶***: ${raw.tier || ''}\n***类型***: ${raw.cyberType || ''}\n***部位***: ${raw.zone || ''}\n***占用槽位***: ${raw.slots || ''}\n\n`;
+            if (raw.restriction) effectsMarkdown += `***限制***: ${raw.restriction}\n\n`;
+            if (raw.effect) effectsMarkdown += `***效果***:\n${raw.effect}\n\n`;
+            if (raw.compCost || raw.surgCost) effectsMarkdown += `***费用***: 元件 ${raw.compCost || '0'} / 手术 ${raw.surgCost || '0'}\n\n`;
+            effectsMarkdown += `${raw.description || ''}`;
+            briefInfo = {
+              item1: raw.tier || '',
+              item2: raw.cyberType || '',
+              item3: raw.slots ? `${raw.slots}槽` : ''
+            };
+            break;
           default:
             effectsMarkdown = raw.description || '';
             break;
@@ -506,8 +518,9 @@ export const convertToCCPack = (
           名称: card.name,
           类型: variantTypeLabel,
           效果: effectsMarkdown.trim(),
-          简略信息: Object.keys(briefInfo).length > 0 ? briefInfo : undefined
-        });
+          简略信息: Object.keys(briefInfo).length > 0 ? briefInfo : undefined,
+          icon: raw.icon,
+        } as any);
         break;
       }
     }

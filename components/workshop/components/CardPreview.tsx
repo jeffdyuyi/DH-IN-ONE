@@ -1103,21 +1103,35 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif'
         }}
       >
-        {/* Header */}
-        <div className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0">
-          {tierVal ? (
-            <div className="absolute top-0 right-6 bg-[#0D0D0D] text-[#FCEE0A] text-[11px] font-black px-2 py-0.5 tracking-wider">
-              {tierVal}
-            </div>
-          ) : null}
-          <div className={`text-[18px] font-black leading-tight tracking-wide text-[#0D0D0D] break-words ${tierVal ? 'pr-14' : 'pr-2'}`}>
-            {d.name || '微型皮下线圈'}
+        {/* Header (含正方形 Icon 徽章) */}
+        <div className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3">
+          {/* 左侧正方形 Icon 徽章 */}
+          <div className="w-11 h-11 rounded-lg border-2 border-[#0D0D0D] bg-[#0D0D0D] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-mono select-none">
+            {d.icon ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={d.icon} alt={d.name || ''} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[11px] font-black text-[#FCEE0A] text-center leading-none tracking-tight">
+                {(d.name || '元件').slice(0, 4)}
+              </span>
+            )}
           </div>
-          {d.cyberType && (
-            <div className="text-[11px] font-bold text-[#4A4600] uppercase tracking-wider mt-0.5">
-              {d.cyberType}
+
+          <div className="flex-1 min-w-0">
+            {tierVal ? (
+              <div className="absolute top-0 right-6 bg-[#0D0D0D] text-[#FCEE0A] text-[11px] font-black px-2 py-0.5 tracking-wider">
+                {tierVal}
+              </div>
+            ) : null}
+            <div className={`text-[17px] font-black leading-tight tracking-wide text-[#0D0D0D] truncate ${tierVal ? 'pr-12' : ''}`}>
+              {d.name || '微型皮下线圈'}
             </div>
-          )}
+            {d.cyberType && (
+              <div className="text-[10px] font-bold text-[#4A4600] uppercase tracking-wider mt-0.5">
+                {d.cyberType}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Meta Bar */}

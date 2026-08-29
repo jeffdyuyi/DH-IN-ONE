@@ -15,6 +15,8 @@ export type AugmentationType = 'bionic' | 'implant' | 'fashion' | 'custom'
 export interface CyberpunkAugmentation {
   id: string
   name: string
+  icon?: string // 自定义正方形图标/图片URL或Base64
+  image?: string // 兼容image字段
   type?: AugmentationType
   cyberType?: string
   tier?: string
@@ -50,6 +52,7 @@ export interface CyberpunkAugmentation {
 export interface CyberpunkConsumable {
   id: string
   name: string
+  icon?: string
   quantity?: number
   maxQuantity?: number
   effect?: string
@@ -74,6 +77,8 @@ export interface CyberpunkIllegalModData {
 export interface CyberpunkExternalGear {
   id: string
   name: string
+  icon?: string // 自定义正方形图标
+  image?: string
   tier?: string
   cyberType?: string // "外置设备", "战术挂载", "无人机", etc.
   zone?: string // "主武器", "副武器", "战术护甲", "外置挂载", etc.
@@ -113,6 +118,8 @@ export interface CyberpunkSheetExtension {
   streetFame?: number
   streetCred?: number
   zones?: Partial<Record<CyberpunkBodyZoneKey, CyberpunkZoneSlotGroup>>
+  // 手动微调各部位槽位上限 (若未手动设定则按位阶规则计算)
+  zoneSlotLimits?: Partial<Record<CyberpunkBodyZoneKey | 'external', number>>
   externalGear?: CyberpunkExternalGear[]
   illegalMods?: CyberpunkIllegalModData[] | CyberpunkIllegalModData
   illegalModifications?: any

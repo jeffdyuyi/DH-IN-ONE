@@ -673,6 +673,61 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
         return (
           <>
+            {/* 元件专属正方形图标 (Icon) */}
+            <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 border border-slate-300 dark:border-zinc-700 rounded-lg flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                {/* 实时图标预览 */}
+                <div className="w-12 h-12 rounded-lg border-2 border-yellow-400 bg-black flex items-center justify-center overflow-hidden shrink-0 shadow">
+                  {cw.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={cw.icon} alt="Icon Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-[11px] font-black font-mono text-yellow-400 text-center leading-tight">
+                      {(cw.name || '赛博元件').slice(0, 4)}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-800 dark:text-zinc-200 block">
+                    元件图标 (正方形 Icon)
+                  </label>
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block">
+                    {cw.icon ? '已上传自定义图标' : '留空将自动提取名称前 4 字生成赛博汉字印章'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="cursor-pointer px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold transition-colors">
+                  上传图标
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        handleChange('icon', reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {cw.icon && (
+                  <button
+                    type="button"
+                    onClick={() => handleChange('icon', '')}
+                    className="px-2.5 py-1.5 rounded bg-zinc-200 dark:bg-zinc-700 hover:bg-red-500 hover:text-white text-zinc-600 dark:text-zinc-300 text-xs font-bold transition-colors"
+                  >
+                    清除
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-1">
                 <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">位阶 (Tier, 可留空)</label>

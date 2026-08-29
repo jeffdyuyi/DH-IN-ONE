@@ -1,468 +1,665 @@
 "use client"
 
 import React, { useState } from 'react'
+import { useSheetStore } from '@/lib/sheet-store'
 import type {
   CyberpunkAugmentation,
   CyberpunkBodyZoneKey,
   CyberpunkExternalGear,
   CyberpunkSheetExtension,
-} from '../../types/cyberpunk'
-import type { EquipmentData } from '@/automation/equipment/types'
-import { CYBERPUNK_TIER_SLOTS, CYBERPUNK_TIER_EQUIP_SLOTS } from '../../lib/cyberpunk/tier-constants'
-import { CyberpunkPortraitFrame } from './cyberpunk-portrait-frame'
-import { CyberpunkSlotItem } from './cyberpunk-slot-item'
-import { InstallAugmentationModal } from './modals/install-augmentation-modal'
-import { CustomAugmentationModal } from './modals/custom-augmentation-modal'
-import { InstallExternalGearModal } from './modals/install-external-gear-modal'
+} from '@/types/cyberpunk'
 import {
+  CYBERPUNK_TIER_SLOTS,
+  CYBERPUNK_TIER_EQUIP_SLOTS,
+} from '../../lib/cyberpunk/tier-constants'
+import { CyberpunkPortraitFrame } from './cyberpunk-portrait-frame'
+import { CyberpunkSquareIcon } from './cyberpunk-square-icon'
+import { CardMarkdown } from '@/components/ui/card-markdown'
+import {
+  Cpu,
   Sword,
-  Shield,
-  Radio,
   Plus,
   Trash2,
-  Power,
-  ChevronDown,
-  ChevronUp,
-  Cpu,
-  Eye,
-  Hand,
-  Activity,
-  Footprints,
+  ArrowLeftRight,
+  Pin,
+  X,
 } from 'lucide-react'
 
 interface CyberpunkEquipmentHudProps {
   cyberpunkData: CyberpunkSheetExtension
-  equipment?: EquipmentData
   onChangeCyberpunk: (updated: CyberpunkSheetExtension) => void
-  onOpenWeaponModal: (slot: 'primary' | 'secondary') => void
-  onOpenArmorModal: () => void
+  onOpenSelectModal: (
+    type: 'weapon' | 'armor' | 'augmentation' | 'external',
+    zoneKey?: CyberpunkBodyZoneKey | string,
+    slotIndex?: number
+  ) => void
+}
+
+interface ActiveItemDetail {
+  id: string
+  name: string
+  icon?: string | null
+  image?: string | null
+  tier?: string
+  zoneName?: string
+  slotCost?: number
+  typeLabel?: string
+  stats?: Array<{ label: string; value: string | number; color?: string }>
+  rulesText?: string
+  description?: string
+  onReplace?: () => void
+  onRemove?: () => void
 }
 
 export function CyberpunkEquipmentHud({
   cyberpunkData,
-  equipment,
   onChangeCyberpunk,
-  onOpenWeaponModal,
-  onOpenArmorModal,
+  onOpenSelectModal,
 }: CyberpunkEquipmentHudProps) {
+  const formData = useSheetStore((state) => state.sheetData)
+  const setFormData = useSheetStore((state) => state.setSheetData)
+
   const currentTier = cyberpunkData.tier || 'T1'
-  const maxSlotsPerZone = CYBERPUNK_TIER_SLOTS[currentTier] || 2
-  const maxEquipSlots = CYBERPUNK_TIER_EQUIP_SLOTS[currentTier] || 2
+  const defaultZoneSlots = CYBERPUNK_TIER_SLOTS[currentTier] || 2
+  const defaultEquipSlots = CYBERPUNK_TIER_EQUIP_SLOTS[currentTier] || 2
 
-  // 模态框状态
-  const [selectedZone, setSelectedZone] = useState<CyberpunkBodyZoneKey | null>(null)
-  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false)
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
-  const [isExternalModalOpen, setIsExternalModalOpen] = useState(false)
-  const [expandedGearId, setExpandedGearId] = useState<string | null>(null)
-
-  // 义体卸载
-  const handleUninstallAugmentation = (zoneKey: CyberpunkBodyZoneKey, augId: string) => {
-    const currentZone = cyberpunkData.zones?.[zoneKey]
-    if (!currentZone) return
-
-    const updatedAugs = currentZone.augmentations.filter((a) => a.id !== augId)
-    onChangeCyberpunk({
-      ...cyberpunkData,
-      zones: {
-        ...cyberpunkData.zones,
-        [zoneKey]: { augmentations: updatedAugs },
-      },
-    })
-  }
-
-  // 义体安装
-  const handleInstallAugmentation = (zoneKey: CyberpunkBodyZoneKey, newAug: CyberpunkAugmentation) => {
-    const currentZone = cyberpunkData.zones?.[zoneKey] || { augmentations: [] }
-    const updatedAugs = [...currentZone.augmentations, newAug]
-
-    onChangeCyberpunk({
-      ...cyberpunkData,
-      zones: {
-        ...cyberpunkData.zones,
-        [zoneKey]: { augmentations: updatedAugs },
-      },
-    })
-  }
-
-  // 打开安装义体弹窗
-  const handleOpenInstall = (zoneKey: CyberpunkBodyZoneKey) => {
-    setSelectedZone(zoneKey)
-    setIsInstallModalOpen(true)
-  }
-
-  // 外置装备列表
-  const gearList: CyberpunkExternalGear[] = cyberpunkData.externalGear || []
-  const usedActiveSlots = gearList
-    .filter((g) => g.active)
-    .reduce((sum, g) => sum + (Number(g.slots || g.slotCost) || 1), 0)
-
-  // 切换外置装备激活状态
-  const handleToggleExternalActive = (gearId: string) => {
-    const gear = gearList.find((g) => g.id === gearId)
-    if (!gear) return
-
-    const slotCost = Number(gear.slots || gear.slotCost) || 1
-    if (!gear.active && usedActiveSlots + slotCost > maxEquipSlots) {
-      alert(`【激活槽位不足】当前位阶 (${currentTier}) 外置激活上限为 ${maxEquipSlots} 槽，已占用 ${usedActiveSlots} 槽！`)
-      return
+  // 各部位槽位上限（优先读取用户手动微调的上限，若无则按规则位阶基准）
+  const getZoneCapacity = (zoneKey: CyberpunkBodyZoneKey | 'external'): number => {
+    if (cyberpunkData.zoneSlotLimits && cyberpunkData.zoneSlotLimits[zoneKey] !== undefined) {
+      return cyberpunkData.zoneSlotLimits[zoneKey]!
     }
+    return zoneKey === 'external' ? defaultEquipSlots : defaultZoneSlots
+  }
 
-    const updatedList = gearList.map((g) =>
-      g.id === gearId ? { ...g, active: !g.active } : g
-    )
+  // 手动调整指定部位槽位上限
+  const handleAdjustZoneCapacity = (zoneKey: CyberpunkBodyZoneKey | 'external', delta: number) => {
+    const currentCap = getZoneCapacity(zoneKey)
+    const newCap = Math.max(1, Math.min(10, currentCap + delta))
+    const updatedLimits = {
+      ...(cyberpunkData.zoneSlotLimits || {}),
+      [zoneKey]: newCap,
+    }
     onChangeCyberpunk({
       ...cyberpunkData,
-      externalGear: updatedList,
+      zoneSlotLimits: updatedLimits,
     })
   }
 
-  // 移除外置装备
-  const handleRemoveExternalGear = (gearId: string) => {
+  // 浮窗状态：hoveredItem 为临时悬停，pinnedItem 为点击常驻
+  const [hoveredItem, setHoveredItem] = useState<ActiveItemDetail | null>(null)
+  const [pinnedItem, setPinnedItem] = useState<ActiveItemDetail | null>(null)
+  const activeTooltip = pinnedItem || hoveredItem
+
+  // 各身体区域已装配义体数据
+  const upperLimbAugs = cyberpunkData.zones?.upper_limb?.augmentations || []
+  const lowerLimbAugs = cyberpunkData.zones?.lower_limb?.augmentations || []
+  const headAugs = cyberpunkData.zones?.head?.augmentations || []
+  const torsoAugs = cyberpunkData.zones?.torso?.augmentations || []
+
+  // 外置战术装备列表
+  const externalGears = cyberpunkData.externalGear || []
+
+  // 主武器、副武器、战术护甲
+  const primaryWeapon = formData.equipment?.weaponSlots?.primary
+  const secondaryWeapon = formData.equipment?.weaponSlots?.secondary
+  const armorSlot = formData.equipment?.armorSlot
+
+  const primaryWeaponName = primaryWeapon?.name || ''
+  const secondaryWeaponName = secondaryWeapon?.name || ''
+  const armorName = armorSlot?.name || ''
+
+  // 卸载义体
+  const handleRemoveAug = (zoneKey: CyberpunkBodyZoneKey, augIndex: number) => {
+    const zoneGroup = cyberpunkData.zones?.[zoneKey]
+    if (!zoneGroup) return
+    const newAugs = zoneGroup.augmentations.filter((_, i) => i !== augIndex)
     onChangeCyberpunk({
       ...cyberpunkData,
-      externalGear: gearList.filter((g) => g.id !== gearId),
+      zones: {
+        ...cyberpunkData.zones,
+        [zoneKey]: { ...zoneGroup, augmentations: newAugs },
+      },
     })
+    if (pinnedItem) setPinnedItem(null)
   }
 
-  // 安装外置装备
-  const handleInstallExternalGear = (newGear: CyberpunkExternalGear) => {
-    const slotCost = Number(newGear.slots || newGear.slotCost) || 1
-    const willActive = usedActiveSlots + slotCost <= maxEquipSlots
+  // 卸载外置装备
+  const handleRemoveGear = (gearIndex: number) => {
+    const newGears = externalGears.filter((_, i) => i !== gearIndex)
     onChangeCyberpunk({
       ...cyberpunkData,
-      externalGear: [...gearList, { ...newGear, active: willActive }],
+      externalGear: newGears,
     })
+    if (pinnedItem) setPinnedItem(null)
   }
 
-  // 获取各区数据
-  const renderZoneCard = (
+  // 卸载主武器/副武器/护甲
+  const handleClearWeapon = (slot: 'primary' | 'secondary') => {
+    setFormData((prev) => {
+      if (!prev.equipment) return prev
+      return {
+        ...prev,
+        equipment: {
+          ...prev.equipment,
+          weaponSlots: {
+            ...prev.equipment.weaponSlots,
+            [slot]: { name: '', trait: '', damage: '', feature: '', modifierContributions: [] },
+          },
+        },
+      }
+    })
+    if (pinnedItem) setPinnedItem(null)
+  }
+
+  const handleClearArmor = () => {
+    setFormData((prev) => {
+      if (!prev.equipment) return prev
+      return {
+        ...prev,
+        equipment: {
+          ...prev.equipment,
+          armorSlot: {
+            name: '',
+            baseArmorMax: null,
+            baseThresholds: { minor: null, major: null },
+            feature: '',
+            modifierContributions: [],
+          },
+        },
+      }
+    })
+    if (pinnedItem) setPinnedItem(null)
+  }
+
+  // 渲染身体部位 Icon 槽位组
+  const renderZoneSlotGroup = (
     zoneKey: CyberpunkBodyZoneKey,
-    title: string,
-    enTitle: string,
-    IconComponent: React.ComponentType<{ className?: string }>
+    zoneTitle: string,
+    augs: CyberpunkAugmentation[],
+    theme: 'cyberware' | 'weapon' | 'armor' | 'external' = 'cyberware'
   ) => {
-    const zoneState = cyberpunkData.zones?.[zoneKey] || { augmentations: [] }
-    const installedAugs = zoneState.augmentations || []
-    const usedSlots = installedAugs.reduce((sum, a) => sum + (Number(a.slots || a.slotCost) || 1), 0)
-    const availableSlots = Math.max(0, maxSlotsPerZone - usedSlots)
+    const capacity = getZoneCapacity(zoneKey)
+    const totalSlotCost = augs.reduce((sum, a) => sum + (a.slotCost ?? a.slots ?? 1), 0)
 
     return (
-      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] p-3 flex flex-col justify-between hover:border-[#6C00FF]/60 transition-all shadow-md min-h-[220px]">
-        <div>
-          {/* 区标头 */}
-          <div className="flex items-center justify-between pb-2 border-b border-[#6C00FF]/20 mb-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <IconComponent className="w-3.5 h-3.5 text-[#00FFA3] shrink-0" />
-              <span className="font-bold text-xs text-white">{title}</span>
-              <span className="text-[10px] text-[#F5F500] font-mono truncate">{enTitle}</span>
-            </div>
-            <div className="text-[11px] font-mono shrink-0">
-              <span className={usedSlots > maxSlotsPerZone ? 'text-[#FF007F] font-bold' : 'text-[#00FFA3] font-bold'}>
-                {usedSlots}
-              </span>
-              <span className="text-slate-400">/{maxSlotsPerZone}</span>
-            </div>
+      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-3 shadow-md space-y-2.5">
+        {/* 区域标题与槽位上限微调 */}
+        <div className="flex items-center justify-between border-b border-[#6C00FF]/20 pb-1.5">
+          <div className="flex items-center gap-1.5">
+            <Cpu className="w-3.5 h-3.5 text-[#00FFA3]" />
+            <span className="font-bold text-xs text-white">{zoneTitle}</span>
           </div>
 
-          {/* 已安装列表 */}
-          <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-0.5 custom-scrollbar">
-            {installedAugs.map((aug) => (
-              <CyberpunkSlotItem
-                key={aug.id}
-                aug={aug}
-                onUninstall={(id) => handleUninstallAugmentation(zoneKey, id)}
-              />
-            ))}
-            {installedAugs.length === 0 && (
-              <div className="text-[11px] text-slate-500 italic py-3 text-center">
-                尚未安装义体元件
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 底部安装按钮 */}
-        <div className="pt-2 mt-2 border-t border-[#6C00FF]/15">
-          <button
-            type="button"
-            onClick={() => handleOpenInstall(zoneKey)}
-            className="w-full py-1 px-2 rounded-lg bg-[#00FFA3]/10 hover:bg-[#00FFA3]/20 border border-[#00FFA3]/30 text-[#00FFA3] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
-          >
-            <Plus className="w-3 h-3" />
-            <span>安装义体 ({availableSlots}空槽)</span>
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const primaryWeapon = equipment?.weaponSlots?.primary
-  const secondaryWeapon = equipment?.weaponSlots?.secondary
-  const armorSlot = equipment?.armorSlot
-
-  return (
-    <div className="space-y-4">
-      {/* 上方核心装配区：左二区 + 中心人体立绘 + 右二区 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
-        {/* 左侧：左上上肢 + 左下下肢 (3/12) */}
-        <div className="lg:col-span-3 flex flex-col justify-between gap-3">
-          {/* 左上：上肢槽位 */}
-          {renderZoneCard('arms', '上肢槽位', 'Arms / 上肢', Hand)}
-          {/* 左下：下肢槽位 */}
-          {renderZoneCard('legs', '下肢槽位', 'Legs / 下肢', Footprints)}
-        </div>
-
-        {/* 中心：人体框与自由上传立绘 (6/12) */}
-        <div className="lg:col-span-6 flex flex-col justify-center min-h-[460px]">
-          <CyberpunkPortraitFrame
-            portraitUrl={cyberpunkData.portrait}
-            scale={cyberpunkData.portraitScale}
-            position={cyberpunkData.portraitPosition}
-            onChange={(update) => {
-              onChangeCyberpunk({
-                ...cyberpunkData,
-                ...update,
-              })
-            }}
-          />
-        </div>
-
-        {/* 右侧：右上头部 + 右下躯干 (3/12) */}
-        <div className="lg:col-span-3 flex flex-col justify-between gap-3">
-          {/* 右上：头部槽位 */}
-          {renderZoneCard('head', '头部槽位', 'Head / 头部', Eye)}
-          {/* 右下：躯干槽位 */}
-          {renderZoneCard('torso', '躯干槽位', 'Torso / 躯干', Activity)}
-        </div>
-      </div>
-
-      {/* 下方装备与挂载配件横排区 (4 格网格) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-        {/* 1. 主手武器 */}
-        <div className="rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] p-3 flex flex-col justify-between hover:border-[#00FFA3]/50 transition-colors shadow-md">
-          <div>
-            <div className="flex items-center justify-between pb-1.5 border-b border-[#6C00FF]/20">
-              <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                <Sword className="w-3.5 h-3.5 text-[#F5F500]" />
-                <span>主手武器</span>
-              </span>
+          {/* 容量指示器与微调按钮 */}
+          <div className="flex items-center gap-1 text-[11px] font-mono">
+            <span
+              className={`font-bold px-1.5 py-0.5 rounded border ${
+                totalSlotCost > capacity
+                  ? 'bg-red-950 text-red-400 border-red-500'
+                  : 'bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/30'
+              }`}
+            >
+              {totalSlotCost}/{capacity} 槽
+            </span>
+            <div className="flex items-center gap-0.5 ml-1">
               <button
                 type="button"
-                onClick={() => onOpenWeaponModal('primary')}
-                className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
+                onClick={() => handleAdjustZoneCapacity(zoneKey, -1)}
+                className="w-4 h-4 rounded bg-[#0B0320] border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-[10px]"
+                title="微调减少槽位上限"
               >
-                更换 ⇄
+                -
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAdjustZoneCapacity(zoneKey, 1)}
+                className="w-4 h-4 rounded bg-[#0B0320] border border-slate-700 text-slate-400 hover:text-[#00FFA3] flex items-center justify-center text-[10px]"
+                title="微调增加槽位上限"
+              >
+                +
               </button>
             </div>
-            <div className="mt-2 font-bold text-sm text-white truncate">
-              {primaryWeapon?.name || '（未装备主手）'}
-            </div>
-            {primaryWeapon?.damage && (
-              <div className="mt-1 text-[11px] text-[#00FFA3] font-mono">
-                伤害: {primaryWeapon.damage} {primaryWeapon.trait ? `· ${primaryWeapon.trait}` : ''}
-              </div>
-            )}
-            {primaryWeapon?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed line-clamp-3">
-                {primaryWeapon.feature}
-              </div>
-            )}
           </div>
         </div>
 
-        {/* 2. 副手武器 */}
-        <div className="rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] p-3 flex flex-col justify-between hover:border-[#00FFA3]/50 transition-colors shadow-md">
-          <div>
-            <div className="flex items-center justify-between pb-1.5 border-b border-[#6C00FF]/20">
-              <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                <Sword className="w-3.5 h-3.5 text-[#00FFA3]" />
-                <span>副手 / 备用</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => onOpenWeaponModal('secondary')}
-                className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
-              >
-                更换 ⇄
-              </button>
-            </div>
-            <div className="mt-2 font-bold text-sm text-white truncate">
-              {secondaryWeapon?.name || '（未装备副手）'}
-            </div>
-            {secondaryWeapon?.damage && (
-              <div className="mt-1 text-[11px] text-[#00FFA3] font-mono">
-                伤害: {secondaryWeapon.damage} {secondaryWeapon.trait ? `· ${secondaryWeapon.trait}` : ''}
-              </div>
-            )}
-            {secondaryWeapon?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed line-clamp-3">
-                {secondaryWeapon.feature}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* 正方形 Icon 插槽阵列 */}
+        <div className="flex flex-wrap gap-2.5 items-center">
+          {augs.map((aug, idx) => {
+            const slotCost = aug.slotCost ?? aug.slots ?? 1
+            const isPinned = pinnedItem?.id === aug.id
 
-        {/* 3. 战术护甲 */}
-        <div className="rounded-xl border border-[#6C00FF]/30 bg-[#0B0320] p-3 flex flex-col justify-between hover:border-[#F5F500]/50 transition-colors shadow-md">
-          <div>
-            <div className="flex items-center justify-between pb-1.5 border-b border-[#6C00FF]/20">
-              <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#F5F500]" />
-                <span>战术护甲</span>
-              </span>
-              <button
-                type="button"
-                onClick={onOpenArmorModal}
-                className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/15 hover:bg-[#F5F500]/25 px-1.5 py-0.5 rounded border border-[#F5F500]/30 transition-colors"
+            const itemDetail: ActiveItemDetail = {
+              id: aug.id || `${zoneKey}-${idx}`,
+              name: aug.name,
+              icon: aug.icon,
+              image: aug.image,
+              tier: aug.tier || currentTier,
+              zoneName: zoneTitle,
+              slotCost,
+              typeLabel: aug.cyberType || '义体元件',
+              rulesText: aug.effect || aug.rulesText || aug.description,
+              stats: [
+                ...(aug.thresholdBonus?.major ? [{ label: '重度阈值', value: `+${aug.thresholdBonus.major}` }] : []),
+                ...(aug.thresholdBonus?.severe ? [{ label: '严重阈值', value: `+${aug.thresholdBonus.severe}` }] : []),
+                ...(aug.costCredits ? [{ label: '费用', value: `${aug.costCredits} 信用点` }] : []),
+              ],
+              onReplace: () => onOpenSelectModal('augmentation', zoneKey, idx),
+              onRemove: () => handleRemoveAug(zoneKey, idx),
+            }
+
+            return (
+              <div
+                key={aug.id || idx}
+                className="relative group cursor-pointer"
+                onMouseEnter={() => setHoveredItem(itemDetail)}
+                onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => setPinnedItem(pinnedItem?.id === aug.id ? null : itemDetail)}
               >
-                更换 ⇄
-              </button>
-            </div>
-            <div className="mt-2 font-bold text-sm text-white truncate">
-              {armorSlot?.name || '（未穿戴战术护甲）'}
-            </div>
-            {armorSlot?.name && (
-              <div className="mt-1 text-[11px] text-[#F5F500] font-mono flex items-center gap-1.5 flex-wrap">
-                <span>护甲值: {armorSlot?.baseArmorMax ?? 0}</span>
-                {armorSlot?.baseThresholds && (
-                  <span>
-                    (加成: +{armorSlot.baseThresholds.minor ?? 0}/+{armorSlot.baseThresholds.major ?? 0})
+                <CyberpunkSquareIcon
+                  name={aug.name}
+                  icon={aug.icon}
+                  image={aug.image}
+                  size="md"
+                  theme={theme}
+                  className={`${isPinned ? 'ring-2 ring-[#00FFA3] shadow-[0_0_12px_rgba(0,255,163,0.6)]' : ''}`}
+                />
+                {/* 槽位占用角标 */}
+                {slotCost > 1 && (
+                  <span className="absolute -top-1.5 -right-1.5 px-1 py-0.2 rounded-full bg-[#FF007F] text-white font-mono font-bold text-[9px] border border-black shadow">
+                    {slotCost}槽
                   </span>
                 )}
               </div>
-            )}
-            {armorSlot?.feature && (
-              <div className="mt-1 text-[11px] text-slate-300 leading-relaxed line-clamp-3">
-                {armorSlot.feature}
-              </div>
-            )}
-          </div>
+            )
+          })}
+
+          {/* 空插槽添加按钮 */}
+          {totalSlotCost < capacity && (
+            <button
+              type="button"
+              onClick={() => onOpenSelectModal('augmentation', zoneKey)}
+              className="w-12 h-12 rounded-lg border-2 border-dashed border-[#6C00FF]/40 bg-[#0B0320]/60 hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 text-slate-500 hover:text-[#00FFA3] flex flex-col items-center justify-center transition-all shadow-inner group"
+              title={`安装新义体到${zoneTitle}`}
+            >
+              <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] font-mono mt-0.5">安装</span>
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4 font-sans text-slate-100 relative">
+      {/* ======================= 上部：人体线框 + 四肢/头躯 4 大区 ======================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        {/* 左侧 (3/12)：上肢 与 下肢 */}
+        <div className="lg:col-span-3 space-y-4">
+          {renderZoneSlotGroup('upper_limb', '上肢插槽', upperLimbAugs, 'cyberware')}
+          {renderZoneSlotGroup('lower_limb', '下肢插槽', lowerLimbAugs, 'cyberware')}
         </div>
 
-        {/* 4. 外置装备槽 */}
-        <div className="rounded-xl border border-[#00FFA3]/30 bg-[#0B0320] p-3 flex flex-col justify-between hover:border-[#00FFA3]/60 transition-colors shadow-md">
-          <div>
-            <div className="flex items-center justify-between pb-1.5 border-b border-[#00FFA3]/20">
-              <div className="flex items-center gap-1.5">
-                <Radio className="w-3.5 h-3.5 text-[#00FFA3]" />
-                <span className="font-bold text-slate-200">外置设备</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-mono text-[#00FFA3]">
-                  {usedActiveSlots}/{maxEquipSlots}
-                </span>
+        {/* 中间 (6/12)：仿命运2居中人体线框与自由上传 */}
+        <div className="lg:col-span-6 flex flex-col items-center">
+          <CyberpunkPortraitFrame
+            portraitUrl={cyberpunkData.portrait}
+            scale={cyberpunkData.portraitScale ?? 1}
+            position={cyberpunkData.portraitPosition ?? { x: 0, y: 0 }}
+            onChange={(patch) => onChangeCyberpunk({ ...cyberpunkData, ...patch })}
+          />
+        </div>
+
+        {/* 右侧 (3/12)：头部 与 躯干 */}
+        <div className="lg:col-span-3 space-y-4">
+          {renderZoneSlotGroup('head', '头部插槽', headAugs, 'cyberware')}
+          {renderZoneSlotGroup('torso', '躯干插槽', torsoAugs, 'cyberware')}
+        </div>
+      </div>
+
+      {/* ======================= 下部：核心战备区 (主副手、护甲、外置挂载) ======================= */}
+      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md space-y-3">
+        <div className="flex items-center justify-between border-b border-[#6C00FF]/20 pb-2">
+          <div className="flex items-center gap-2">
+            <Sword className="w-4 h-4 text-[#F5F500]" />
+            <h3 className="text-sm font-bold text-white tracking-wide">核心战备与外置装备</h3>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono">
+            主副手武器 · 战术护甲 · 外置挂载模块
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* 1. 主手武器 */}
+          <div className="rounded-xl border border-[#F5F500]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {primaryWeaponName ? (
+                <div
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setPinnedItem(
+                      pinnedItem?.id === 'weapon-primary'
+                        ? null
+                        : {
+                            id: 'weapon-primary',
+                            name: primaryWeaponName,
+                            typeLabel: '主手武器',
+                            tier: currentTier,
+                            stats: [
+                              { label: '伤害', value: primaryWeapon?.damage || '-' },
+                              { label: '特性', value: primaryWeapon?.trait || '-' },
+                            ],
+                            rulesText: primaryWeapon?.feature,
+                            onReplace: () => onOpenSelectModal('weapon', undefined, 0),
+                            onRemove: () => handleClearWeapon('primary'),
+                          }
+                    )
+                  }
+                >
+                  <CyberpunkSquareIcon name={primaryWeaponName} size="md" theme="weapon" />
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setIsExternalModalOpen(true)}
-                  className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors flex items-center gap-0.5"
+                  onClick={() => onOpenSelectModal('weapon', undefined, 0)}
+                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
                 >
-                  <Plus className="w-2.5 h-2.5" />
-                  <span>添加</span>
+                  <Plus className="w-4 h-4" />
                 </button>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] text-[#F5F500] font-bold block">主手武器</span>
+                <div className="font-bold text-xs text-white truncate">
+                  {primaryWeaponName || '（未装配）'}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  {primaryWeapon?.damage || '-'}
+                </div>
               </div>
             </div>
 
-            {/* 外置设备列表 */}
-            <div className="mt-2 space-y-1.5 max-h-[85px] overflow-y-auto pr-0.5 custom-scrollbar">
-              {gearList.map((gear) => (
+            {primaryWeaponName && (
+              <button
+                type="button"
+                onClick={() => onOpenSelectModal('weapon', undefined, 0)}
+                className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
+              >
+                更换 ⇄
+              </button>
+            )}
+          </div>
+
+          {/* 2. 副手武器 */}
+          <div className="rounded-xl border border-[#F5F500]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {secondaryWeaponName ? (
                 <div
-                  key={gear.id}
-                  className={`p-1.5 rounded-lg border text-[11px] flex items-center justify-between gap-1 transition ${
-                    gear.active
-                      ? 'border-[#00FFA3]/40 bg-[#00FFA3]/10 text-white'
-                      : 'border-slate-800 bg-slate-900/50 text-slate-400'
-                  }`}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setPinnedItem(
+                      pinnedItem?.id === 'weapon-secondary'
+                        ? null
+                        : {
+                            id: 'weapon-secondary',
+                            name: secondaryWeaponName,
+                            typeLabel: '副手武器',
+                            tier: currentTier,
+                            stats: [
+                              { label: '伤害', value: secondaryWeapon?.damage || '-' },
+                              { label: '特性', value: secondaryWeapon?.trait || '-' },
+                            ],
+                            rulesText: secondaryWeapon?.feature,
+                            onReplace: () => onOpenSelectModal('weapon', undefined, 1),
+                            onRemove: () => handleClearWeapon('secondary'),
+                          }
+                    )
+                  }
                 >
-                  <div className="flex items-center gap-1 min-w-0 flex-1 truncate">
-                    <span className="font-mono text-[9px] text-[#F5F500] shrink-0">
-                      [{gear.tier || 'T1'}]
-                    </span>
-                    <span className="font-bold truncate">{gear.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleExternalActive(gear.id)}
-                      className={`p-0.5 rounded ${gear.active ? 'text-[#00FFA3]' : 'text-slate-500 hover:text-white'}`}
-                      title={gear.active ? '休眠' : '激活'}
-                    >
-                      <Power className="w-3 h-3" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveExternalGear(gear.id)}
-                      className="p-0.5 text-slate-500 hover:text-[#FF007F]"
-                      title="卸载"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
+                  <CyberpunkSquareIcon name={secondaryWeaponName} size="md" theme="weapon" />
                 </div>
-              ))}
-              {gearList.length === 0 && (
-                <div className="text-[10px] text-slate-500 italic py-2 text-center">
-                  暂无外置挂载装备
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenSelectModal('weapon', undefined, 1)}
+                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] text-[#F5F500] font-bold block">副手武器</span>
+                <div className="font-bold text-xs text-white truncate">
+                  {secondaryWeaponName || '（未装配）'}
                 </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  {secondaryWeapon?.damage || '-'}
+                </div>
+              </div>
+            </div>
+
+            {secondaryWeaponName && (
+              <button
+                type="button"
+                onClick={() => onOpenSelectModal('weapon', undefined, 1)}
+                className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
+              >
+                更换 ⇄
+              </button>
+            )}
+          </div>
+
+          {/* 3. 战术护甲 */}
+          <div className="rounded-xl border border-[#00FFA3]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {armorName ? (
+                <div
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setPinnedItem(
+                      pinnedItem?.id === 'armor-0'
+                        ? null
+                        : {
+                            id: 'armor-0',
+                            name: armorName,
+                            typeLabel: '战术护甲',
+                            tier: currentTier,
+                            stats: [
+                              { label: '护甲值', value: armorSlot?.baseArmorMax ?? 0 },
+                              { label: '阈值加成', value: `轻${armorSlot?.baseThresholds?.minor ?? 0}/重${armorSlot?.baseThresholds?.major ?? 0}` },
+                            ],
+                            rulesText: armorSlot?.feature,
+                            onReplace: () => onOpenSelectModal('armor'),
+                            onRemove: () => handleClearArmor(),
+                          }
+                    )
+                  }
+                >
+                  <CyberpunkSquareIcon name={armorName} size="md" theme="armor" />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenSelectModal('armor')}
+                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#00FFA3]/40 bg-[#0B0320] text-[#00FFA3] hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 flex flex-col items-center justify-center transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
+
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] text-[#00FFA3] font-bold block">战术护甲</span>
+                <div className="font-bold text-xs text-white truncate">
+                  {armorName || '（未装配）'}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  护甲: {armorSlot?.baseArmorMax ?? 0}
+                </div>
+              </div>
+            </div>
+
+            {armorName && (
+              <button
+                type="button"
+                onClick={() => onOpenSelectModal('armor')}
+                className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/10 hover:bg-[#00FFA3]/20 px-2 py-1 rounded border border-[#00FFA3]/30 transition-colors shrink-0"
+              >
+                更换 ⇄
+              </button>
+            )}
+          </div>
+
+          {/* 4. 外置挂载装备 (Icon 列表) */}
+          <div className="rounded-xl border border-[#FF007F]/30 bg-[#0B0320] p-3 flex flex-col justify-between shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#FF007F]/20 pb-1 mb-2">
+              <span className="text-[10px] text-[#FF007F] font-bold">外置挂载模块</span>
+              <span className="text-[9px] text-slate-400 font-mono">
+                {externalGears.length}/{getZoneCapacity('external')}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2 items-center">
+              {externalGears.map((gear, idx) => {
+                const isPinned = pinnedItem?.id === gear.id
+                const itemDetail: ActiveItemDetail = {
+                  id: gear.id || `external-${idx}`,
+                  name: gear.name,
+                  icon: gear.icon,
+                  image: gear.image,
+                  tier: gear.tier || currentTier,
+                  typeLabel: gear.cyberType || '外置设备',
+                  rulesText: gear.effect || gear.description,
+                  onReplace: () => onOpenSelectModal('external', undefined, idx),
+                  onRemove: () => handleRemoveGear(idx),
+                }
+
+                return (
+                  <div
+                    key={gear.id || idx}
+                    className="cursor-pointer"
+                    onMouseEnter={() => setHoveredItem(itemDetail)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    onClick={() => setPinnedItem(isPinned ? null : itemDetail)}
+                  >
+                    <CyberpunkSquareIcon
+                      name={gear.name}
+                      icon={gear.icon}
+                      image={gear.image}
+                      size="sm"
+                      theme="external"
+                      className={`${isPinned ? 'ring-2 ring-[#FF007F]' : ''}`}
+                    />
+                  </div>
+                )
+              })}
+
+              {externalGears.length < getZoneCapacity('external') && (
+                <button
+                  type="button"
+                  onClick={() => onOpenSelectModal('external')}
+                  className="w-9 h-9 rounded-lg border-2 border-dashed border-[#FF007F]/40 bg-[#0B0320] text-[#FF007F] hover:border-[#FF007F] hover:bg-[#FF007F]/10 flex items-center justify-center transition-all"
+                  title="添加外置挂载"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 义体安装弹窗 */}
-      {selectedZone && isInstallModalOpen && (
-        <InstallAugmentationModal
-          isOpen={isInstallModalOpen}
-          onClose={() => {
-            setIsInstallModalOpen(false)
-            setSelectedZone(null)
-          }}
-          zone={selectedZone}
-          zoneName={
-            selectedZone === 'arms'
-              ? '上肢'
-              : selectedZone === 'legs'
-              ? '下肢'
-              : selectedZone === 'head'
-              ? '头部'
-              : '躯干'
-          }
-          availableSlots={Math.max(
-            0,
-            maxSlotsPerZone -
-              ((cyberpunkData.zones?.[selectedZone]?.augmentations || []).reduce(
-                (sum, a) => sum + (Number(a.slots || a.slotCost) || 1),
-                0
-              ))
+      {/* ======================= 全量卡片悬停 / 钉住浮窗 (Popover) ======================= */}
+      {activeTooltip && (
+        <div className="fixed bottom-6 right-6 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-[#00FFA3]/60 bg-[#0B0320]/95 backdrop-blur-md p-4 shadow-[0_0_30px_rgba(0,255,163,0.35)] text-white animate-fade-in flex flex-col space-y-2.5">
+          {/* 浮窗头部 */}
+          <div className="flex items-start justify-between border-b border-[#6C00FF]/30 pb-2">
+            <div className="flex items-center gap-2.5">
+              <CyberpunkSquareIcon
+                name={activeTooltip.name}
+                icon={activeTooltip.icon}
+                image={activeTooltip.image}
+                size="sm"
+              />
+              <div>
+                <span className="text-[10px] font-bold text-[#F5F500] font-mono block">
+                  [{activeTooltip.tier || currentTier}] {activeTooltip.typeLabel || '装备'}
+                </span>
+                <h4 className="font-bold text-xs text-white truncate max-w-[170px]">
+                  {activeTooltip.name}
+                </h4>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              {pinnedItem ? (
+                <span
+                  className="p-1 text-[#00FFA3] text-[10px] flex items-center gap-0.5"
+                  title="已固定锁定显示"
+                >
+                  <Pin className="w-3 h-3 fill-current" />
+                </span>
+              ) : (
+                <span className="text-[9px] text-slate-500 font-mono">悬停预览</span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setPinnedItem(null)
+                  setHoveredItem(null)
+                }}
+                className="p-1 text-slate-400 hover:text-white rounded"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* 属性徽章 */}
+          {activeTooltip.stats && activeTooltip.stats.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 py-1">
+              {activeTooltip.stats.map((st, i) => (
+                <span
+                  key={i}
+                  className="px-2 py-0.5 rounded bg-[#6C00FF]/25 border border-[#6C00FF]/40 text-[10px] font-mono text-[#00FFA3]"
+                >
+                  {st.label}: <strong>{st.value}</strong>
+                </span>
+              ))}
+            </div>
           )}
-          onInstall={(newAug) => handleInstallAugmentation(selectedZone, newAug)}
-          onOpenCustomModal={() => {
-            setIsInstallModalOpen(false)
-            setIsCustomModalOpen(true)
-          }}
-        />
-      )}
 
-      {/* 自定义义体弹窗 */}
-      {selectedZone && isCustomModalOpen && (
-        <CustomAugmentationModal
-          isOpen={isCustomModalOpen}
-          defaultZone={selectedZone}
-          onClose={() => setIsCustomModalOpen(false)}
-          onSave={(newAug) => handleInstallAugmentation(selectedZone, newAug)}
-        />
-      )}
+          {/* 规则特性描述全文 */}
+          <div className="text-[11px] text-slate-300 leading-relaxed max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+            <CardMarkdown>{activeTooltip.rulesText || activeTooltip.description || '暂无详细描述'}</CardMarkdown>
+          </div>
 
-      {/* 外置装备安装弹窗 */}
-      {isExternalModalOpen && (
-        <InstallExternalGearModal
-          isOpen={isExternalModalOpen}
-          availableSlots={Math.max(0, maxEquipSlots - usedActiveSlots)}
-          maxSlots={maxEquipSlots}
-          onClose={() => setIsExternalModalOpen(false)}
-          onInstall={handleInstallExternalGear}
-        />
+          {/* 底部操作按钮 */}
+          {(activeTooltip.onReplace || activeTooltip.onRemove) && (
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#6C00FF]/20 text-xs">
+              {activeTooltip.onRemove && (
+                <button
+                  type="button"
+                  onClick={activeTooltip.onRemove}
+                  className="flex items-center gap-1 text-[11px] text-[#FF007F] hover:bg-[#FF007F]/10 px-2 py-1 rounded border border-[#FF007F]/30 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>卸下</span>
+                </button>
+              )}
+              {activeTooltip.onReplace && (
+                <button
+                  type="button"
+                  onClick={activeTooltip.onReplace}
+                  className="flex items-center gap-1 text-[11px] text-[#00FFA3] hover:bg-[#00FFA3]/10 px-2 py-1 rounded border border-[#00FFA3]/30 font-bold transition-colors"
+                >
+                  <ArrowLeftRight className="w-3 h-3" />
+                  <span>更换</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

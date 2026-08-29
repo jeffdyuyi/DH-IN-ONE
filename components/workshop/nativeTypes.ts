@@ -293,6 +293,7 @@ export interface PriceListData extends BaseCardData {
 }
 
 export interface CyberwareData extends BaseCardData {
+  icon?: string;         // 正方形图标 (Base64/URL，留空则自动提取4字汉字)
   tier: string;          // 位阶: T1, T2, T3...
   cyberType: string;     // 类型: 植入体, 仿生件, 时尚件, 外置设备, 消耗品, 自定义...
   zone: string;          // 安装部位: 上肢, 下肢, 躯干, 头部, 自定义 (可留空)

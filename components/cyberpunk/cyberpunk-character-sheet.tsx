@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { useSheetStore, type WeaponSelectionInput, type ArmorSelectionInput } from '@/lib/sheet-store'
 import type { CyberpunkSheetExtension } from '@/types/cyberpunk'
-import { DEFAULT_CYBERPUNK_EXTENSION } from '@/lib/cyberpunk/tier-constants'
+import {
+  DEFAULT_CYBERPUNK_EXTENSION,
+  CYBERPUNK_TIER_SLOTS,
+  CYBERPUNK_TIER_EQUIP_SLOTS,
+} from '@/lib/cyberpunk/tier-constants'
 import { CardType, type StandardCard } from '@/card/card-types'
 import { useCardStore } from '@/card/stores/unified-card-store'
 
@@ -19,7 +23,9 @@ import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
 import { CyberpunkStoryTab } from './cyberpunk-story-tab'
 import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
 import { CyberpunkCompanionTab } from './cyberpunk-companion-tab'
-import type { CyberpunkExternalGear } from '@/types/cyberpunk'
+import { InstallAugmentationModal } from './modals/install-augmentation-modal'
+import { InstallExternalGearModal } from './modals/install-external-gear-modal'
+import type { CyberpunkExternalGear, CyberpunkAugmentation, CyberpunkBodyZoneKey } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
 // 核心车卡器模态框与通用组件
@@ -61,6 +67,11 @@ export function CyberpunkCharacterSheet() {
   // 默认使用极简浅色/黑白灰主题 (按用户要求默认开启)
   const [isLightPreview, setIsLightPreview] = useState(true)
   const [saveToast, setSaveToast] = useState(false)
+
+  // 义体与外置装备模态框状态
+  const [installAugModalOpen, setInstallAugModalOpen] = useState(false)
+  const [activeZoneKey, setActiveZoneKey] = useState<CyberpunkBodyZoneKey>('upper_limb')
+  const [installExternalGearModalOpen, setInstallExternalGearModalOpen] = useState(false)
 
   // 移动端检测
   const [isMobile, setIsMobile] = useState(false)
@@ -568,13 +579,20 @@ export function CyberpunkCharacterSheet() {
         {activeTab === 'loadout' && (
           <CyberpunkEquipmentHud
             cyberpunkData={cyberpunkData}
-            equipment={formData?.equipment}
             onChangeCyberpunk={handleCyberpunkChange}
-            onOpenWeaponModal={(slot) => {
-              setActiveWeaponSlot(slot)
-              setWeaponModalOpen(true)
+            onOpenSelectModal={(type, zoneKey, slotIndex) => {
+              if (type === 'weapon') {
+                setActiveWeaponSlot((slotIndex ?? 0) === 1 ? 'secondary' : 'primary')
+                setWeaponModalOpen(true)
+              } else if (type === 'armor') {
+                setArmorModalOpen(true)
+              } else if (type === 'augmentation') {
+                setActiveZoneKey((zoneKey as CyberpunkBodyZoneKey) || 'upper_limb')
+                setInstallAugModalOpen(true)
+              } else if (type === 'external') {
+                setInstallExternalGearModalOpen(true)
+              }
             }}
-            onOpenArmorModal={() => setArmorModalOpen(true)}
           />
         )}
 
@@ -701,6 +719,67 @@ export function CyberpunkCharacterSheet() {
         onSelect={handleArmorSelect}
         title="选择护甲"
       />
+
+      {/* 义体安装模态框 */}
+      {installAugModalOpen && (
+        <InstallAugmentationModal
+          isOpen={installAugModalOpen}
+          zone={activeZoneKey}
+          zoneName={
+            activeZoneKey === 'head'
+              ? '头部'
+              : activeZoneKey === 'torso'
+              ? '躯干'
+              : activeZoneKey === 'upper_limb'
+              ? '上肢'
+              : '下肢'
+          }
+          availableSlots={
+            (cyberpunkData.zoneSlotLimits?.[activeZoneKey] ?? CYBERPUNK_TIER_SLOTS[cyberpunkData.tier || 'T1'] ?? 2) -
+            (cyberpunkData.zones?.[activeZoneKey]?.augmentations || []).reduce(
+              (sum, a) => sum + (a.slotCost ?? a.slots ?? 1),
+              0
+            )
+          }
+          onClose={() => setInstallAugModalOpen(false)}
+          onInstall={(aug) => {
+            const zoneGroup = cyberpunkData.zones?.[activeZoneKey] || { augmentations: [] }
+            handleCyberpunkChange({
+              ...cyberpunkData,
+              zones: {
+                ...cyberpunkData.zones,
+                [activeZoneKey]: {
+                  augmentations: [...zoneGroup.augmentations, aug],
+                },
+              },
+            })
+            setInstallAugModalOpen(false)
+          }}
+          onOpenCustomModal={() => {}}
+        />
+      )}
+
+      {/* 外置战备装备安装模态框 */}
+      {installExternalGearModalOpen && (
+        <InstallExternalGearModal
+          isOpen={installExternalGearModalOpen}
+          availableSlots={
+            (cyberpunkData.zoneSlotLimits?.external ?? CYBERPUNK_TIER_EQUIP_SLOTS[cyberpunkData.tier || 'T1'] ?? 2) -
+            (cyberpunkData.externalGear || []).length
+          }
+          maxSlots={
+            cyberpunkData.zoneSlotLimits?.external ?? CYBERPUNK_TIER_EQUIP_SLOTS[cyberpunkData.tier || 'T1'] ?? 2
+          }
+          onClose={() => setInstallExternalGearModalOpen(false)}
+          onInstall={(gear) => {
+            handleCyberpunkChange({
+              ...cyberpunkData,
+              externalGear: [...(cyberpunkData.externalGear || []), gear],
+            })
+            setInstallExternalGearModalOpen(false)
+          }}
+        />
+      )}
 
       {/* 多存档管理模态框 */}
       <CharacterManagementModal
