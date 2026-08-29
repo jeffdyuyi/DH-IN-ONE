@@ -1,6 +1,6 @@
 /**
  * 自动生成的CSS内容文件
- * 生成时间: 2026-08-29T03:44:39.972Z
+ * 生成时间: 2026-08-29T03:50:37.379Z
  * 
  * 该文件包含了应用的所有CSS样式，用于HTML导出功能
  * 请勿手动编辑此文件，它会在构建时自动生成
@@ -48,7 +48,7 @@ export function getStylesInfo() {
     size: embeddedStyles.length,
     sizeKB: (embeddedStyles.length / 1024).toFixed(2),
     sizeMB: (embeddedStyles.length / 1024 / 1024).toFixed(2),
-    generated: '2026-08-29T03:44:39.974Z',
+    generated: '2026-08-29T03:50:37.381Z',
     compressed: false
   };
 }

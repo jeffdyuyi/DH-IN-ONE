@@ -42,6 +42,7 @@ import { BottomDock } from '@/components/layout/bottom-dock'
 import { useCharacterManagement } from '@/hooks/use-character-management'
 import { useExportHandlers } from '@/hooks/use-export-handlers'
 import { announcements, isLatestAnnouncementRead, markLatestAnnouncementRead } from '@/lib/announcements'
+import { saveCharacterSheet } from '@/character/storage/character-save-storage'
 import { User, CheckCircle2, Shield, UserCheck, Cpu, BookOpen, Bot, ScrollText } from 'lucide-react'
 
 export function CyberpunkCharacterSheet() {
@@ -99,6 +100,7 @@ export function CyberpunkCharacterSheet() {
     duplicateCharacterHandler,
     renameCharacterHandler,
     handleQuickCreateArchive,
+    isLoading,
   } = useCharacterManagement({
     isClient: true,
     setCurrentTabValue: () => {},
@@ -144,11 +146,41 @@ export function CyberpunkCharacterSheet() {
     }))
   }
 
-  // 快速保存提示
-  const handleQuickSave = () => {
+  // 主动点击快速保存：真正写入持久化存档 (localStorage & IndexedDB)
+  const handleQuickSave = async () => {
+    if (currentCharacterId && formData) {
+      try {
+        await saveCharacterSheet(currentCharacterId, {
+          ...formData,
+          campaignMode: 'cyberpunk',
+          cyberpunkData: formData.cyberpunkData || cyberpunkData,
+        })
+      } catch (err) {
+        console.error('[CyberpunkSave] Failed to save character:', err)
+      }
+    }
     setSaveToast(true)
     setTimeout(() => setSaveToast(false), 2000)
   }
+
+  // 自动防抖保存：角色编辑变动时在后台静默保存
+  useEffect(() => {
+    if (!currentCharacterId || !formData || isLoading) return
+
+    const timer = setTimeout(async () => {
+      try {
+        await saveCharacterSheet(currentCharacterId, {
+          ...formData,
+          campaignMode: 'cyberpunk',
+          cyberpunkData: formData.cyberpunkData || cyberpunkData,
+        })
+      } catch (err) {
+        console.error('[CyberpunkAutoSave] Failed to autosave character:', err)
+      }
+    }, 1200)
+
+    return () => clearTimeout(timer)
+  }, [currentCharacterId, formData, cyberpunkData, isLoading])
 
   // 4. 数据库选择模态框状态 (支持 levelFilter 区分种族特性一 / 二)
   const [genericModalState, setGenericModalState] = useState<{
