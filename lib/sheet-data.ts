@@ -157,6 +157,8 @@ export type NotebookLine = NotebookTextLine | NotebookCounterLine | NotebookDice
 // 单页
 export interface NotebookPage {
   id: string
+  title?: string            // 抽屉/页面标题 (默认按创建日期)
+  createdAt?: string        // 创建日期
   lines: NotebookLine[]
 }
 

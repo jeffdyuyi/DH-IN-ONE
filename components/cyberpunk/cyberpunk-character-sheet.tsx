@@ -17,8 +17,8 @@ import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
 import { CyberpunkStoryTab } from './cyberpunk-story-tab'
+import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
 import CharacterSheetPageThree from '@/components/character-sheet-page-ranger-companion'
-import CharacterSheetPageAdventureNotes from '@/components/character-sheet-page-adventure-notes'
 import type { CyberpunkExternalGear } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
@@ -596,14 +596,8 @@ export function CyberpunkCharacterSheet() {
           </div>
         )}
 
-        {/* ===================== 第五页：笔记 (Adventure Notes) ===================== */}
-        {activeTab === 'notes' && (
-          <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md text-slate-900">
-            <div className="rounded-lg bg-white p-2">
-              <CharacterSheetPageAdventureNotes currentCharacterId={currentCharacterId} />
-            </div>
-          </div>
-        )}
+        {/* ===================== 第五页：速记收纳 (Quick Notebook & Drawers) ===================== */}
+        {activeTab === 'notes' && <CyberpunkNotebookTab />}
       </div>
 
       {/* 底部浮动通用工具栏 (Bottom Dock - 可收缩展开) */}
