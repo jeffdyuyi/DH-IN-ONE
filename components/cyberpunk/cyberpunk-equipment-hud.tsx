@@ -18,6 +18,8 @@ import { CardMarkdown } from '@/components/ui/card-markdown'
 import {
   Cpu,
   Sword,
+  Shield,
+  Package,
   Plus,
   Trash2,
   ArrowLeftRight,
@@ -98,6 +100,10 @@ export function CyberpunkEquipmentHud({
 
   // 外置战术装备列表
   const externalGears = cyberpunkData.externalGear || []
+  const usedExternalSlots = externalGears.reduce(
+    (sum, g) => sum + (g.slots !== undefined ? g.slots : 1),
+    0
+  )
 
   // 主武器、副武器、战术护甲
   const primaryWeapon = formData.equipment?.weaponSlots?.primary
@@ -182,7 +188,7 @@ export function CyberpunkEquipmentHud({
     const totalSlotCost = augs.reduce((sum, a) => sum + (a.slotCost ?? a.slots ?? 1), 0)
 
     return (
-      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-3 shadow-md space-y-2.5">
+      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-3 shadow-md space-y-2.5 transition-all">
         {/* 区域标题与槽位上限微调 */}
         <div className="flex items-center justify-between border-b border-[#6C00FF]/20 pb-1.5">
           <div className="flex items-center gap-1.5">
@@ -291,231 +297,325 @@ export function CyberpunkEquipmentHud({
   }
 
   return (
-    <div className="space-y-4 font-sans text-slate-100 relative">
-      {/* ======================= 上部：人体线框 + 四肢/头躯 4 大区 ======================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-        {/* 左侧 (3/12)：上肢 与 下肢 */}
-        <div className="lg:col-span-3 space-y-4">
+    <div className="space-y-4 font-sans text-slate-100 relative pb-28 sm:pb-36">
+      {/* ======================= 三列平级紧凑网格布局 ======================= */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+        {/* ======================= 左侧列 (4/12)：上肢、下肢、主手、副手 ======================= */}
+        <div className="xl:col-span-4 space-y-3.5 flex flex-col justify-between">
+          {/* 1. 上肢插槽 */}
           {renderZoneSlotGroup('upper_limb', '上肢插槽', upperLimbAugs, 'cyberware')}
+
+          {/* 2. 下肢插槽 */}
           {renderZoneSlotGroup('lower_limb', '下肢插槽', lowerLimbAugs, 'cyberware')}
-        </div>
 
-        {/* 中间 (6/12)：仿命运2居中人体线框与自由上传 */}
-        <div className="lg:col-span-6 flex flex-col items-center">
-          <CyberpunkPortraitFrame
-            portraitUrl={cyberpunkData.portrait}
-            scale={cyberpunkData.portraitScale ?? 1}
-            position={cyberpunkData.portraitPosition ?? { x: 0, y: 0 }}
-            onChange={(patch) => onChangeCyberpunk({ ...cyberpunkData, ...patch })}
-          />
-        </div>
+          {/* 3. 主手武器 */}
+          <div className="rounded-xl border border-[#F5F500]/30 bg-[#12072B] p-3 shadow-md">
+            <div className="flex items-center justify-between border-b border-[#F5F500]/20 pb-1.5 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Sword className="w-3.5 h-3.5 text-[#F5F500]" />
+                <span className="font-bold text-xs text-white">主手武器</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {primaryWeapon?.damage || '未装配'}
+              </span>
+            </div>
 
-        {/* 右侧 (3/12)：头部 与 躯干 */}
-        <div className="lg:col-span-3 space-y-4">
-          {renderZoneSlotGroup('head', '头部插槽', headAugs, 'cyberware')}
-          {renderZoneSlotGroup('torso', '躯干插槽', torsoAugs, 'cyberware')}
-        </div>
-      </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {primaryWeaponName ? (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setPinnedItem(
+                        pinnedItem?.id === 'weapon-primary'
+                          ? null
+                          : {
+                              id: 'weapon-primary',
+                              name: primaryWeaponName,
+                              typeLabel: '主手武器',
+                              tier: currentTier,
+                              stats: [
+                                { label: '伤害', value: primaryWeapon?.damage || '-' },
+                                { label: '特性', value: primaryWeapon?.trait || '-' },
+                              ],
+                              rulesText: primaryWeapon?.feature,
+                              onReplace: () => onOpenSelectModal('weapon', undefined, 0),
+                              onRemove: () => handleClearWeapon('primary'),
+                            }
+                      )
+                    }
+                  >
+                    <CyberpunkSquareIcon name={primaryWeaponName} size="md" theme="weapon" />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenSelectModal('weapon', undefined, 0)}
+                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
 
-      {/* ======================= 下部：核心战备区 (主副手、护甲、外置挂载) ======================= */}
-      <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-md space-y-3">
-        <div className="flex items-center justify-between border-b border-[#6C00FF]/20 pb-2">
-          <div className="flex items-center gap-2">
-            <Sword className="w-4 h-4 text-[#F5F500]" />
-            <h3 className="text-sm font-bold text-white tracking-wide">核心战备与外置装备</h3>
-          </div>
-          <span className="text-[10px] text-slate-400 font-mono">
-            主副手武器 · 战术护甲 · 外置挂载模块
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* 1. 主手武器 */}
-          <div className="rounded-xl border border-[#F5F500]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {primaryWeaponName ? (
-                <div
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setPinnedItem(
-                      pinnedItem?.id === 'weapon-primary'
-                        ? null
-                        : {
-                            id: 'weapon-primary',
-                            name: primaryWeaponName,
-                            typeLabel: '主手武器',
-                            tier: currentTier,
-                            stats: [
-                              { label: '伤害', value: primaryWeapon?.damage || '-' },
-                              { label: '特性', value: primaryWeapon?.trait || '-' },
-                            ],
-                            rulesText: primaryWeapon?.feature,
-                            onReplace: () => onOpenSelectModal('weapon', undefined, 0),
-                            onRemove: () => handleClearWeapon('primary'),
-                          }
-                    )
-                  }
-                >
-                  <CyberpunkSquareIcon name={primaryWeaponName} size="md" theme="weapon" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-xs text-white truncate">
+                    {primaryWeaponName || '（未装配）'}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    {primaryWeapon?.trait || '——'}
+                  </div>
                 </div>
-              ) : (
+              </div>
+
+              {primaryWeaponName && (
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('weapon', undefined, 0)}
-                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                  className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  更换 ⇄
                 </button>
               )}
-
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-[#F5F500] font-bold block">主手武器</span>
-                <div className="font-bold text-xs text-white truncate">
-                  {primaryWeaponName || '（未装配）'}
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  {primaryWeapon?.damage || '-'}
-                </div>
-              </div>
             </div>
-
-            {primaryWeaponName && (
-              <button
-                type="button"
-                onClick={() => onOpenSelectModal('weapon', undefined, 0)}
-                className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
-              >
-                更换 ⇄
-              </button>
-            )}
           </div>
 
-          {/* 2. 副手武器 */}
-          <div className="rounded-xl border border-[#F5F500]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {secondaryWeaponName ? (
-                <div
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setPinnedItem(
-                      pinnedItem?.id === 'weapon-secondary'
-                        ? null
-                        : {
-                            id: 'weapon-secondary',
-                            name: secondaryWeaponName,
-                            typeLabel: '副手武器',
-                            tier: currentTier,
-                            stats: [
-                              { label: '伤害', value: secondaryWeapon?.damage || '-' },
-                              { label: '特性', value: secondaryWeapon?.trait || '-' },
-                            ],
-                            rulesText: secondaryWeapon?.feature,
-                            onReplace: () => onOpenSelectModal('weapon', undefined, 1),
-                            onRemove: () => handleClearWeapon('secondary'),
-                          }
-                    )
-                  }
-                >
-                  <CyberpunkSquareIcon name={secondaryWeaponName} size="md" theme="weapon" />
+          {/* 4. 副手武器 */}
+          <div className="rounded-xl border border-[#F5F500]/30 bg-[#12072B] p-3 shadow-md">
+            <div className="flex items-center justify-between border-b border-[#F5F500]/20 pb-1.5 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Sword className="w-3.5 h-3.5 text-[#F5F500]" />
+                <span className="font-bold text-xs text-white">副手武器</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {secondaryWeapon?.damage || '未装配'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {secondaryWeaponName ? (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setPinnedItem(
+                        pinnedItem?.id === 'weapon-secondary'
+                          ? null
+                          : {
+                              id: 'weapon-secondary',
+                              name: secondaryWeaponName,
+                              typeLabel: '副手武器',
+                              tier: currentTier,
+                              stats: [
+                                { label: '伤害', value: secondaryWeapon?.damage || '-' },
+                                { label: '特性', value: secondaryWeapon?.trait || '-' },
+                              ],
+                              rulesText: secondaryWeapon?.feature,
+                              onReplace: () => onOpenSelectModal('weapon', undefined, 1),
+                              onRemove: () => handleClearWeapon('secondary'),
+                            }
+                      )
+                    }
+                  >
+                    <CyberpunkSquareIcon name={secondaryWeaponName} size="md" theme="weapon" />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenSelectModal('weapon', undefined, 1)}
+                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-xs text-white truncate">
+                    {secondaryWeaponName || '（未装配）'}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    {secondaryWeapon?.trait || '——'}
+                  </div>
                 </div>
-              ) : (
+              </div>
+
+              {secondaryWeaponName && (
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('weapon', undefined, 1)}
-                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                  className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  更换 ⇄
                 </button>
               )}
-
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-[#F5F500] font-bold block">副手武器</span>
-                <div className="font-bold text-xs text-white truncate">
-                  {secondaryWeaponName || '（未装配）'}
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  {secondaryWeapon?.damage || '-'}
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
-            {secondaryWeaponName && (
-              <button
-                type="button"
-                onClick={() => onOpenSelectModal('weapon', undefined, 1)}
-                className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/10 hover:bg-[#F5F500]/20 px-2 py-1 rounded border border-[#F5F500]/30 transition-colors shrink-0"
-              >
-                更换 ⇄
-              </button>
-            )}
+        {/* ======================= 中间列 (4/12)：窄版修长人体框 + 4 条科技虚线指针 ======================= */}
+        <div className="xl:col-span-4 flex flex-col items-center justify-center relative min-h-[500px]">
+          {/* SVG 科技感虚线连接层 (在宽屏桌面端呈现 4 侧部位连接) */}
+          <div className="absolute inset-0 pointer-events-none hidden xl:block z-10 overflow-visible">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              {/* 1. 上肢连接线 (人物左手臂 -> 左上方上肢插槽) */}
+              <line
+                x1="38%"
+                y1="34%"
+                x2="0%"
+                y2="14%"
+                stroke="#00FFA3"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                strokeOpacity="0.75"
+              />
+              <circle cx="38%" cy="34%" r="3" fill="#00FFA3" />
+              <circle cx="0%" cy="14%" r="3" fill="#00FFA3" />
+
+              {/* 2. 下肢连接线 (人物腿部 -> 左下方下肢插槽) */}
+              <line
+                x1="42%"
+                y1="68%"
+                x2="0%"
+                y2="42%"
+                stroke="#00FFA3"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                strokeOpacity="0.75"
+              />
+              <circle cx="42%" cy="68%" r="3" fill="#00FFA3" />
+              <circle cx="0%" cy="42%" r="3" fill="#00FFA3" />
+
+              {/* 3. 头部连接线 (人物头部 -> 右上方头部插槽) */}
+              <line
+                x1="52%"
+                y1="18%"
+                x2="100%"
+                y2="14%"
+                stroke="#00FFA3"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                strokeOpacity="0.75"
+              />
+              <circle cx="52%" cy="18%" r="3" fill="#00FFA3" />
+              <circle cx="100%" cy="14%" r="3" fill="#00FFA3" />
+
+              {/* 4. 躯干连接线 (人物胸部核心 -> 右中侧躯干插槽) */}
+              <line
+                x1="52%"
+                y1="36%"
+                x2="100%"
+                y2="42%"
+                stroke="#00FFA3"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                strokeOpacity="0.75"
+              />
+              <circle cx="52%" cy="36%" r="3" fill="#00FFA3" />
+              <circle cx="100%" cy="42%" r="3" fill="#00FFA3" />
+            </svg>
           </div>
 
+          {/* 窄版竖向紧凑立绘容器 */}
+          <div className="w-full max-w-[270px] h-full flex flex-col items-center justify-center relative z-20">
+            <CyberpunkPortraitFrame
+              portraitUrl={cyberpunkData.portrait}
+              scale={cyberpunkData.portraitScale ?? 1}
+              position={cyberpunkData.portraitPosition ?? { x: 0, y: 0 }}
+              onChange={(patch) => onChangeCyberpunk({ ...cyberpunkData, ...patch })}
+            />
+          </div>
+        </div>
+
+        {/* ======================= 右侧列 (4/12)：头部、躯干、护甲、外置装备 ======================= */}
+        <div className="xl:col-span-4 space-y-3.5 flex flex-col justify-between">
+          {/* 1. 头部插槽 */}
+          {renderZoneSlotGroup('head', '头部插槽', headAugs, 'cyberware')}
+
+          {/* 2. 躯干插槽 */}
+          {renderZoneSlotGroup('torso', '躯干插槽', torsoAugs, 'cyberware')}
+
           {/* 3. 战术护甲 */}
-          <div className="rounded-xl border border-[#00FFA3]/30 bg-[#0B0320] p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {armorName ? (
-                <div
-                  className="cursor-pointer"
-                  onClick={() =>
-                    setPinnedItem(
-                      pinnedItem?.id === 'armor-0'
-                        ? null
-                        : {
-                            id: 'armor-0',
-                            name: armorName,
-                            typeLabel: '战术护甲',
-                            tier: currentTier,
-                            stats: [
-                              { label: '护甲值', value: armorSlot?.baseArmorMax ?? 0 },
-                              { label: '阈值加成', value: `轻${armorSlot?.baseThresholds?.minor ?? 0}/重${armorSlot?.baseThresholds?.major ?? 0}` },
-                            ],
-                            rulesText: armorSlot?.feature,
-                            onReplace: () => onOpenSelectModal('armor'),
-                            onRemove: () => handleClearArmor(),
-                          }
-                    )
-                  }
-                >
-                  <CyberpunkSquareIcon name={armorName} size="md" theme="armor" />
+          <div className="rounded-xl border border-[#00FFA3]/30 bg-[#12072B] p-3 shadow-md">
+            <div className="flex items-center justify-between border-b border-[#00FFA3]/20 pb-1.5 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-[#00FFA3]" />
+                <span className="font-bold text-xs text-white">战术护甲</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                护甲值: {armorSlot?.baseArmorMax ?? 0}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {armorName ? (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setPinnedItem(
+                        pinnedItem?.id === 'armor-0'
+                          ? null
+                          : {
+                              id: 'armor-0',
+                              name: armorName,
+                              typeLabel: '战术护甲',
+                              tier: currentTier,
+                              stats: [
+                                { label: '护甲值', value: armorSlot?.baseArmorMax ?? 0 },
+                                {
+                                  label: '阈值加成',
+                                  value: `轻${armorSlot?.baseThresholds?.minor ?? 0}/重${armorSlot?.baseThresholds?.major ?? 0}`,
+                                },
+                              ],
+                              rulesText: armorSlot?.feature,
+                              onReplace: () => onOpenSelectModal('armor'),
+                              onRemove: () => handleClearArmor(),
+                            }
+                      )
+                    }
+                  >
+                    <CyberpunkSquareIcon name={armorName} size="md" theme="armor" />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenSelectModal('armor')}
+                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#00FFA3]/40 bg-[#0B0320] text-[#00FFA3] hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 flex flex-col items-center justify-center transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-xs text-white truncate">
+                    {armorName || '（未装配）'}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    轻{armorSlot?.baseThresholds?.minor ?? 0} / 重{armorSlot?.baseThresholds?.major ?? 0}
+                  </div>
                 </div>
-              ) : (
+              </div>
+
+              {armorName && (
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('armor')}
-                  className="w-12 h-12 rounded-lg border-2 border-dashed border-[#00FFA3]/40 bg-[#0B0320] text-[#00FFA3] hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 flex flex-col items-center justify-center transition-all"
+                  className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/10 hover:bg-[#00FFA3]/20 px-2 py-1 rounded border border-[#00FFA3]/30 transition-colors shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  更换 ⇄
                 </button>
               )}
-
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-[#00FFA3] font-bold block">战术护甲</span>
-                <div className="font-bold text-xs text-white truncate">
-                  {armorName || '（未装配）'}
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  护甲: {armorSlot?.baseArmorMax ?? 0}
-                </div>
-              </div>
             </div>
-
-            {armorName && (
-              <button
-                type="button"
-                onClick={() => onOpenSelectModal('armor')}
-                className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/10 hover:bg-[#00FFA3]/20 px-2 py-1 rounded border border-[#00FFA3]/30 transition-colors shrink-0"
-              >
-                更换 ⇄
-              </button>
-            )}
           </div>
 
-          {/* 4. 外置挂载装备 (Icon 列表) */}
-          <div className="rounded-xl border border-[#FF007F]/30 bg-[#0B0320] p-3 flex flex-col justify-between shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#FF007F]/20 pb-1 mb-2">
-              <span className="text-[10px] text-[#FF007F] font-bold">外置挂载模块</span>
-              <span className="text-[9px] text-slate-400 font-mono">
-                {externalGears.reduce((sum, g) => sum + (g.slots !== undefined ? g.slots : 1), 0)}/{getZoneCapacity('external')} 槽
+          {/* 4. 外置挂载模块 */}
+          <div className="rounded-xl border border-[#FF007F]/30 bg-[#12072B] p-3 shadow-md">
+            <div className="flex items-center justify-between border-b border-[#FF007F]/20 pb-1.5 mb-2">
+              <div className="flex items-center gap-1.5">
+                <Package className="w-3.5 h-3.5 text-[#FF007F]" />
+                <span className="font-bold text-xs text-white">外置挂载模块</span>
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {usedExternalSlots}/{getZoneCapacity('external')} 槽
               </span>
             </div>
 
@@ -560,7 +660,7 @@ export function CyberpunkEquipmentHud({
                 )
               })}
 
-              {externalGears.reduce((sum, g) => sum + (g.slots !== undefined ? g.slots : 1), 0) < getZoneCapacity('external') && (
+              {usedExternalSlots < getZoneCapacity('external') && (
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('external')}
@@ -577,7 +677,7 @@ export function CyberpunkEquipmentHud({
 
       {/* ======================= 全量卡片悬停 / 钉住浮窗 (Popover) ======================= */}
       {activeTooltip && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-[#00FFA3]/60 bg-[#0B0320]/95 backdrop-blur-md p-4 shadow-[0_0_30px_rgba(0,255,163,0.35)] text-white animate-fade-in flex flex-col space-y-2.5">
+        <div className="fixed bottom-10 right-6 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-[#00FFA3]/60 bg-[#0B0320]/95 backdrop-blur-md p-4 shadow-[0_0_30px_rgba(0,255,163,0.35)] text-slate-100 animate-fade-in flex flex-col space-y-2.5">
           {/* 浮窗头部 */}
           <div className="flex items-start justify-between border-b border-[#6C00FF]/30 pb-2">
             <div className="flex items-center gap-2.5">
@@ -597,16 +697,16 @@ export function CyberpunkEquipmentHud({
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {pinnedItem ? (
                 <span
                   className="p-1 text-[#00FFA3] text-[10px] flex items-center gap-0.5"
                   title="已固定锁定显示"
                 >
-                  <Pin className="w-3 h-3 fill-current" />
+                  <Pin className="w-3.5 h-3.5 fill-current" />
                 </span>
               ) : (
-                <span className="text-[9px] text-slate-500 font-mono">悬停预览</span>
+                <span className="text-[9px] text-slate-400 font-mono">悬停预览</span>
               )}
               <button
                 type="button"
@@ -614,9 +714,9 @@ export function CyberpunkEquipmentHud({
                   setPinnedItem(null)
                   setHoveredItem(null)
                 }}
-                className="p-1 text-slate-400 hover:text-white rounded"
+                className="p-1 text-slate-400 hover:text-white rounded transition-colors"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -635,21 +735,21 @@ export function CyberpunkEquipmentHud({
             </div>
           )}
 
-          {/* 规则特性描述全文 */}
-          <div className="text-[11px] text-slate-300 leading-relaxed max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+          {/* 规则特性描述全文 (支持强化 Markdown 粗体与高亮) */}
+          <div className="text-xs text-slate-200 leading-relaxed max-h-48 overflow-y-auto pr-1 custom-scrollbar">
             <CardMarkdown>{activeTooltip.rulesText || activeTooltip.description || '暂无详细描述'}</CardMarkdown>
           </div>
 
-          {/* 底部操作按钮 */}
+          {/* 底部操作按钮：高对比度、清晰边框、告别反色异常 */}
           {(activeTooltip.onReplace || activeTooltip.onRemove) && (
             <div className="flex justify-end gap-2 pt-2 border-t border-[#6C00FF]/20 text-xs">
               {activeTooltip.onRemove && (
                 <button
                   type="button"
                   onClick={activeTooltip.onRemove}
-                  className="flex items-center gap-1 text-[11px] text-[#FF007F] hover:bg-[#FF007F]/10 px-2 py-1 rounded border border-[#FF007F]/30 transition-colors"
+                  className="flex items-center gap-1 text-xs text-red-400 bg-red-950/40 hover:bg-red-900/60 px-3 py-1.5 rounded-lg border border-red-500/50 font-bold transition-colors"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   <span>卸下</span>
                 </button>
               )}
@@ -657,9 +757,9 @@ export function CyberpunkEquipmentHud({
                 <button
                   type="button"
                   onClick={activeTooltip.onReplace}
-                  className="flex items-center gap-1 text-[11px] text-[#00FFA3] hover:bg-[#00FFA3]/10 px-2 py-1 rounded border border-[#00FFA3]/30 font-bold transition-colors"
+                  className="flex items-center gap-1 text-xs text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/30 px-3 py-1.5 rounded-lg border border-[#00FFA3]/50 font-bold transition-colors shadow-sm"
                 >
-                  <ArrowLeftRight className="w-3 h-3" />
+                  <ArrowLeftRight className="w-3.5 h-3.5" />
                   <span>更换</span>
                 </button>
               )}

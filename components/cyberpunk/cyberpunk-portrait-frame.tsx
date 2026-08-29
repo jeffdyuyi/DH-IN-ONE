@@ -117,7 +117,7 @@ export function CyberpunkPortraitFrame({
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-full min-h-[460px] max-h-[580px] rounded-xl border border-[#6C00FF]/40 bg-[#0B0320]/90 p-2 overflow-hidden shadow-[inset_0_0_25px_rgba(108,0,255,0.15)] group select-none">
+    <div className="relative flex flex-col items-center justify-center w-full max-w-[260px] min-h-[480px] max-h-[560px] rounded-xl border border-[#6C00FF]/40 bg-[#0B0320]/90 p-2 overflow-hidden shadow-[inset_0_0_25px_rgba(108,0,255,0.15)] group select-none">
       {/* 隐藏的上传 input */}
       <input
         type="file"

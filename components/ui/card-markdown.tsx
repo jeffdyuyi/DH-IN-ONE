@@ -21,10 +21,18 @@ interface CardMarkdownProps {
  * - *直角引号* → 「text-amber-900」（琥珀色，使用直角引号包裹）
  * - ***重要*** → text-amber-800（琥珀色加粗 #92400E）
  */
+function sanitizeMarkdownText(text: string): string {
+    if (!text) return ""
+    return text
+        .replace(/\*\*\s*([^\*]+?)\s*\*\*/g, '**$1**')
+        .replace(/\*\*\s+/g, '**')
+        .replace(/\s+\*\*/g, '**')
+}
+
 export function CardMarkdown({ children, className = "", rehypePlugins, customComponents }: CardMarkdownProps) {
     // 默认组件配置
     const defaultComponents: Components = {
-        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+        p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
         ul: ({ children }) => <ul className="mb-2 list-outside list-disc pl-5">{children}</ul>,
         ol: ({ children }) => <ol className="mb-2 list-outside list-decimal pl-5">{children}</ol>,
         li: ({ children }) => <li className="mb-1">{children}</li>,
@@ -37,10 +45,10 @@ export function CardMarkdown({ children, className = "", rehypePlugins, customCo
 
             if (hasEmElement) {
                 // *** 情况：琥珀色加粗
-                return <strong className="font-bold text-amber-800">{children}</strong>;
+                return <strong className="font-black text-amber-500">{children}</strong>;
             }
-            // ** 情况：深灰加粗
-            return <strong className="font-bold text-gray-800">{children}</strong>;
+            // ** 情况：加粗并继承当前主题颜色，确保深浅色清晰可见
+            return <strong className="font-black text-inherit underline-offset-2">{children}</strong>;
         },
         em: ({ children }) => {
             const childArray = React.Children.toArray(children);
@@ -58,10 +66,10 @@ export function CardMarkdown({ children, className = "", rehypePlugins, customCo
                     return '';
                 };
                 const textContent = childArray.map(extractText).join('');
-                return <span className="font-bold text-amber-800">{textContent}</span>;
+                return <span className="font-black text-amber-500">{textContent}</span>;
             }
-            // * 情况：琥珀色直角引号
-            return <span className="text-amber-900">「{children}」</span>;
+            // * 情况：直角引号
+            return <span>「{children}」</span>;
         },
     };
 
@@ -70,6 +78,8 @@ export function CardMarkdown({ children, className = "", rehypePlugins, customCo
         ? { ...defaultComponents, ...customComponents }
         : defaultComponents;
 
+    const cleanedText = typeof children === 'string' ? sanitizeMarkdownText(children) : children;
+
     return (
         <div className={className}>
             <ReactMarkdown
@@ -77,7 +87,7 @@ export function CardMarkdown({ children, className = "", rehypePlugins, customCo
                 remarkPlugins={[remarkGfm, remarkBreaks]}
                 rehypePlugins={rehypePlugins}
             >
-                {children}
+                {cleanedText}
             </ReactMarkdown>
         </div>
     );
