@@ -14,17 +14,13 @@ import {
 } from '../../lib/cyberpunk/tier-constants'
 import { CyberpunkPortraitFrame } from './cyberpunk-portrait-frame'
 import { CyberpunkSquareIcon } from './cyberpunk-square-icon'
-import { CardMarkdown } from '@/components/ui/card-markdown'
+import { CyberpunkCardDisplay } from './cyberpunk-card-display'
 import {
   Cpu,
   Sword,
   Shield,
   Package,
   Plus,
-  Trash2,
-  ArrowLeftRight,
-  Pin,
-  X,
 } from 'lucide-react'
 
 interface CyberpunkEquipmentHudProps {
@@ -44,8 +40,16 @@ interface ActiveItemDetail {
   image?: string | null
   tier?: string
   zoneName?: string
-  slotCost?: number
+  slotCost?: number | string
   typeLabel?: string
+  trait?: string
+  range?: string
+  damage?: string
+  burden?: string
+  damageType?: string
+  armorScore?: number | string
+  majorThreshold?: number | string
+  severeThreshold?: number | string
   stats?: Array<{ label: string; value: string | number; color?: string }>
   rulesText?: string
   description?: string
@@ -332,13 +336,12 @@ export function CyberpunkEquipmentHud({
                           : {
                               id: 'weapon-primary',
                               name: primaryWeaponName,
-                              typeLabel: '主手武器',
+                              typeLabel: '外置装备 - 主武器',
+                              zoneName: '主武器',
                               tier: currentTier,
-                              stats: [
-                                { label: '伤害', value: primaryWeapon?.damage || '-' },
-                                { label: '特性', value: primaryWeapon?.trait || '-' },
-                              ],
-                              rulesText: primaryWeapon?.feature,
+                              trait: primaryWeapon?.trait || '',
+                              damage: primaryWeapon?.damage || '',
+                              rulesText: primaryWeapon?.feature || '',
                               onReplace: () => onOpenSelectModal('weapon', undefined, 0),
                               onRemove: () => handleClearWeapon('primary'),
                             }
@@ -403,13 +406,13 @@ export function CyberpunkEquipmentHud({
                           : {
                               id: 'weapon-secondary',
                               name: secondaryWeaponName,
-                              typeLabel: '副手武器',
+                              typeLabel: '外置装备 - 副武器',
+                              zoneName: '副武器',
                               tier: currentTier,
-                              stats: [
-                                { label: '伤害', value: secondaryWeapon?.damage || '-' },
-                                { label: '特性', value: secondaryWeapon?.trait || '-' },
-                              ],
-                              rulesText: secondaryWeapon?.feature,
+                              trait: secondaryWeapon?.trait || '',
+                              damage: secondaryWeapon?.damage || '',
+                              burden: '副手',
+                              rulesText: secondaryWeapon?.feature || '',
                               onReplace: () => onOpenSelectModal('weapon', undefined, 1),
                               onRemove: () => handleClearWeapon('secondary'),
                             }
@@ -557,16 +560,13 @@ export function CyberpunkEquipmentHud({
                           : {
                               id: 'armor-0',
                               name: armorName,
-                              typeLabel: '战术护甲',
+                              typeLabel: '外置装备 - 护甲',
+                              zoneName: '护甲',
                               tier: currentTier,
-                              stats: [
-                                { label: '护甲值', value: armorSlot?.baseArmorMax ?? 0 },
-                                {
-                                  label: '阈值加成',
-                                  value: `轻${armorSlot?.baseThresholds?.minor ?? 0}/重${armorSlot?.baseThresholds?.major ?? 0}`,
-                                },
-                              ],
-                              rulesText: armorSlot?.feature,
+                              armorScore: armorSlot?.baseArmorMax ?? 0,
+                              majorThreshold: armorSlot?.baseThresholds?.minor ?? 0,
+                              severeThreshold: armorSlot?.baseThresholds?.major ?? 0,
+                              rulesText: armorSlot?.feature || '',
                               onReplace: () => onOpenSelectModal('armor'),
                               onRemove: () => handleClearArmor(),
                             }
@@ -630,7 +630,18 @@ export function CyberpunkEquipmentHud({
                   image: gear.image,
                   tier: gear.tier || currentTier,
                   typeLabel: gear.cyberType || '外置装备',
+                  zoneName: gear.zone || '通用挂载',
+                  slotCost,
+                  trait: gear.weaponStats?.trait,
+                  damage: gear.weaponStats?.damage,
+                  range: gear.weaponStats?.range,
+                  burden: gear.weaponStats?.burden,
+                  damageType: gear.weaponStats?.damageType,
+                  armorScore: gear.armorStats?.armorScore,
+                  majorThreshold: gear.armorStats?.majorThreshold,
+                  severeThreshold: gear.armorStats?.severeThreshold,
                   rulesText: gear.effect || gear.description,
+                  description: gear.description,
                   onReplace: () => onOpenSelectModal('external', undefined, idx),
                   onRemove: () => handleRemoveGear(idx),
                 }
@@ -675,96 +686,38 @@ export function CyberpunkEquipmentHud({
         </div>
       </div>
 
-      {/* ======================= 全量卡片悬停 / 钉住浮窗 (Popover) ======================= */}
+      {/* ======================= 全量卡片悬停 / 钉住浮窗 (直接调用工坊标准全量卡片呈现) ======================= */}
       {activeTooltip && (
-        <div className="fixed bottom-10 right-6 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-[#00FFA3]/60 bg-[#0B0320]/95 backdrop-blur-md p-4 shadow-[0_0_30px_rgba(0,255,163,0.35)] text-slate-100 animate-fade-in flex flex-col space-y-2.5">
-          {/* 浮窗头部 */}
-          <div className="flex items-start justify-between border-b border-[#6C00FF]/30 pb-2">
-            <div className="flex items-center gap-2.5">
-              <CyberpunkSquareIcon
-                name={activeTooltip.name}
-                icon={activeTooltip.icon}
-                image={activeTooltip.image}
-                size="sm"
-              />
-              <div>
-                <span className="text-[10px] font-bold text-[#F5F500] font-mono block">
-                  [{activeTooltip.tier || currentTier}] {activeTooltip.typeLabel || '装备'}
-                </span>
-                <h4 className="font-bold text-xs text-white truncate max-w-[170px]">
-                  {activeTooltip.name}
-                </h4>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {pinnedItem ? (
-                <span
-                  className="p-1 text-[#00FFA3] text-[10px] flex items-center gap-0.5"
-                  title="已固定锁定显示"
-                >
-                  <Pin className="w-3.5 h-3.5 fill-current" />
-                </span>
-              ) : (
-                <span className="text-[9px] text-slate-400 font-mono">悬停预览</span>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setPinnedItem(null)
-                  setHoveredItem(null)
-                }}
-                className="p-1 text-slate-400 hover:text-white rounded transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* 属性徽章 */}
-          {activeTooltip.stats && activeTooltip.stats.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 py-1">
-              {activeTooltip.stats.map((st, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-0.5 rounded bg-[#6C00FF]/25 border border-[#6C00FF]/40 text-[10px] font-mono text-[#00FFA3]"
-                >
-                  {st.label}: <strong>{st.value}</strong>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* 规则特性描述全文 (支持强化 Markdown 粗体与高亮) */}
-          <div className="text-xs text-slate-200 leading-relaxed max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-            <CardMarkdown>{activeTooltip.rulesText || activeTooltip.description || '暂无详细描述'}</CardMarkdown>
-          </div>
-
-          {/* 底部操作按钮：高对比度、清晰边框、告别反色异常 */}
-          {(activeTooltip.onReplace || activeTooltip.onRemove) && (
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#6C00FF]/20 text-xs">
-              {activeTooltip.onRemove && (
-                <button
-                  type="button"
-                  onClick={activeTooltip.onRemove}
-                  className="flex items-center gap-1 text-xs text-red-400 bg-red-950/40 hover:bg-red-900/60 px-3 py-1.5 rounded-lg border border-red-500/50 font-bold transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>卸下</span>
-                </button>
-              )}
-              {activeTooltip.onReplace && (
-                <button
-                  type="button"
-                  onClick={activeTooltip.onReplace}
-                  className="flex items-center gap-1 text-xs text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/30 px-3 py-1.5 rounded-lg border border-[#00FFA3]/50 font-bold transition-colors shadow-sm"
-                >
-                  <ArrowLeftRight className="w-3.5 h-3.5" />
-                  <span>更换</span>
-                </button>
-              )}
-            </div>
-          )}
+        <div className="fixed bottom-8 right-6 z-50 animate-fade-in pointer-events-auto">
+          <CyberpunkCardDisplay
+            data={{
+              id: activeTooltip.id,
+              name: activeTooltip.name,
+              icon: activeTooltip.icon,
+              image: activeTooltip.image,
+              tier: activeTooltip.tier || currentTier,
+              cyberType: activeTooltip.typeLabel,
+              zone: activeTooltip.zoneName,
+              slots: activeTooltip.slotCost,
+              trait: activeTooltip.trait,
+              range: activeTooltip.range,
+              damage: activeTooltip.damage,
+              burden: activeTooltip.burden,
+              damageType: activeTooltip.damageType,
+              armorScore: activeTooltip.armorScore,
+              majorThreshold: activeTooltip.majorThreshold,
+              severeThreshold: activeTooltip.severeThreshold,
+              effect: activeTooltip.rulesText,
+              description: activeTooltip.description,
+              isPinned: Boolean(pinnedItem),
+              onClosePin: () => {
+                setPinnedItem(null)
+                setHoveredItem(null)
+              },
+              onReplace: activeTooltip.onReplace,
+              onRemove: activeTooltip.onRemove,
+            }}
+          />
         </div>
       )}
     </div>
