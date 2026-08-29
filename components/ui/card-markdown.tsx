@@ -16,17 +16,33 @@ interface CardMarkdownProps {
 /**
  * 统一的卡牌 Markdown 渲染组件
  *
- * 颜色方案：
- * - **粗体** → text-gray-800（深灰加粗 #1F2937）
- * - *直角引号* → 「text-amber-900」（琥珀色，使用直角引号包裹）
- * - ***重要*** → text-amber-800（琥珀色加粗 #92400E）
+ * 颜色与排版规范：
+ * - ***标题/重要特性*** → 琥珀金加粗 + 直角引号包裹
+ * - **常规加粗** → 琥珀金加粗
+ * - *斜体/强调* → 直角引号「...」包裹
  */
 function sanitizeMarkdownText(text: string): string {
     if (!text) return ""
-    return text
-        .replace(/\*\*\s*([^\*]+?)\s*\*\*/g, '**$1**')
-        .replace(/\*\*\s+/g, '**')
-        .replace(/\s+\*\*/g, '**')
+
+    let processed = text
+
+    // 1. 优先处理三连星号 ***内容*** (必须优先于双星号处理，避免被误伤拆散)
+    // 并在闭合 *** 后若紧跟非空格非标点字符时补充空格，帮助 CommonMark 正确识别 delimiter 闭合
+    processed = processed.replace(/\*{3,}\s*([^\*]+?)\s*\*{3,}/g, (match, content) => {
+        return `***${content.trim()}*** `
+    })
+
+    // 2. 处理双连星号 **内容**
+    processed = processed.replace(/\*{2}\s*([^\*]+?)\s*\*{2}/g, (match, content) => {
+        return `**${content.trim()}**`
+    })
+
+    // 3. 处理单星号 *内容*
+    processed = processed.replace(/(?<!\*)\*\s*([^\*]+?)\s*\*(?!\*)/g, (match, content) => {
+        return `*${content.trim()}*`
+    })
+
+    return processed
 }
 
 export function CardMarkdown({ children, className = "", rehypePlugins, customComponents }: CardMarkdownProps) {
@@ -37,39 +53,10 @@ export function CardMarkdown({ children, className = "", rehypePlugins, customCo
         ol: ({ children }) => <ol className="mb-2 list-outside list-decimal pl-5">{children}</ol>,
         li: ({ children }) => <li className="mb-1">{children}</li>,
         strong: ({ children }) => {
-            // 检查子节点类型
-            const childArray = React.Children.toArray(children);
-            const hasEmElement = childArray.some(
-                child => React.isValidElement(child) && typeof child.type === 'function' && child.type.name === 'em'
-            );
-
-            if (hasEmElement) {
-                // *** 情况：琥珀色加粗
-                return <strong className="font-black text-amber-500">{children}</strong>;
-            }
-            // ** 情况：加粗并继承当前主题颜色，确保深浅色清晰可见
-            return <strong className="font-black text-inherit underline-offset-2">{children}</strong>;
+            return <strong className="font-black text-amber-600 dark:text-amber-400">{children}</strong>;
         },
         em: ({ children }) => {
-            const childArray = React.Children.toArray(children);
-            const hasStrongElement = childArray.some(
-                child => React.isValidElement(child) && typeof child.type === 'function' && child.type.name === 'strong'
-            );
-
-            if (hasStrongElement) {
-                // *** 的情况：em 包含 strong，琥珀色加粗
-                const extractText = (child: any): string => {
-                    if (typeof child === 'string') return child;
-                    if (React.isValidElement(child) && (child.props as any).children) {
-                        return React.Children.toArray((child.props as any).children).map(extractText).join('');
-                    }
-                    return '';
-                };
-                const textContent = childArray.map(extractText).join('');
-                return <span className="font-black text-amber-500">{textContent}</span>;
-            }
-            // * 情况：直角引号
-            return <span>「{children}」</span>;
+            return <span className="font-bold text-amber-600 dark:text-amber-400">「{children}」</span>;
         },
     };
 
