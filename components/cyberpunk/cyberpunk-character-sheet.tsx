@@ -52,6 +52,9 @@ export function CyberpunkCharacterSheet() {
   // 多分页控制：'profile' (档案与特性) | 'loadout' (装配与义体) | 'story' (角色故事) | 'companion' (战斗伙伴) | 'notes' (笔记)
   const [activeTab, setActiveTab] = useState<'profile' | 'loadout' | 'story' | 'companion' | 'notes'>('profile')
 
+  // 身份特性面板选择固定开关 (锁定后隐藏更换按钮，防止误触)
+  const [isFeaturesLocked, setIsFeaturesLocked] = useState(false)
+
   // 卡牌数据库 store
   const cardStore = useCardStore()
 
@@ -418,151 +421,103 @@ export function CyberpunkCharacterSheet() {
         {/* ===================== 第一页：角色档案与行动特性 ===================== */}
         {activeTab === 'profile' && (
           <div className="space-y-4">
-            {/* 2. 角色基础身份信息矩阵 */}
+            {/* 2. 角色基础身份与核心指标 (姓名、位阶切换T1~T4、信用点与声望 - 参考图1和2) */}
             <div className="rounded-xl border border-[#6C00FF]/30 bg-[#12072B] p-4 shadow-[0_4px_20px_rgba(11,3,32,0.6)]">
-              <div className="flex items-center gap-2 border-b border-[#6C00FF]/20 pb-2 mb-3">
-                <User className="h-4 w-4 text-[#F5F500]" />
-                <h2 className="text-sm font-bold text-white tracking-wide">基础信息 (Identity)</h2>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-                {/* 角色姓名 */}
-                <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5">
-                  <label className="text-[11px] text-slate-400 font-bold block">角色姓名 / 代号</label>
-                  <input
-                    type="text"
-                    value={formData?.name || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    placeholder="输入姓名..."
-                    className="mt-1 w-full rounded border border-[#6C00FF]/40 bg-[#12072B] px-2 py-1 text-xs font-bold text-[#F5F500] focus:border-[#00FFA3] focus:outline-none font-mono"
-                  />
-                </div>
-
-                {/* 种族特性一 (限定特性一 levelFilter: 1) */}
-                <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-slate-400 font-bold">种族特性一</label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setGenericModalState({
-                            isOpen: true,
-                            type: 'ancestry',
-                            field: 'ancestry1',
-                            levelFilter: 1,
-                          })
-                        }
-                        className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
-                      >
-                        选择 ⇄
-                      </button>
-                    </div>
-                    <div className="mt-1 font-bold text-xs text-white truncate">
-                      {formData?.ancestry1 || '（未选择）'}
-                    </div>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                {/* 角色姓名 / 代号 */}
+                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <User className="h-4 w-4 text-[#F5F500] shrink-0" />
+                  <div className="flex-1">
+                    <label className="text-[10px] text-slate-400 font-bold block">角色姓名 / 代号</label>
+                    <input
+                      type="text"
+                      value={formData?.name || ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFormData((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      placeholder="输入姓名 / 代号..."
+                      className="mt-0.5 w-full rounded border border-[#6C00FF]/40 bg-[#0B0320] px-2.5 py-1 text-xs font-bold text-[#F5F500] focus:border-[#00FFA3] focus:outline-none font-mono"
+                    />
                   </div>
                 </div>
 
-                {/* 种族特性二 (限定特性二 levelFilter: 2) */}
-                <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-slate-400 font-bold">种族特性二</label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setGenericModalState({
-                            isOpen: true,
-                            type: 'ancestry',
-                            field: 'ancestry2',
-                            levelFilter: 2,
-                          })
-                        }
-                        className="text-[10px] font-bold text-[#00FFA3] bg-[#00FFA3]/15 hover:bg-[#00FFA3]/25 px-1.5 py-0.5 rounded border border-[#00FFA3]/30 transition-colors"
-                      >
-                        选择 ⇄
-                      </button>
-                    </div>
-                    <div className="mt-1 font-bold text-xs text-white truncate">
-                      {formData?.ancestry2 || '（未选择）'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 职业与子职业 */}
-                <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-slate-400 font-bold">职业 / 子职业</label>
-                      <div className="flex gap-1">
+                {/* 核心指标组 (位阶选择器 + 信用点 + 声望) */}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {/* 位阶选择器 (参考图2: T1~T4 高亮胶囊) */}
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#6C00FF]/40 bg-[#0B0320] px-2 py-1 shadow-sm">
+                    <span className="text-[10px] text-slate-400 font-bold font-mono pl-1">位阶:</span>
+                    {(['T1', 'T2', 'T3', 'T4'] as const).map((tierKey) => {
+                      const isActive = (cyberpunkData.tier || 'T1') === tierKey
+                      return (
                         <button
+                          key={tierKey}
                           type="button"
-                          onClick={() =>
-                            setGenericModalState({
-                              isOpen: true,
-                              type: 'profession',
-                            })
-                          }
-                          className="text-[10px] font-bold text-[#F5F500] bg-[#F5F500]/15 hover:bg-[#F5F500]/25 px-1.5 py-0.5 rounded border border-[#F5F500]/30 transition-colors"
+                          onClick={() => handleCyberpunkChange({ ...cyberpunkData, tier: tierKey })}
+                          className={`px-2 py-0.5 rounded-full text-xs font-bold font-mono transition-all ${
+                            isActive
+                              ? 'bg-[#F5F500] text-black shadow-[0_0_12px_rgba(245,245,0,0.7)] scale-105'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
                         >
-                          职业 ⇄
+                          {tierKey}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setGenericModalState({
-                              isOpen: true,
-                              type: 'subclass',
-                              levelFilter: 1,
-                            })
-                          }
-                          className="text-[10px] font-bold text-[#6C00FF] bg-[#6C00FF]/20 hover:bg-[#6C00FF]/35 px-1.5 py-0.5 rounded border border-[#6C00FF]/50 transition-colors"
-                        >
-                          子职 ⇄
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-1 font-bold text-xs text-white truncate">
-                      {formData?.profession || '（未选择）'}
-                      {formData?.subclass ? ` · ${formData.subclass}` : ''}
-                    </div>
+                      )
+                    })}
                   </div>
-                </div>
 
-                {/* 社群 */}
-                <div className="rounded-lg border border-[#6C00FF]/30 bg-[#0B0320] p-2.5 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-slate-400 font-bold">社群</label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setGenericModalState({
-                            isOpen: true,
-                            type: 'community',
-                          })
-                        }
-                        className="text-[10px] font-bold text-[#FF007F] bg-[#FF007F]/15 hover:bg-[#FF007F]/25 px-1.5 py-0.5 rounded border border-[#FF007F]/30 transition-colors"
-                      >
-                        选择 ⇄
-                      </button>
-                    </div>
-                    <div className="mt-1 font-bold text-xs text-white truncate">
-                      {formData?.community || '（未选择）'}
-                    </div>
+                  {/* 信用点 (参考图1: 黄色胶囊徽章) */}
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#F5F500]/50 bg-[#0B0320] px-3 py-1 shadow-[0_0_10px_rgba(245,245,0,0.15)]">
+                    <span className="text-xs text-[#F5F500] font-bold">🪙 信用点:</span>
+                    <input
+                      type="number"
+                      value={cyberpunkData.credits ?? 0}
+                      onChange={(e) =>
+                        handleCyberpunkChange({
+                          ...cyberpunkData,
+                          credits: Number(e.target.value) || 0,
+                        })
+                      }
+                      className="w-16 bg-transparent text-xs font-bold font-mono text-[#F5F500] focus:outline-none text-right"
+                    />
+                    <span className="text-[10px] text-slate-400 font-mono">点</span>
+                  </div>
+
+                  {/* 街头声望 (参考图1: 青绿色胶囊徽章) */}
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#00FFA3]/50 bg-[#0B0320] px-3 py-1 shadow-[0_0_10px_rgba(0,255,163,0.15)]">
+                    <span className="text-xs text-[#00FFA3] font-bold">🎖️ 声望:</span>
+                    <input
+                      type="number"
+                      value={cyberpunkData.streetCred ?? cyberpunkData.streetFame ?? 0}
+                      onChange={(e) =>
+                        handleCyberpunkChange({
+                          ...cyberpunkData,
+                          streetCred: Number(e.target.value) || 0,
+                          streetFame: Number(e.target.value) || 0,
+                        })
+                      }
+                      className="w-14 bg-transparent text-xs font-bold font-mono text-[#00FFA3] focus:outline-none text-right"
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 3. 角色六维属性、生命 HP、压力 Stress、伤害阈值、经历与希望点 Hope Panel */}
-            <CyberpunkAttributesHopePanel cyberpunkData={cyberpunkData} />
+            {/* 3. 身份特性与能力详情融合展示面板 (一行5列所选即所得 + 锁定开关 - 融合参考图3和4) */}
+            <CyberpunkFeaturesDetailPanel
+              isLocked={isFeaturesLocked}
+              onToggleLock={() => setIsFeaturesLocked(!isFeaturesLocked)}
+              onOpenSelectModal={(type, field, levelFilter) => {
+                setGenericModalState({
+                  isOpen: true,
+                  type,
+                  field,
+                  levelFilter,
+                })
+              }}
+            />
 
-            {/* 4. 身份特性与能力详情展示面板（职业专精、子职、种族一/二、社群全文阅读） */}
-            <CyberpunkFeaturesDetailPanel />
+            {/* 4. 角色六维属性、生命 HP、压力 Stress、伤害阈值、经历与希望点 Hope Panel */}
+            <CyberpunkAttributesHopePanel cyberpunkData={cyberpunkData} />
 
             {/* 5. 非法改造与消耗品 */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
