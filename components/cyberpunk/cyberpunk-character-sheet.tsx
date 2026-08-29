@@ -23,19 +23,12 @@ import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
 import { CyberpunkStoryTab } from './cyberpunk-story-tab'
 import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
 import { CyberpunkCompanionTab } from './cyberpunk-companion-tab'
-import { InstallAugmentationModal } from './modals/install-augmentation-modal'
-import { InstallExternalGearModal } from './modals/install-external-gear-modal'
-import { CyberpunkWeaponSelectionModal } from './modals/cyberpunk-weapon-selection-modal'
-import { CyberpunkArmorSelectionModal } from './modals/cyberpunk-armor-selection-modal'
+import { CyberpunkSheetModalsHost, type CyberpunkSheetModalsState } from './modals/cyberpunk-sheet-modals-host'
 import { CyberpunkPrintRenderer, type CyberpunkPrintOptions } from './print/cyberpunk-print-renderer'
-import { CyberpunkPrintModal } from './modals/cyberpunk-print-modal'
 import type { CyberpunkExternalGear, CyberpunkAugmentation, CyberpunkBodyZoneKey } from '@/types/cyberpunk'
 import './cyberpunk-light-minimal.css'
 
-// 核心车卡器模态框与通用组件
-import { GenericCardSelectionModal } from '@/components/modals/generic-card-selection-modal'
-import { CardSelectionModal } from '@/components/modals/card-selection-modal'
-import { CharacterManagementModal } from '@/components/modals/character-management-modal'
+// 核心车卡器全局辅助组件
 import { CharacterCreationGuide } from '@/components/guide/character-creation-guide'
 import { FloatingNotebook } from '@/components/notebook'
 import { SealDiceExportModal } from '@/components/modals/seal-dice-export-modal'
@@ -184,33 +177,21 @@ export function CyberpunkCharacterSheet() {
     return () => clearTimeout(timer)
   }, [currentCharacterId, formData, cyberpunkData, isLoading])
 
-  // 4. 数据库选择模态框状态 (支持 levelFilter 区分种族特性一 / 二)
-  const [genericModalState, setGenericModalState] = useState<{
-    isOpen: boolean
-    type: 'profession' | 'ancestry' | 'community' | 'subclass'
-    field?: string
-    levelFilter?: number
-  }>({
-    isOpen: false,
-    type: 'profession',
+  // 4. 模态框集中状态管理
+  const [modalsState, setModalsState] = useState<CyberpunkSheetModalsState>({
+    genericModal: { isOpen: false, type: 'profession' },
+    domainModal: { isOpen: false, slotIndex: 5, isVault: false },
+    weaponModalOpen: false,
+    activeWeaponSlot: 'primary',
+    armorModalOpen: false,
+    installAugModalOpen: false,
+    activeZoneKey: 'head',
+    installExternalGearModalOpen: false,
+    characterManagementModalOpen: false,
+    printModalOpen: false,
   })
-
-  const [domainModalState, setDomainModalState] = useState<{
-    isOpen: boolean
-    slotIndex: number
-    isVault: boolean
-  }>({
-    isOpen: false,
-    slotIndex: 5,
-    isVault: false,
-  })
-
-  const [weaponModalOpen, setWeaponModalOpen] = useState(false)
-  const [activeWeaponSlot, setActiveWeaponSlot] = useState<'primary' | 'secondary'>('primary')
-  const [armorModalOpen, setArmorModalOpen] = useState(false)
 
   // 5. A4 实体印刷与战术卡牌导出状态
-  const [printModalOpen, setPrintModalOpen] = useState(false)
   const [printOptions, setPrintOptions] = useState<CyberpunkPrintOptions>({
     includeDossier: true,
     includeGearCards: true,
@@ -230,7 +211,7 @@ export function CyberpunkCharacterSheet() {
     const card = cardStore.getCardById(cardId)
     if (!card) return
 
-    if (genericModalState.type === 'profession') {
+    if (modalsState.genericModal.type === 'profession') {
       let fullName = card.name
       if (card.cardSelectDisplay?.item1 && card.cardSelectDisplay?.item2) {
         fullName = `${card.name} - ${card.cardSelectDisplay.item1}&${card.cardSelectDisplay.item2}`
@@ -240,20 +221,20 @@ export function CyberpunkCharacterSheet() {
         ...prev,
         profession: card.name,
       }))
-    } else if (genericModalState.type === 'ancestry' && field) {
+    } else if (modalsState.genericModal.type === 'ancestry' && field) {
       const kind = field === 'ancestry1' ? 'ancestry1' : 'ancestry2'
       selectCharacterChoiceCard(kind, { id: card.id, name: card.name }, card)
       setFormData((prev) => ({
         ...prev,
         [field]: card.name,
       }))
-    } else if (genericModalState.type === 'community') {
+    } else if (modalsState.genericModal.type === 'community') {
       selectCharacterChoiceCard('community', { id: card.id, name: card.name }, card)
       setFormData((prev) => ({
         ...prev,
         community: card.name,
       }))
-    } else if (genericModalState.type === 'subclass') {
+    } else if (modalsState.genericModal.type === 'subclass') {
       selectCharacterChoiceCard('subclass', { id: card.id, name: card.name }, card)
       setFormData((prev) => ({
         ...prev,
@@ -261,17 +242,25 @@ export function CyberpunkCharacterSheet() {
       }))
     }
 
-    setGenericModalState((prev) => ({ ...prev, isOpen: false }))
+    setModalsState((prev) => ({
+      ...prev,
+      genericModal: { ...prev.genericModal, isOpen: false },
+    }))
   }
 
   // 处理领域卡选择与删除
-  const handleDomainCardSelect = (selectedCard: StandardCard) => {
+  const handleDomainCardSelect = (cardId: string, slotIndex: number, isVault: boolean) => {
+    const card = cardStore.getCardById(cardId)
+    if (!card) return
     selectCardForSlot({
-      zone: domainModalState.isVault ? 'vault' : 'loadout',
-      index: domainModalState.slotIndex,
-      template: selectedCard,
+      zone: isVault ? 'vault' : 'loadout',
+      index: slotIndex,
+      template: card,
     })
-    setDomainModalState((prev) => ({ ...prev, isOpen: false }))
+    setModalsState((prev) => ({
+      ...prev,
+      domainModal: { ...prev.domainModal, isOpen: false },
+    }))
   }
 
   const handleDomainCardRemove = (index: number, isVault = false) => {
@@ -279,14 +268,14 @@ export function CyberpunkCharacterSheet() {
   }
 
   // 处理武器与护甲选择
-  const handleWeaponSelect = (input: WeaponSelectionInput) => {
-    selectWeapon({ slotType: activeWeaponSlot }, input)
-    setWeaponModalOpen(false)
+  const handleWeaponSelect = (input: WeaponSelectionInput, slotKey: 'primary' | 'secondary') => {
+    selectWeapon({ slotType: slotKey }, input)
+    setModalsState((prev) => ({ ...prev, weaponModalOpen: false }))
   }
 
   const handleArmorSelect = (input: ArmorSelectionInput) => {
     selectArmorSlot(input)
-    setArmorModalOpen(false)
+    setModalsState((prev) => ({ ...prev, armorModalOpen: false }))
   }
 
   // 将外置装备快速挂载到作战主手/副手武器插槽
@@ -403,7 +392,7 @@ export function CyberpunkCharacterSheet() {
             isLightPreview={isLightPreview}
             onToggleLightPreview={() => setIsLightPreview(!isLightPreview)}
             onSave={handleQuickSave}
-            onOpenPrintModal={() => setPrintModalOpen(true)}
+            onOpenPrintModal={() => setModalsState((prev) => ({ ...prev, printModalOpen: true }))}
           />
 
         {/* 保存成功提示 */}
@@ -571,12 +560,15 @@ export function CyberpunkCharacterSheet() {
               isLocked={isFeaturesLocked}
               onToggleLock={() => setIsFeaturesLocked(!isFeaturesLocked)}
               onOpenSelectModal={(type, field, levelFilter) => {
-                setGenericModalState({
-                  isOpen: true,
-                  type,
-                  field,
-                  levelFilter,
-                })
+                setModalsState((prev) => ({
+                  ...prev,
+                  genericModal: {
+                    isOpen: true,
+                    type,
+                    field,
+                    levelFilter,
+                  },
+                }))
               }}
             />
 
@@ -617,11 +609,14 @@ export function CyberpunkCharacterSheet() {
               cards={formData?.cards || []}
               vaultCards={formData?.inventory_cards || []}
               onSelectSlot={(slotIndex, isVault) => {
-                setDomainModalState({
-                  isOpen: true,
-                  slotIndex,
-                  isVault: isVault || false,
-                })
+                setModalsState((prev) => ({
+                  ...prev,
+                  domainModal: {
+                    isOpen: true,
+                    slotIndex,
+                    isVault: isVault || false,
+                  },
+                }))
               }}
               onRemoveCard={handleDomainCardRemove}
             />
@@ -635,15 +630,21 @@ export function CyberpunkCharacterSheet() {
             onChangeCyberpunk={handleCyberpunkChange}
             onOpenSelectModal={(type, zoneKey, slotIndex) => {
               if (type === 'weapon') {
-                setActiveWeaponSlot((slotIndex ?? 0) === 1 ? 'secondary' : 'primary')
-                setWeaponModalOpen(true)
+                setModalsState((prev) => ({
+                  ...prev,
+                  weaponModalOpen: true,
+                  activeWeaponSlot: (slotIndex ?? 0) === 1 ? 'secondary' : 'primary',
+                }))
               } else if (type === 'armor') {
-                setArmorModalOpen(true)
+                setModalsState((prev) => ({ ...prev, armorModalOpen: true }))
               } else if (type === 'augmentation') {
-                setActiveZoneKey((zoneKey as CyberpunkBodyZoneKey) || 'upper_limb')
-                setInstallAugModalOpen(true)
+                setModalsState((prev) => ({
+                  ...prev,
+                  installAugModalOpen: true,
+                  activeZoneKey: (zoneKey as CyberpunkBodyZoneKey) || 'upper_limb',
+                }))
               } else if (type === 'external') {
-                setInstallExternalGearModalOpen(true)
+                setModalsState((prev) => ({ ...prev, installExternalGearModalOpen: true }))
               }
             }}
           />
@@ -716,128 +717,20 @@ export function CyberpunkCharacterSheet() {
         announcements={announcements}
       />
 
-      {/* 卡牌与特性选择模态框 */}
-      {genericModalState.isOpen && (
-        <GenericCardSelectionModal
-          isOpen={genericModalState.isOpen}
-          onClose={() => setGenericModalState((prev) => ({ ...prev, isOpen: false }))}
-          onSelect={handleGenericCardSelect}
-          title={
-            genericModalState.type === 'profession'
-              ? '选择职业'
-              : genericModalState.type === 'ancestry'
-              ? (genericModalState.levelFilter === 1 ? '选择种族特性一 (原生特性一)' : '选择种族特性二 (原生特性二)')
-              : genericModalState.type === 'community'
-              ? '选择社群'
-              : '选择子职业'
-          }
-          cardType={
-            genericModalState.type === 'profession'
-              ? CardType.Profession
-              : genericModalState.type === 'ancestry'
-              ? CardType.Ancestry
-              : genericModalState.type === 'community'
-              ? CardType.Community
-              : CardType.Subclass
-          }
-          field={genericModalState.field}
-          levelFilter={genericModalState.levelFilter}
-        />
-      )}
+      </div>
 
-      {/* 领域卡选择模态框 */}
-      {domainModalState.isOpen && (
-        <CardSelectionModal
-          isOpen={domainModalState.isOpen}
-          onClose={() => setDomainModalState((prev) => ({ ...prev, isOpen: false }))}
-          onSelect={handleDomainCardSelect}
-          selectedCardIndex={domainModalState.slotIndex}
-          initialTab="domain"
-        />
-      )}
-
-      {/* 爽博朋克专属武器选择模态框 (默认渊边行者初始军备，支持切换奇幻装备) */}
-      <CyberpunkWeaponSelectionModal
-        isOpen={weaponModalOpen}
-        onClose={() => setWeaponModalOpen(false)}
-        weaponSlotType={activeWeaponSlot}
-        onSelect={handleWeaponSelect}
-        title={activeWeaponSlot === 'primary' ? '选择主手武器' : '选择副手/备用武器'}
-      />
-
-      {/* 爽博朋克专属护甲选择模态框 (默认渊边行者初始护甲，支持切换奇幻护甲) */}
-      <CyberpunkArmorSelectionModal
-        isOpen={armorModalOpen}
-        onClose={() => setArmorModalOpen(false)}
-        onSelect={handleArmorSelect}
-        title="选择战术护甲"
-      />
-
-      {/* 义体安装模态框 */}
-      {installAugModalOpen && (
-        <InstallAugmentationModal
-          isOpen={installAugModalOpen}
-          zone={activeZoneKey}
-          zoneName={
-            activeZoneKey === 'head'
-              ? '头部'
-              : activeZoneKey === 'torso'
-              ? '躯干'
-              : activeZoneKey === 'upper_limb'
-              ? '上肢'
-              : '下肢'
-          }
-          availableSlots={
-            (cyberpunkData.zoneSlotLimits?.[activeZoneKey] ?? CYBERPUNK_TIER_SLOTS[cyberpunkData.tier || 'T1'] ?? 2) -
-            (cyberpunkData.zones?.[activeZoneKey]?.augmentations || []).reduce(
-              (sum, a) => sum + (a.slotCost ?? a.slots ?? 1),
-              0
-            )
-          }
-          onClose={() => setInstallAugModalOpen(false)}
-          onInstall={(aug) => {
-            const zoneGroup = cyberpunkData.zones?.[activeZoneKey] || { augmentations: [] }
-            handleCyberpunkChange({
-              ...cyberpunkData,
-              zones: {
-                ...cyberpunkData.zones,
-                [activeZoneKey]: {
-                  augmentations: [...zoneGroup.augmentations, aug],
-                },
-              },
-            })
-            setInstallAugModalOpen(false)
-          }}
-          onOpenCustomModal={() => {}}
-        />
-      )}
-
-      {/* 外置战备装备安装模态框 */}
-      {installExternalGearModalOpen && (
-        <InstallExternalGearModal
-          isOpen={installExternalGearModalOpen}
-          availableSlots={
-            (cyberpunkData.zoneSlotLimits?.external ?? CYBERPUNK_TIER_EQUIP_SLOTS[cyberpunkData.tier || 'T1'] ?? 2) -
-            (cyberpunkData.externalGear || []).length
-          }
-          maxSlots={
-            cyberpunkData.zoneSlotLimits?.external ?? CYBERPUNK_TIER_EQUIP_SLOTS[cyberpunkData.tier || 'T1'] ?? 2
-          }
-          onClose={() => setInstallExternalGearModalOpen(false)}
-          onInstall={(gear) => {
-            handleCyberpunkChange({
-              ...cyberpunkData,
-              externalGear: [...(cyberpunkData.externalGear || []), gear],
-            })
-            setInstallExternalGearModalOpen(false)
-          }}
-        />
-      )}
-
-      {/* 多存档管理模态框 */}
-      <CharacterManagementModal
-        isOpen={characterManagementModalOpen}
-        onClose={closeCharacterManagementModal}
+      {/* 2. 集中模态框宿主组件 (解耦独立管理全部 8 大模态框) */}
+      <CyberpunkSheetModalsHost
+        modalsState={modalsState}
+        setModalsState={setModalsState}
+        sheetData={formData}
+        cyberpunkData={cyberpunkData}
+        onUpdateCyberpunk={handleCyberpunkChange}
+        onGenericCardSelect={handleGenericCardSelect}
+        onDomainCardSelect={handleDomainCardSelect}
+        onWeaponSelect={handleWeaponSelect}
+        onArmorSelect={handleArmorSelect}
+        onTriggerPrint={handleTriggerPrint}
         characterList={characterList}
         currentCharacterId={currentCharacterId}
         onSwitchCharacter={switchToCharacter}
@@ -847,22 +740,13 @@ export function CyberpunkCharacterSheet() {
         onDuplicateCharacter={duplicateCharacterHandler}
         onRenameCharacter={renameCharacterHandler}
       />
-    </div>
 
-    {/* 2. 专用 A4 实体印刷与战术卡牌导出渲染器 (仅在 @media print 触发时渲染) */}
-    <CyberpunkPrintRenderer
-      sheetData={formData}
-      cyberpunkData={cyberpunkData}
-      options={printOptions}
-    />
-
-    {/* 3. A4 实体印刷与卡牌导出配置模态框 */}
-    <CyberpunkPrintModal
-      isOpen={printModalOpen}
-      onClose={() => setPrintModalOpen(false)}
-      onTriggerPrint={handleTriggerPrint}
-      hasCompanion={Boolean(formData?.companionName)}
-    />
-  </>
+      {/* 3. 专用 A4 实体打印与战术卡牌导出渲染器 (仅在 @media print 触发时渲染) */}
+      <CyberpunkPrintRenderer
+        sheetData={formData}
+        cyberpunkData={cyberpunkData}
+        options={printOptions}
+      />
+    </>
   )
 }

@@ -3,6 +3,7 @@
 import React from 'react'
 import type { SheetData } from '@/lib/sheet-data'
 import type { CyberpunkSheetExtension, CyberpunkAugmentation, CyberpunkExternalGear } from '@/types/cyberpunk'
+import { getZoneAugmentations } from '@/lib/cyberpunk/cyberpunk-data-normalizer'
 import { CardMarkdown } from '@/components/ui/card-markdown'
 
 interface PrintableCardItem {
@@ -118,15 +119,10 @@ export function CyberpunkPrintGearCardsPage({
     })
   }
 
-  const headList = cyberpunkData.zones?.head?.augmentations || (cyberpunkData as any).augmentations?.head || []
-  const torsoList = cyberpunkData.zones?.torso?.augmentations || (cyberpunkData as any).augmentations?.torso || []
-  const armsList = cyberpunkData.zones?.upper_limb?.augmentations || cyberpunkData.zones?.arms?.augmentations || (cyberpunkData as any).augmentations?.arms || []
-  const legsList = cyberpunkData.zones?.lower_limb?.augmentations || cyberpunkData.zones?.legs?.augmentations || (cyberpunkData as any).augmentations?.legs || []
-
-  pushAugs(headList, '头部')
-  pushAugs(torsoList, '躯干')
-  pushAugs(armsList, '上肢')
-  pushAugs(legsList, '下肢')
+  pushAugs(getZoneAugmentations(cyberpunkData, 'head'), '头部')
+  pushAugs(getZoneAugmentations(cyberpunkData, 'torso'), '躯干')
+  pushAugs(getZoneAugmentations(cyberpunkData, 'upper_limb'), '上肢')
+  pushAugs(getZoneAugmentations(cyberpunkData, 'lower_limb'), '下肢')
 
   // 5. 外置挂载装备
   if (cyberpunkData.externalGear) {

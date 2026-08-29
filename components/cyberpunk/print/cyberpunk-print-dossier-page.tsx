@@ -4,6 +4,7 @@ import React from 'react'
 import type { SheetData } from '@/lib/sheet-data'
 import type { CyberpunkSheetExtension } from '@/types/cyberpunk'
 import { CYBERPUNK_TIER_SLOTS, CYBERPUNK_TIER_EQUIP_SLOTS } from '@/lib/cyberpunk/tier-constants'
+import { getZoneAugmentations, getZoneSlotLimit } from '@/lib/cyberpunk/cyberpunk-data-normalizer'
 import { CardMarkdown } from '@/components/ui/card-markdown'
 
 interface CyberpunkPrintDossierPageProps {
@@ -16,28 +17,20 @@ export function CyberpunkPrintDossierPage({
   cyberpunkData,
 }: CyberpunkPrintDossierPageProps) {
   const currentTier = cyberpunkData.tier || 'T1'
-  const baseSlots = CYBERPUNK_TIER_SLOTS[currentTier]
-  const baseEquipLimit = CYBERPUNK_TIER_EQUIP_SLOTS[currentTier]
 
-  // 计算各部位已装配数量 (兼容 zones.head 与 augmentations 两种可能)
-  const headList = cyberpunkData.zones?.head?.augmentations || (cyberpunkData as any).augmentations?.head || []
-  const torsoList = cyberpunkData.zones?.torso?.augmentations || (cyberpunkData as any).augmentations?.torso || []
-  const armsList = cyberpunkData.zones?.upper_limb?.augmentations || cyberpunkData.zones?.arms?.augmentations || (cyberpunkData as any).augmentations?.arms || []
-  const legsList = cyberpunkData.zones?.lower_limb?.augmentations || cyberpunkData.zones?.legs?.augmentations || (cyberpunkData as any).augmentations?.legs || []
-  const externalList = cyberpunkData.externalGear || []
-
-  const headCount = headList.length
-  const torsoCount = torsoList.length
-  const armsCount = armsList.length
-  const legsCount = legsList.length
-  const externalCount = externalList.length
+  // 计算各部位已装配数量
+  const headCount = getZoneAugmentations(cyberpunkData, 'head').length
+  const torsoCount = getZoneAugmentations(cyberpunkData, 'torso').length
+  const armsCount = getZoneAugmentations(cyberpunkData, 'upper_limb').length
+  const legsCount = getZoneAugmentations(cyberpunkData, 'lower_limb').length
+  const externalCount = (cyberpunkData.externalGear || []).length
 
   // 各部位槽位上限
-  const headMax = cyberpunkData.zoneSlotLimits?.head ?? baseSlots
-  const torsoMax = cyberpunkData.zoneSlotLimits?.torso ?? baseSlots
-  const armsMax = cyberpunkData.zoneSlotLimits?.upper_limb ?? cyberpunkData.zoneSlotLimits?.arms ?? baseSlots
-  const legsMax = cyberpunkData.zoneSlotLimits?.lower_limb ?? cyberpunkData.zoneSlotLimits?.legs ?? baseSlots
-  const externalMax = cyberpunkData.zoneSlotLimits?.external ?? baseEquipLimit
+  const headMax = getZoneSlotLimit(cyberpunkData, 'head')
+  const torsoMax = getZoneSlotLimit(cyberpunkData, 'torso')
+  const armsMax = getZoneSlotLimit(cyberpunkData, 'upper_limb')
+  const legsMax = getZoneSlotLimit(cyberpunkData, 'lower_limb')
+  const externalMax = getZoneSlotLimit(cyberpunkData, 'external')
 
   // 提取立绘图片
   const portraitUrl = cyberpunkData.portrait || (sheetData as any).characterImage || (cyberpunkData as any).portraitImage
