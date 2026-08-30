@@ -220,19 +220,39 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           </blockquote>
         );
 
-      case 'note':
+      case 'note': {
+        const variant = block.data?.variant || 'info';
+        const noteStyles = 
+          variant === 'warning' ? 'border-red-500/80 bg-red-950/20 text-inherit' :
+          variant === 'tip' ? 'border-amber-500/80 bg-amber-950/20 text-inherit' :
+          'border-current/30 bg-current/5 text-inherit';
+
+        const IconComp = variant === 'warning' ? ShieldAlert : variant === 'tip' ? Sparkles : StickyNote;
+        const defaultTitle = variant === 'warning' ? '重要警告与危险判定' : variant === 'tip' ? '规则提示与实操建议' : '游戏主持人备忘';
+
         return (
-          <div key={`note-${bIdx}`} className="dh-note">
-            <div className="dh-note-title">
-              <StickyNote size={14} /> 游戏主持人备忘
+          <div key={`note-${bIdx}`} className={`dh-note p-3.5 my-3 rounded-lg border-2 border-dashed ${noteStyles}`}>
+            <div className="dh-note-title font-bold text-xs flex items-center gap-1.5 mb-1.5 opacity-90">
+              <IconComp size={14} className={variant === 'warning' ? 'text-red-400' : variant === 'tip' ? 'text-amber-400' : 'text-sky-400'} />
+              {defaultTitle}
             </div>
-            {block.content?.split('\n').map((nLine, nIdx) => (
-              <p key={nIdx} className="text-xs mb-1 last:mb-0">
-                {parseInline(nLine)}
-              </p>
-            ))}
+            {block.content?.split('\n').map((nLine, nIdx) => {
+              if (nLine.startsWith('#')) {
+                const match = nLine.match(/^(#{1,6})\s+(.*)$/);
+                if (match) {
+                  const Comp = `h${match[1].length}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+                  return <Comp key={nIdx} className="font-black text-sm my-1">{parseInline(match[2])}</Comp>;
+                }
+              }
+              return (
+                <p key={nIdx} className="text-xs mb-1 last:mb-0 leading-relaxed">
+                  {parseInline(nLine)}
+                </p>
+              );
+            })}
           </div>
         );
+      }
 
       case 'wide':
         return (

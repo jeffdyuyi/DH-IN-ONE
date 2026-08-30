@@ -110,8 +110,10 @@ function serializeBlockToMarkdown(block: ContentBlock): string {
     case 'read_aloud':
       return `> ${block.content}`;
 
-    case 'callout':
-      return `{{note\n##### ${block.title || 'GM 备忘'}\n${block.content || ''}\n}}`;
+    case 'callout': {
+      const tag = block.variant ? `{{note,${block.variant}` : `{{note`;
+      return `${tag}\n##### ${block.title || 'GM 备忘'}\n${block.content || ''}\n}}`;
+    }
 
     case 'table': {
       const headers = block.headers || [];

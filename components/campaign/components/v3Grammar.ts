@@ -304,10 +304,12 @@ export function parseDocumentToPages(fullText: string): ParsedPage[] {
             content: innerContent,
             data: parseAdvancedTable(tableLines),
           });
-        } else if (tagName === 'note' || tagName === 'dhtip') {
+        } else if (tagName === 'note' || tagName === 'dhtip' || tagName === 'callout') {
+          const variant = tagArgs.includes('warning') ? 'warning' : tagArgs.includes('tip') ? 'tip' : 'info';
           blocks.push({
             type: 'note',
             content: innerContent,
+            data: { variant },
           });
         } else if (tagName === 'artist') {
           blocks.push({
