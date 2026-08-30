@@ -564,7 +564,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   // Standard inline rendering (for within small cards/block view)
   return (
-    <div className={`dh-book-viewport max-w-none text-left leading-relaxed ${className}`} data-theme={theme}>
+    <div className={`max-w-none text-left leading-relaxed text-inherit ${className}`}>
       {parsedPages.flatMap((p) => p.blocks).map((block, bIdx) => renderBlock(block, bIdx))}
     </div>
   );
