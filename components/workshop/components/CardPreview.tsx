@@ -602,15 +602,19 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
                        <Markdown text={d.effect} className="text-center text-slate-800 dark:text-zinc-200 leading-relaxed font-medium" />
                    </div>
 
-                   <div className="text-center px-4">
-                       <Markdown text={d.description} className="italic text-slate-500 dark:text-zinc-500 text-sm text-center" />
-                   </div>
+                   {d.description && (
+                     <div className="text-center px-4">
+                         <Markdown text={d.description} className="italic text-slate-500 dark:text-zinc-500 text-sm text-center" />
+                     </div>
+                   )}
                </div>
 
-               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-zinc-800">
-                   <h3 className="text-center text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">失效条件</h3>
-                   <Markdown text={d.cureCondition} className="text-center text-sm text-slate-700 dark:text-zinc-300" />
-               </div>
+               {d.cureCondition && (
+                 <div className="mt-auto pt-6 border-t border-slate-200 dark:border-zinc-800">
+                     <h3 className="text-center text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">失效条件</h3>
+                     <Markdown text={d.cureCondition} className="text-center text-sm text-slate-700 dark:text-zinc-300" />
+                 </div>
+               )}
             </>
         );
       }

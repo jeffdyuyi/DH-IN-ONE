@@ -395,7 +395,8 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
           <>
              <div className="col-span-2 space-y-4">
                 <TextArea label="效果" value={(data as MadnessData).effect} onChange={v => handleChange('effect', v)} placeholder="对玩家造成的负面影响..." />
-                <TextArea label="失效条件" value={(data as MadnessData).cureCondition} onChange={v => handleChange('cureCondition', v)} placeholder="如何治愈..." />
+                <TextArea label="风味描述 / 心理旁白" value={data.description} onChange={v => handleChange('description', v)} placeholder="如：他们在看着我...他们都想害我..." />
+                <TextArea label="失效条件" value={(data as MadnessData).cureCondition} onChange={v => handleChange('cureCondition', v)} placeholder="如何治愈或解除症状..." />
              </div>
           </>
         );
