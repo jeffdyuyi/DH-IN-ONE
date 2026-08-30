@@ -209,6 +209,28 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
     splitRatio === '60:40' ? 'w-[40%]' :
     splitRatio === '40:60' ? 'w-[60%]' : 'w-1/2';
 
+  const handleInsertBlockFromToolbar = useCallback((type: BlockType) => {
+    const newBlock = createDefaultContentBlock(type);
+    handleUpdateProject(prev => {
+      const sections = [...(prev.sections || [])];
+      if (sections.length === 0) {
+        sections.push({
+          id: 'sec_' + Math.random().toString(36).substring(2, 9),
+          title: '第 1 章：初启篇章',
+          level: 2,
+          blocks: [newBlock]
+        });
+      } else {
+        const lastIdx = sections.length - 1;
+        sections[lastIdx] = {
+          ...sections[lastIdx],
+          blocks: [...(sections[lastIdx].blocks || []), newBlock]
+        };
+      }
+      return { ...prev, sections };
+    });
+  }, [handleUpdateProject]);
+
   return (
     <div className="flex flex-col h-full w-full bg-stone-900 text-stone-100 overflow-hidden select-none border border-stone-800 rounded-xl shadow-2xl">
       
@@ -485,6 +507,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             onChange={(newVal) => {
               onChangeMarkdown(newVal);
             }}
+            onInsertBlock={editStyle === 'visual' ? handleInsertBlockFromToolbar : undefined}
             onGenerateToc={onGenerateToc}
           />
         </div>

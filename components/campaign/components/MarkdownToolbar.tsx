@@ -8,11 +8,13 @@ import {
   Highlighter, Type, Heading, MessageSquareQuote, AlertCircle,
   Swords, Mountain, ListChecks, Minus
 } from 'lucide-react';
+import { BlockType } from '../types';
 
 interface MarkdownToolbarProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>;
   value?: string;
   onChange?: (newVal: string) => void;
+  onInsertBlock?: (type: BlockType) => void;
   className?: string;
   compact?: boolean;
   onGenerateToc?: () => void;
@@ -22,74 +24,78 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
   textareaRef,
   value,
   onChange,
+  onInsertBlock,
   className = '',
   compact = false,
   onGenerateToc,
 }) => {
   const insertText = (prefix: string, suffix: string = '', defaultPlaceholder: string = '') => {
-    if (!textareaRef?.current) {
-      // Fallback: try finding split-editor textarea in DOM
-      const domTextarea = document.querySelector('.dh-split-editor textarea') as HTMLTextAreaElement | null;
-      if (domTextarea) {
-        const start = domTextarea.selectionStart;
-        const end = domTextarea.selectionEnd;
-        const currentText = domTextarea.value;
-        const selectedText = currentText.substring(start, end) || defaultPlaceholder;
-        const replacement = `${prefix}${selectedText}${suffix}`;
-        const newText = currentText.substring(0, start) + replacement + currentText.substring(end);
-        
-        if (onChange) {
-          onChange(newText);
-        } else {
-          domTextarea.value = newText;
-        }
+    // 1. Check if there's a currently focused input or textarea in split editor (e.g. in VisualBlockStream)
+    const activeEl = document.activeElement as HTMLTextAreaElement | HTMLInputElement | null;
+    const isEditorInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text')) && document.querySelector('.dh-split-editor')?.contains(activeEl);
 
-        const newStart = start + prefix.length;
-        const newEnd = start + prefix.length + selectedText.length;
-        requestAnimationFrame(() => {
-          domTextarea.focus({ preventScroll: true });
-          try {
-            domTextarea.setSelectionRange(newStart, newEnd);
-          } catch (e) {}
-        });
-        return;
-      }
+    if (isEditorInput && activeEl) {
+      const start = activeEl.selectionStart ?? activeEl.value.length;
+      const end = activeEl.selectionEnd ?? activeEl.value.length;
+      const currentText = activeEl.value;
+      const selectedText = currentText.substring(start, end) || defaultPlaceholder;
+      const replacement = `${prefix}${selectedText}${suffix}`;
+      const newText = currentText.substring(0, start) + replacement + currentText.substring(end);
+      
+      // Update DOM value & dispatch input event
+      activeEl.value = newText;
+      activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+      activeEl.dispatchEvent(new Event('change', { bubbles: true }));
 
-      if (onChange && value !== undefined) {
-        onChange(`${value}\n${prefix}${defaultPlaceholder}${suffix}`);
-      }
+      const newStart = start + prefix.length;
+      const newEnd = start + prefix.length + selectedText.length;
+      requestAnimationFrame(() => {
+        activeEl.focus({ preventScroll: true });
+        try {
+          activeEl.setSelectionRange(newStart, newEnd);
+        } catch (e) {}
+      });
       return;
     }
 
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentText = textarea.value;
+    // 2. Otherwise use root textarea ref or DOM split editor textarea
+    const domTextarea = textareaRef?.current || (document.querySelector('.dh-split-editor textarea') as HTMLTextAreaElement | null);
+    if (domTextarea) {
+      const start = domTextarea.selectionStart;
+      const end = domTextarea.selectionEnd;
+      const currentText = domTextarea.value;
+      const selectedText = currentText.substring(start, end) || defaultPlaceholder;
+      const replacement = `${prefix}${selectedText}${suffix}`;
+      const newText = currentText.substring(0, start) + replacement + currentText.substring(end);
+      
+      if (onChange) {
+        onChange(newText);
+      } else {
+        domTextarea.value = newText;
+      }
 
-    const selectedText = currentText.substring(start, end) || defaultPlaceholder;
-    const replacement = `${prefix}${selectedText}${suffix}`;
-
-    const newText = currentText.substring(0, start) + replacement + currentText.substring(end);
-
-    if (onChange) {
-      onChange(newText);
-    } else {
-      textarea.value = newText;
+      const newStart = start + prefix.length;
+      const newEnd = start + prefix.length + selectedText.length;
+      requestAnimationFrame(() => {
+        domTextarea.focus({ preventScroll: true });
+        try {
+          domTextarea.setSelectionRange(newStart, newEnd);
+        } catch (e) {}
+      });
+      return;
     }
 
-    const newStart = start + prefix.length;
-    const newEnd = start + prefix.length + selectedText.length;
+    if (onChange && value !== undefined) {
+      onChange(`${value}\n${prefix}${defaultPlaceholder}${suffix}`);
+    }
+  };
 
-    requestAnimationFrame(() => {
-      if (textarea) {
-        textarea.focus({ preventScroll: true });
-        try {
-          textarea.setSelectionRange(newStart, newEnd);
-        } catch (e) {
-          // ignore
-        }
-      }
-    });
+  const handleBlockAction = (type: BlockType, fallbackSnippet: string) => {
+    if (onInsertBlock) {
+      onInsertBlock(type);
+    } else {
+      insertText(fallbackSnippet, '', '');
+    }
   };
 
   const handleSelectSnippet = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -153,8 +159,8 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
             type="button"
             onMouseDown={handleBtnMouseDown}
             onClick={() => insertText('~~', '~~', '删除文本')}
-            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
-            title="删除线 (~~删除文本~~)"
+            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 line-through flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
+            title="删除线 (~~文本~~)"
           >
             <Strikethrough size={13} /> 删除
           </button>
@@ -162,29 +168,29 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('## ', '\n', '二级标题')}
-            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold flex items-center gap-0.5 text-[11px] transition-colors cursor-pointer"
-            title="二级标题 (## )"
+            onClick={() => insertText('## ', '', '二级小节标题')}
+            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold text-[11px] transition-colors cursor-pointer"
+            title="二级标题 (##)"
           >
-            <Heading2 size={13} />
+            H2
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('### ', '\n', '三级标题')}
-            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold flex items-center gap-0.5 text-[11px] transition-colors cursor-pointer"
-            title="三级标题 (### )"
+            onClick={() => insertText('### ', '', '三级条目标题')}
+            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold text-[11px] transition-colors cursor-pointer"
+            title="三级标题 (###)"
           >
-            <Heading3 size={13} />
+            H3
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('> ', '\n', '引用描述内容...')}
+            onClick={() => insertText('> ', '', '引用或朗读段落')}
             className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
-            title="引用块 (> )"
+            title="引用段落 (> )"
           >
             <Quote size={12} /> 引用
           </button>
@@ -192,29 +198,29 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('- ', '\n', '列表项')}
+            onClick={() => insertText('- ', '', '列表要点项')}
             className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
             title="无序列表 (- )"
           >
-            <List size={12} /> 列表
+            <List size={13} /> 列表
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('1. ', '\n', '序号项')}
+            onClick={() => insertText('1. ', '', '步骤要点项')}
             className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
-            title="有序列表 (1. )"
+            title="有序序号 (1. )"
           >
-            <ListOrdered size={12} /> 序号
+            <ListOrdered size={13} /> 序号
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('`', '`', '行内代码')}
+            onClick={() => insertText('`', '`', '行内代码或专有名词')}
             className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-mono flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
-            title="代码 (`代码`)"
+            title="行内代码 (`code`)"
           >
             <Code size={12} /> 代码
           </button>
@@ -222,51 +228,48 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('\n| 表头1 | 表头2 |\n| :--- | :--- |\n| 内容1 | 内容2 |\n', '', '')}
-            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
-            title="插入标准表格"
+            onClick={() => insertText('\n| 表头列 1 | 表头列 2 | 表头列 3 |\n| :--- | :---: | :--- |\n| 条目数据 A | 位阶 1 | 效果说明描述 |\n| 条目数据 B | 位阶 2 | 效果说明描述 |\n\n', '', '')}
+            className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
+            title="插入标准 Markdown 表格"
           >
             <TableIcon size={12} /> 表格
           </button>
         </div>
 
-        {/* 2. 规则 (Rules) */}
+        {/* 2. 规则 (Rules & Tokens) */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-bold text-stone-400 mr-1 flex items-center gap-1">
             <span>🎲</span> 规则:
           </span>
-          
+
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('【花费 1 希望】', '', '')}
-            className="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-            title="插入花费希望标识"
+            onClick={() => insertText('【花费 1 希望点】', '', '')}
+            className="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded font-bold text-[11px] transition-colors cursor-pointer"
+            title="插入花费希望点标记"
           >
-            <Sparkles size={12} className="text-amber-400" />
-            <span>+花费希望</span>
+            +花费希望
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('【花费 1 恐惧】', '', '')}
-            className="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-            title="插入花费恐惧标识"
+            onClick={() => insertText('【花费 1 恐惧点】', '', '')}
+            className="px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded font-bold text-[11px] transition-colors cursor-pointer"
+            title="插入花费恐惧点标记"
           >
-            <Flame size={12} className="text-purple-400" />
-            <span>+花费恐惧</span>
+            +花费恐惧
           </button>
 
           <button
             type="button"
             onMouseDown={handleBtnMouseDown}
-            onClick={() => insertText('【标记 1 压力】', '', '')}
-            className="px-2 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-            title="插入标记压力标识"
+            onClick={() => insertText('【标记 1 压力点】', '', '')}
+            className="px-2 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 rounded font-bold text-[11px] transition-colors cursor-pointer"
+            title="插入标记压力点描述"
           >
-            <Zap size={12} className="text-rose-400" />
-            <span>+标记压力</span>
+            +标记压力
           </button>
 
           {/* 官方术语库下拉 */}
@@ -319,7 +322,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n这里输入正文段落描述，描写生动的剧情、环境或背景细节...\n\n', '', '')}
+          onClick={() => handleBlockAction('text', '\n这里输入正文段落描述，描写生动的剧情、环境或背景细节...\n\n')}
           className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-medium flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入标准正文段落"
         >
@@ -330,7 +333,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n## 新小节标题\n*这里是小节引言或环境基调描述*\n\n', '', '')}
+          onClick={() => handleBlockAction('subsection', '\n## 新小节标题\n*这里是小节引言或环境基调描述*\n\n')}
           className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入带引言的新小节"
         >
@@ -341,7 +344,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n> 🎙️ **向玩家朗读：**\n> 这里的空气中弥漫着潮湿与古老的尘埃气息，石壁上的火把忽明忽暗...\n\n', '', '')}
+          onClick={() => handleBlockAction('read_aloud', '\n> 🎙️ **向玩家朗读：**\n> 这里的空气中弥漫着潮湿与古老的尘埃气息，石壁上的火把忽明忽暗...\n\n')}
           className="px-2 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入场景向玩家朗读框 (Read Aloud)"
         >
@@ -352,7 +355,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n{{note\n##### 🔒 GM 隐秘备忘与提示\n这里填写仅主持可见的隐秘DC、剧情线索与突发机制...\n}}\n\n', '', '')}
+          onClick={() => handleBlockAction('callout', '\n{{note\n##### 🔒 GM 隐秘备忘与提示\n这里填写仅主持可见的隐秘DC、剧情线索与突发机制...\n}}\n\n')}
           className="px-2 py-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入主持专属 GM 提示盒"
         >
@@ -363,7 +366,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n{{adversary\n## 渊面潜伏者\n### Tier 2 伏击者\navatar: https://i.imgur.com/example.png (circle)\nhealthDisplay: dots\n*阴影中浮现的异化甲壳生物，利齿滴落着腐蚀性黏液。*\n**动机与战术：** 埋伏突袭、分化队伍、猎杀落单目标\n\n{{descriptive\n**Difficulty:** 15 | **Thresholds:** 12/24 | **HP:** 6 | **Stress:** 5\n**ATK:** +3 | **骨刺穿刺:** 近战 (物理) | 2d8+4 伤害\n___\n**Experience:** 潜行与伪装 +2, 剧毒抗性 +3\n}}\n\n#### 特性\n**暗影潜伏 - 被动：** 在昏暗环境中潜行检定获得优势。\n**腐蚀喷射 - 动作：标记 1 压力** 对近距离目标造成 1d10 魔法伤害并使其【脆弱】。\n**断尾逃生 - 反应：花费 1 恐惧** 生命降至 2 以下时立即隐形并撤退至远距离。\n}}\n\n', '', '')}
+          onClick={() => handleBlockAction('enemy', '\n{{adversary\n## 渊面潜伏者\n### Tier 2 伏击者\navatar: https://i.imgur.com/example.png (circle)\nhealthDisplay: dots\n*阴影中浮现的异化甲壳生物，利齿滴落着腐蚀性黏液。*\n**动机与战术：** 埋伏突袭、分化队伍、猎杀落单目标\n\n{{descriptive\n**Difficulty:** 15 | **Thresholds:** 12/24 | **HP:** 6 | **Stress:** 5\n**ATK:** +3 | **骨刺穿刺:** 近战 (物理) | 2d8+4 伤害\n___\n**Experience:** 潜行与伪装 +2, 剧毒抗性 +3\n}}\n\n#### 特性\n**暗影潜伏 - 被动：** 在昏暗环境中潜行检定获得优势。\n**腐蚀喷射 - 动作：标记 1 压力** 对近距离目标造成 1d10 魔法伤害并使其【脆弱】。\n**断尾逃生 - 反应：花费 1 恐惧** 生命降至 2 以下时立即隐形并撤退至远距离。\n}}\n\n')}
           className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入带HP圆点与头像的敌对生物卡"
         >
@@ -374,7 +377,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n{{environment\n## 崩塌的古代祭坛\n### Tier 2 险境事件\ncountdown: 4 (每轮推进 1 格，满格时奥术风暴爆发)\n*古代祭坛在地震中摇摇欲坠，奥术能量不稳定地向四周溢出。*\n**潜在威胁：** 乱石坠落、奥术冲击、地面塌陷\n\n{{descriptive\n**Difficulty:** 14 | **范围:** 祭坛大厅 (近距离至远距离)\n}}\n\n#### 触发机制\n**能量震荡 - 倒计时结算：** 每轮结束时推进 1 格。满格时触发奥术风暴，全场角色进行反应掷骰。\n\n{{gmQuestion\n**GM 启发提问：** 当地面开裂时，哪位角色的随身道具险些滑落深渊？\n}}\n}}\n\n', '', '')}
+          onClick={() => handleBlockAction('environment', '\n{{environment\n## 崩塌的古代祭坛\n### Tier 2 险境事件\ncountdown: 4 (每轮推进 1 格，满格时奥术风暴爆发)\n*古代祭坛在地震中摇摇欲坠，奥术能量不稳定地向四周溢出。*\n**潜在威胁：** 乱石坠落、奥术冲击、地面塌陷\n\n{{descriptive\n**Difficulty:** 14 | **范围:** 祭坛大厅 (近距离至远距离)\n}}\n\n#### 触发机制\n**能量震荡 - 倒计时结算：** 每轮结束时推进 1 格。满格时触发奥术风暴，全场角色进行反应掷骰。\n\n{{gmQuestion\n**GM 启发提问：** 当地面开裂时，哪位角色的随身道具险些滑落深渊？\n}}\n}}\n\n')}
           className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入带倒计时与提问的环境危机卡"
         >
@@ -385,7 +388,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n{{outcome\n[hope,success] 突破封锁并在目标桌上发现绝密信件（获得 1 希望点）。\n[fear,success] 成功撬开大门，但发出的声响惊动了守卫（主持人获得 1 恐惧点）。\n[fear,failure] 警报被触发，两名精锐守卫围堵在走廊拐角。\n[critical] 完美潜入！不仅获得全部情报，还额外清除全队 1 压力点。\n}}\n\n', '', '')}
+          onClick={() => handleBlockAction('outcome', '\n{{outcome\n[hope,success] 突破封锁并在目标桌上发现绝密信件（获得 1 希望点）。\n[fear,success] 成功撬开大门，但发出的声响惊动了守卫（主持人获得 1 恐惧点）。\n[fear,failure] 警报被触发，两名精锐守卫围堵在走廊拐角。\n[critical] 完美潜入！不仅获得全部情报，还额外清除全队 1 压力点。\n}}\n\n')}
           className="px-2 py-1 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入5维希望/恐惧判定分歧矩阵"
         >
@@ -396,7 +399,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n{{DHTable\n| 物品/装备名称 | 位阶 (Tier) | 属性与类型 | 机制效果与结算说明 ||\n| :--- | :---: | :---: | :--- |\n| 逐暗者短刃 | Tier 1 | 近战 (物理) | 攻击昏暗中的目标时获得优势 |\n| 守护者重铠 | Tier 2 | 护甲槽 +2 | 受到物理伤害时可【标记 1 护甲槽】 |\n}}\n\n', '', '')}
+          onClick={() => handleBlockAction('table', '\n{{DHTable\n| 物品/装备名称 | 位阶 (Tier) | 属性与类型 | 机制效果与结算说明 ||\n| :--- | :---: | :---: | :--- |\n| 逐暗者短刃 | Tier 1 | 近战 (物理) | 攻击昏暗中的目标时获得优势 |\n| 守护者重铠 | Tier 2 | 护甲槽 +2 | 受到物理伤害时可【标记 1 护甲槽】 |\n}}\n\n')}
           className="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 rounded font-bold flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入官方黑底大写表头数据表"
         >
@@ -407,7 +410,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n![插画说明描述](https://example.com/image.webp)\n\n', '', '')}
+          onClick={() => handleBlockAction('image', '\n![插画说明描述](https://example.com/image.webp)\n\n')}
           className="px-2 py-1 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 rounded font-medium flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入配图插画"
         >
@@ -418,7 +421,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <button
           type="button"
           onMouseDown={handleBtnMouseDown}
-          onClick={() => insertText('\n---\n\n', '', '')}
+          onClick={() => handleBlockAction('divider', '\n---\n\n')}
           className="px-2 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-700 flex items-center gap-1 text-[11px] transition-colors cursor-pointer"
           title="插入版面分割线 (---)"
         >
