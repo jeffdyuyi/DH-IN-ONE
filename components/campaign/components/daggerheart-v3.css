@@ -1,0 +1,523 @@
+/* ==========================================================================
+   Daggerheart V3 Homebrewery Theme & Scoped Layout Engine
+   Scoped strictly under .dh-book-viewport to prevent polluting external IDE
+   ========================================================================== */
+
+.dh-book-viewport {
+  --dh-page-bg: #f7f5ef;
+  --dh-page-text: #1c1917;
+  --dh-page-border: #dacdb3;
+  --dh-accent: #8a1c1c;
+  --dh-chapter-accent: #536537;
+  --dh-tab-bg: #967b2f;
+  --dh-card-bg: #f5f1e8;
+  --dh-card-inner: #ffffff;
+  --dh-card-border: #dacdb3;
+  --dh-card-text: #1c1917;
+  --dh-table-header-bg: #000000;
+  --dh-table-header-text: #ffffff;
+  --dh-table-stripe: rgba(0, 0, 0, 0.03);
+  --dh-quote-border: #b45309;
+  --dh-quote-bg: rgba(180, 83, 9, 0.06);
+  --dh-font-title: 'Cinzel', 'MedievalSharp', 'Songti SC', 'Source Han Serif SC', serif;
+  --dh-font-body: 'Crimson Pro', 'Spectral', 'Source Han Serif SC', serif;
+  --dh-font-stat: 'Slabo 27px', 'Roboto Slab', serif;
+  
+  font-family: var(--dh-font-body);
+  color: var(--dh-page-text);
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+/* --- Theme Variable Overrides for 8 Distinct Themes (No-Invert) --- */
+.dh-book-viewport[data-theme='gothic'] {
+  --dh-page-bg: #14121e;
+  --dh-page-text: #f5edff;
+  --dh-page-border: #6b21a8;
+  --dh-accent: #c084fc;
+  --dh-chapter-accent: #a855f7;
+  --dh-tab-bg: #7e22ce;
+  --dh-card-bg: #181622;
+  --dh-card-inner: #110e1a;
+  --dh-card-border: #4c1d95;
+  --dh-card-text: #f3e8ff;
+  --dh-table-header-bg: #2e1065;
+  --dh-table-header-text: #f5edff;
+  --dh-table-stripe: rgba(168, 85, 247, 0.08);
+  --dh-quote-border: #c084fc;
+  --dh-quote-bg: rgba(192, 132, 252, 0.1);
+}
+
+.dh-book-viewport[data-theme='fairytale'] {
+  --dh-page-bg: #faf8f5;
+  --dh-page-text: #1e293b;
+  --dh-page-border: #f472b6;
+  --dh-accent: #db2777;
+  --dh-chapter-accent: #0284c7;
+  --dh-tab-bg: #f472b6;
+  --dh-card-bg: #ffffff;
+  --dh-card-inner: #f8fafc;
+  --dh-card-border: #fbcfe8;
+  --dh-card-text: #334155;
+  --dh-table-header-bg: #0f172a;
+  --dh-table-header-text: #ffffff;
+  --dh-table-stripe: rgba(244, 114, 182, 0.06);
+  --dh-quote-border: #db2777;
+  --dh-quote-bg: rgba(219, 39, 119, 0.06);
+}
+
+.dh-book-viewport[data-theme='chinese'] {
+  --dh-page-bg: #fdfbf7;
+  --dh-page-text: #1a1612;
+  --dh-page-border: #c2410c;
+  --dh-accent: #b91c1c;
+  --dh-chapter-accent: #b45309;
+  --dh-tab-bg: #b91c1c;
+  --dh-card-bg: #f7f2ea;
+  --dh-card-inner: #ffffff;
+  --dh-card-border: #e2d7c5;
+  --dh-card-text: #1a1612;
+  --dh-table-header-bg: #450a0a;
+  --dh-table-header-text: #fef08a;
+  --dh-table-stripe: rgba(185, 28, 28, 0.05);
+  --dh-quote-border: #b91c1c;
+  --dh-quote-bg: rgba(185, 28, 28, 0.06);
+}
+
+.dh-book-viewport[data-theme='cyberpunk'] {
+  --dh-page-bg: #0a0a0f;
+  --dh-page-text: #e0f2fe;
+  --dh-page-border: #00f0ff;
+  --dh-accent: #ff007f;
+  --dh-chapter-accent: #00f0ff;
+  --dh-tab-bg: #ff007f;
+  --dh-card-bg: #12111a;
+  --dh-card-inner: #06060a;
+  --dh-card-border: #ff007f;
+  --dh-card-text: #e0f2fe;
+  --dh-table-header-bg: #ff007f;
+  --dh-table-header-text: #ffffff;
+  --dh-table-stripe: rgba(0, 240, 255, 0.08);
+  --dh-quote-border: #00f0ff;
+  --dh-quote-bg: rgba(0, 240, 255, 0.08);
+}
+
+.dh-book-viewport[data-theme='darkfantasy'] {
+  --dh-page-bg: #121214;
+  --dh-page-text: #e4e4e7;
+  --dh-page-border: #52525b;
+  --dh-accent: #dc2626;
+  --dh-chapter-accent: #71717a;
+  --dh-tab-bg: #991b1b;
+  --dh-card-bg: #18181b;
+  --dh-card-inner: #09090b;
+  --dh-card-border: #3f3f46;
+  --dh-card-text: #f4f4f5;
+  --dh-table-header-bg: #000000;
+  --dh-table-header-text: #f4f4f5;
+  --dh-table-stripe: rgba(255, 255, 255, 0.04);
+  --dh-quote-border: #dc2626;
+  --dh-quote-bg: rgba(220, 38, 38, 0.08);
+}
+
+.dh-book-viewport[data-theme='blocky'] {
+  --dh-page-bg: #ffffff;
+  --dh-page-text: #09090b;
+  --dh-page-border: #18181b;
+  --dh-accent: #0284c7;
+  --dh-chapter-accent: #0284c7;
+  --dh-tab-bg: #0f172a;
+  --dh-card-bg: #f4f4f5;
+  --dh-card-inner: #ffffff;
+  --dh-card-border: #18181b;
+  --dh-card-text: #09090b;
+  --dh-table-header-bg: #18181b;
+  --dh-table-header-text: #ffffff;
+  --dh-table-stripe: rgba(0, 0, 0, 0.04);
+  --dh-quote-border: #18181b;
+  --dh-quote-bg: #f4f4f5;
+}
+
+.dh-book-viewport[data-theme='nightracer'] {
+  --dh-page-bg: #09090b;
+  --dh-page-text: #f4f4f5;
+  --dh-page-border: #eab308;
+  --dh-accent: #eab308;
+  --dh-chapter-accent: #facc15;
+  --dh-tab-bg: #ca8a04;
+  --dh-card-bg: #18181b;
+  --dh-card-inner: #09090b;
+  --dh-card-border: #ca8a04;
+  --dh-card-text: #fef08a;
+  --dh-table-header-bg: #ca8a04;
+  --dh-table-header-text: #000000;
+  --dh-table-stripe: rgba(234, 179, 8, 0.08);
+  --dh-quote-border: #eab308;
+  --dh-quote-bg: rgba(234, 179, 8, 0.08);
+}
+
+/* --- A4 Page Container & Multi-Column Layout --- */
+.dh-book-viewport .dh-page {
+  position: relative;
+  background-color: var(--dh-page-bg);
+  color: var(--dh-page-text);
+  width: 100%;
+  max-width: 210mm;
+  min-height: 297mm;
+  padding: 18mm 16mm 20mm 16mm;
+  margin: 0 auto 24px auto;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--dh-page-border);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dh-book-viewport .dh-page-content {
+  column-count: 2;
+  column-gap: 8mm;
+  column-fill: balance;
+  height: 100%;
+}
+
+/* Wide / Spanning Block across all columns */
+.dh-book-viewport .dh-wide {
+  column-span: all;
+  -webkit-column-span: all;
+  margin: 1em 0;
+  width: 100%;
+}
+
+/* Headings */
+.dh-book-viewport h1 {
+  font-family: var(--dh-font-title);
+  font-size: 1.9em;
+  font-weight: 900;
+  color: var(--dh-accent);
+  line-height: 1.15;
+  margin-top: 0.2em;
+  margin-bottom: 0.3em;
+  letter-spacing: -0.5px;
+}
+
+.dh-book-viewport h2 {
+  font-family: var(--dh-font-title);
+  font-size: 1.45em;
+  font-weight: 800;
+  color: var(--dh-chapter-accent);
+  border-bottom: 1.5px solid var(--dh-page-border);
+  padding-bottom: 0.15em;
+  margin-top: 0.8em;
+  margin-bottom: 0.35em;
+}
+
+.dh-book-viewport h3 {
+  font-family: var(--dh-font-title);
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--dh-chapter-accent);
+  margin-top: 0.7em;
+  margin-bottom: 0.25em;
+}
+
+.dh-book-viewport h4 {
+  font-family: var(--dh-font-title);
+  font-size: 1em;
+  font-weight: 700;
+  margin-top: 0.5em;
+  margin-bottom: 0.2em;
+}
+
+.dh-book-viewport p {
+  margin-bottom: 0.65em;
+  text-align: justify;
+  text-justify: inter-word;
+  word-break: break-word;
+}
+
+/* Vertical Spacer (::) */
+.dh-book-viewport .dh-spacer {
+  display: block;
+  height: 0.85em;
+}
+.dh-book-viewport .dh-spacer-2 {
+  display: block;
+  height: 1.7em;
+}
+.dh-book-viewport .dh-spacer-3 {
+  display: block;
+  height: 2.55em;
+}
+
+/* Definition List */
+.dh-book-viewport .dh-def-list {
+  margin: 0.6em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+.dh-book-viewport .dh-def-term {
+  font-weight: 700;
+  color: var(--dh-accent);
+}
+
+/* Quotes / Read Aloud / Flavor Text */
+.dh-book-viewport blockquote,
+.dh-book-viewport .dh-flavor {
+  border-left: 4px solid var(--dh-quote-border);
+  background: var(--dh-quote-bg);
+  padding: 0.65em 0.9em;
+  margin: 0.75em 0;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  break-inside: avoid;
+}
+
+/* GM Note Box */
+.dh-book-viewport .dh-note {
+  border: 1.5px dashed var(--dh-card-border);
+  background: var(--dh-card-bg);
+  padding: 0.8em;
+  margin: 0.85em 0;
+  border-radius: 6px;
+  break-inside: avoid;
+}
+.dh-book-viewport .dh-note-title {
+  font-family: var(--dh-font-title);
+  font-weight: 800;
+  font-size: 0.95em;
+  color: var(--dh-chapter-accent);
+  margin-bottom: 0.35em;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+/* --- Daggerheart Custom Table (DHTable) --- */
+.dh-book-viewport .dh-table-container {
+  margin: 0.8em 0;
+  overflow-x: auto;
+  break-inside: avoid;
+}
+.dh-book-viewport table.dh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  border: 1px solid var(--dh-card-border);
+  background: var(--dh-card-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dh-book-viewport table.dh-table thead tr th {
+  background-color: var(--dh-table-header-bg);
+  color: var(--dh-table-header-text);
+  font-family: var(--dh-font-title);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.9em;
+}
+.dh-book-viewport table.dh-table tbody tr {
+  border-bottom: 1px solid var(--dh-card-border);
+}
+.dh-book-viewport table.dh-table tbody tr:nth-child(even) {
+  background-color: var(--dh-table-stripe);
+}
+.dh-book-viewport table.dh-table tbody td {
+  padding: 4px 8px;
+  border-right: 1px solid var(--dh-card-border);
+}
+.dh-book-viewport table.dh-table tbody td:last-child {
+  border-right: none;
+}
+
+/* --- Adversary Statblock Component --- */
+.dh-book-viewport .dh-adversary {
+  border: 1.5px solid var(--dh-card-border);
+  background: var(--dh-card-bg);
+  color: var(--dh-card-text);
+  border-radius: 6px;
+  padding: 0.7em 0.8em;
+  margin: 0.8em 0;
+  break-inside: avoid;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.dh-book-viewport .dh-adversary .dh-descriptive {
+  background: var(--dh-card-inner);
+  border-top: 1px solid var(--dh-card-border);
+  border-bottom: 1px solid var(--dh-card-border);
+  padding: 0.5em 0.6em;
+  margin: 0.4em -0.8em 0.6em -0.8em;
+}
+
+/* HP & Stress Dots Bar */
+.dh-book-viewport .dh-dots-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+  margin-top: 3px;
+}
+.dh-book-viewport .dh-dot-hp {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid #dc2626;
+  background-color: rgba(220, 38, 38, 0.25);
+  display: inline-block;
+}
+.dh-book-viewport .dh-dot-stress {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid #d97706;
+  background-color: rgba(217, 119, 6, 0.25);
+  display: inline-block;
+}
+
+/* --- Outcome Matrix Component --- */
+.dh-book-viewport .dh-outcome-card {
+  border: 1.5px solid var(--dh-card-border);
+  background: var(--dh-card-bg);
+  border-radius: 8px;
+  padding: 0.75em;
+  margin: 0.85em 0;
+  break-inside: avoid;
+}
+.dh-book-viewport .dh-outcome-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  padding: 0.35em 0;
+  border-bottom: 1px dashed var(--dh-card-border);
+}
+.dh-book-viewport .dh-outcome-entry:last-child {
+  border-bottom: none;
+}
+
+/* --- Environment Component --- */
+.dh-book-viewport .dh-environment {
+  border: 1.5px solid var(--dh-card-border);
+  background: var(--dh-card-bg);
+  border-radius: 6px;
+  padding: 0.7em 0.8em;
+  margin: 0.8em 0;
+  break-inside: avoid;
+}
+
+/* --- Cyberware Component --- */
+.dh-book-viewport .dh-cyberware {
+  border: 1.5px solid var(--dh-card-border);
+  background: var(--dh-card-bg);
+  border-radius: 6px;
+  padding: 0.7em 0.8em;
+  margin: 0.8em 0;
+  break-inside: avoid;
+}
+
+/* --- Table of Contents (TOC) --- */
+.dh-book-viewport .dh-toc {
+  margin: 1em 0;
+  break-inside: avoid;
+}
+.dh-book-viewport .dh-toc-title {
+  font-family: var(--dh-font-title);
+  font-size: 1.5em;
+  font-weight: 900;
+  color: var(--dh-accent);
+  border-bottom: 2px solid var(--dh-accent);
+  padding-bottom: 0.2em;
+  margin-bottom: 0.6em;
+}
+.dh-book-viewport .dh-toc-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.3em;
+  font-size: 0.9em;
+}
+.dh-book-viewport .dh-toc-leader {
+  flex-grow: 1;
+  border-bottom: 1px dotted var(--dh-page-border);
+  margin: 0 0.4em;
+  position: relative;
+  top: -4px;
+}
+.dh-book-viewport .dh-toc-page {
+  font-weight: 700;
+  color: var(--dh-accent);
+  font-size: 0.95em;
+}
+
+/* --- Artist Attribution Badge --- */
+.dh-book-viewport .dh-artist {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.7em;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  line-height: 1.2;
+}
+.dh-book-viewport .dh-artist.dh-artist-light {
+  background: rgba(255, 255, 255, 0.85);
+  color: #000000;
+}
+.dh-book-viewport .dh-artist a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* --- Image Masks --- */
+.dh-book-viewport .dh-image-mask {
+  mask-image: radial-gradient(circle, black 65%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle, black 65%, transparent 100%);
+}
+
+/* --- Side Tab (Chapter Indicators) --- */
+.dh-book-viewport .dh-side-tab {
+  position: absolute;
+  top: 140px;
+  right: -1px;
+  width: 14px;
+  height: 65px;
+  background-color: var(--dh-tab-bg);
+  border-radius: 4px 0 0 4px;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Page Footer & Auto Page Number --- */
+.dh-book-viewport .dh-page-footer {
+  position: absolute;
+  bottom: 8mm;
+  left: 16mm;
+  right: 16mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75em;
+  font-weight: 600;
+  color: var(--dh-page-border);
+  border-top: 1px solid var(--dh-page-border);
+  padding-top: 2mm;
+  box-sizing: border-box;
+}
+
+/* Print Rules */
+@media print {
+  body {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .dh-book-viewport .dh-page {
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    break-after: page;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

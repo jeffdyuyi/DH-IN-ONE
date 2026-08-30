@@ -15,7 +15,7 @@ import {
   Folder, Clock, Save, Bold, Strikethrough,
   Quote, List, ListOrdered, Code, Split, Highlighter, Copy,
   ShieldCheck, Scale, Check, CheckCircle2, Sparkles, FileCheck,
-  Cpu, Database
+  Cpu, Database, Columns
 } from 'lucide-react';
 import { 
   ProjectData, DynamicSection, DEFAULT_PROJECT,
@@ -31,6 +31,8 @@ import { SmartTextarea } from './components/SmartTextarea';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
 import { SavedLibraryModal, LIBRARY_STORAGE_KEY } from './components/SavedLibraryModal';
 import { VaultCardInsertModal } from './components/VaultCardInsertModal';
+import { CampaignSplitEditor } from './components/CampaignSplitEditor';
+import { serializeProjectDataToV3Markdown, generateTocSnippet } from './components/projectSerializer';
 
 // --- Constants & Styles ---
 
@@ -778,7 +780,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 // --- Main App Component ---
 
 const MainContent = () => {
-  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('edit');
+  const [splitMarkdownText, setSplitMarkdownText] = useState<string>('');
   const [projectData, setProjectData] = usePersistentState<ProjectData>('dh_project_v1', DEFAULT_PROJECT);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [activeSpecialPage, setActiveSpecialPage] = useState<'coverPage' | 'creditsPage' | 'copyrightPage' | null>(null);
@@ -786,6 +789,12 @@ const MainContent = () => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [lastAutoSaveTime, setLastAutoSaveTime] = useState<number | null>(null);
   const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null);
+
+  // Sync markdown text when entering split mode
+  const handleEnterSplitMode = useCallback(() => {
+    setSplitMarkdownText(serializeProjectDataToV3Markdown(projectData));
+    setViewMode('split');
+  }, [projectData]);
 
   // Track last edited section ID so returning to outline centers on it
   useEffect(() => {
@@ -1010,7 +1019,22 @@ const MainContent = () => {
       />
 
       <div className="flex-1 flex overflow-hidden relative print:block print:h-auto print:overflow-visible">
-        {viewMode === 'preview' ? (
+        {viewMode === 'split' ? (
+          <div className="flex-1 p-2 md:p-4 overflow-hidden">
+            <CampaignSplitEditor
+              projectData={projectData}
+              fullMarkdownText={splitMarkdownText || serializeProjectDataToV3Markdown(projectData)}
+              onChangeMarkdown={setSplitMarkdownText}
+              activeTheme={projectData.theme}
+              onChangeTheme={(t) => updateField('theme', t)}
+              onGenerateToc={() => {
+                const toc = generateTocSnippet(projectData);
+                setSplitMarkdownText((prev) => `${toc}\n\n${prev || serializeProjectDataToV3Markdown(projectData)}`);
+              }}
+              onCloseSplitView={() => setViewMode('edit')}
+            />
+          </div>
+        ) : viewMode === 'preview' ? (
           <div id="main-scroll" className="flex-1 overflow-y-auto bg-stone-200/50 p-4 md:p-8 scroll-smooth print:p-0 print:m-0 print:bg-white print:overflow-visible print:h-auto print:block">
             <PreviewView data={projectData} activeSectionId={activeSectionId} />
           </div>
@@ -1430,13 +1454,27 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
 
          {/* View Toggle */}
          <div className="flex bg-stone-800 p-1 rounded-lg gap-1 border border-stone-700/50">
-            <button onClick={() => setViewMode('edit')} title="编辑视图" className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode==='edit'?'bg-stone-700 text-white shadow-sm ring-1 ring-stone-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
+            <button onClick={() => setViewMode('edit')} title="积木表单编辑" className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='edit'?'bg-stone-700 text-white shadow-sm ring-1 ring-stone-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
                <Edit3 className="w-3.5 h-3.5" />
-               <span className="text-xs font-bold hidden md:inline">编辑</span>
+               <span className="text-xs font-bold hidden md:inline">积木表单</span>
             </button>
-            <button onClick={() => setViewMode('preview')} title="预览视图" className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${viewMode==='preview'?'bg-amber-700 text-white shadow-sm ring-1 ring-amber-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
+            <button 
+               onClick={() => {
+                  if (viewMode !== 'split') {
+                     setViewMode('split');
+                  } else {
+                     setViewMode('edit');
+                  }
+               }} 
+               title="一页流 · 左右所见即所得工作台" 
+               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='split'?'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400 font-bold':'text-amber-400 hover:text-white hover:bg-stone-800'}`}
+            >
+               <Columns className="w-3.5 h-3.5" />
+               <span className="text-xs font-bold hidden md:inline">分屏 (一页流)</span>
+            </button>
+            <button onClick={() => setViewMode('preview')} title="手册全览" className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='preview'?'bg-amber-700 text-white shadow-sm ring-1 ring-amber-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
                <Eye className="w-3.5 h-3.5" />
-               <span className="text-xs font-bold hidden md:inline">预览</span>
+               <span className="text-xs font-bold hidden md:inline">手册全览</span>
             </button>
          </div>
       </div>
