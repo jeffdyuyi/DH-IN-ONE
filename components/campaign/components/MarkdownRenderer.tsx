@@ -2,12 +2,14 @@ import React, { useMemo } from 'react';
 import './daggerheart-v3.css';
 import { parseDocumentToPages, ParsedBlock, ParsedPage } from './v3Grammar';
 import { Skull, ShieldAlert, Compass, Cpu, BookOpen, Quote, StickyNote, Sparkles, Flame, Zap, Heart, Shield } from 'lucide-react';
+import { ProjectData } from '../types';
 
 interface MarkdownRendererProps {
   content: string;
   className?: string;
   theme?: string;
   isBookMode?: boolean; // If true, render as continuous A4 pages with double-columns
+  projectData?: ProjectData;
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
@@ -15,17 +17,79 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   className = '',
   theme = 'default',
   isBookMode = false,
+  projectData,
 }) => {
   if (!content) return null;
 
-  // Helper to parse inline markdown (bold, italic, strikethrough, highlight ==...==, code, TRPG tokens)
+  // Resolve image tags like [战役封面] or [插画:id] to real data URLs
+  const resolveImageUrl = (rawSrc: string): string => {
+    if (!rawSrc) return '';
+    const trimmed = rawSrc.trim();
+
+    if (trimmed === '[战役封面]' || trimmed === 'cover' || trimmed === '@cover') {
+      return projectData?.coverPage?.coverImage || '';
+    }
+
+    if (trimmed.startsWith('[插画:') && trimmed.endsWith(']')) {
+      const blockId = trimmed.slice(4, -1).trim();
+      const foundBlock = projectData?.sections?.flatMap(s => s.blocks || []).find(b => b.id === blockId);
+      return (foundBlock as any)?.url || '';
+    }
+
+    if (trimmed.startsWith('[头像:') && trimmed.endsWith(']')) {
+      const blockId = trimmed.slice(4, -1).trim();
+      const foundBlock = projectData?.sections?.flatMap(s => s.blocks || []).find(b => b.id === blockId);
+      return (foundBlock as any)?.avatarUrl || '';
+    }
+
+    return trimmed;
+  };
+
+  // Helper to parse inline markdown (bold, italic, strikethrough, highlight ==...==, code, images, TRPG tokens)
   const parseInline = (text: string): React.ReactNode[] => {
     if (!text) return [];
-    const regex = /(\*\*.*?\*\*|\*.*?\*|~~.*?~~|==.*?==|`.*?`|【[^】]+】)/g;
+    const regex = /(!\[.*?\]\(.*?\)|\[.*?\]\(.*?\)|==.*?==|\*\*.*?\*\*|\*.*?\*|~~.*?~~|`.*?`|【[^】]+】)/g;
     const parts = text.split(regex);
 
     return parts.map((part, index) => {
       if (!part) return null;
+
+      // Image: ![alt](url)
+      if (part.startsWith('![') && part.includes('](')) {
+        const match = part.match(/!\[(.*?)\]\((.*?)\)(?:\{(.*?)\})?/);
+        if (match) {
+          const alt = match[1];
+          const rawUrl = match[2];
+          const resolved = resolveImageUrl(rawUrl);
+          if (!resolved) {
+            return (
+              <div key={index} className="my-2 p-3 bg-stone-100 dark:bg-stone-800 border border-dashed border-stone-300 dark:border-stone-700 rounded text-center text-xs text-stone-500">
+                🖼️ [{alt || '插画'}]
+              </div>
+            );
+          }
+          return (
+            <img
+              key={index}
+              src={resolved}
+              alt={alt}
+              className="max-w-full h-auto rounded my-2 shadow-xs object-cover"
+            />
+          );
+        }
+      }
+
+      // Link: [text](url)
+      if (part.startsWith('[') && part.includes('](')) {
+        const match = part.match(/\[(.*?)\]\((.*?)\)/);
+        if (match) {
+          return (
+            <a key={index} href={match[2]} className="text-inherit underline font-semibold hover:opacity-80">
+              {match[1]}
+            </a>
+          );
+        }
+      }
 
       if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
         return <strong key={index} className="font-bold text-inherit">{part.slice(2, -2)}</strong>;
@@ -245,21 +309,23 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
       case 'adversary': {
         const adv = block.data || {};
+        const realAvatar = resolveImageUrl(adv.avatarUrl);
+
         return (
           <div key={`adv-${bIdx}`} className="dh-adversary">
             <div className="flex items-start justify-between gap-2 border-b border-current/20 pb-1 mb-1">
               <div>
                 <h3 className="font-bold text-base m-0 text-inherit flex items-center gap-1.5">
-                  <Skull size={15} className="text-red-600" />
+                  <Skull size={15} className="text-red-500" />
                   {adv.name}
                 </h3>
                 {adv.tierRole && <div className="text-xs italic opacity-80">{adv.tierRole}</div>}
               </div>
-              {adv.avatarUrl && (
+              {realAvatar && (
                 <img
-                  src={adv.avatarUrl}
+                  src={realAvatar}
                   alt={adv.name}
-                  className={`w-10 h-10 object-cover border-2 border-amber-600 shadow-xs ${
+                  className={`w-10 h-10 object-cover border-2 border-current shadow-xs ${
                     adv.avatarShape === 'square' ? 'rounded-md' : 'rounded-full'
                   }`}
                 />
@@ -271,17 +337,17 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
             <div className="dh-descriptive text-xs space-y-1">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 font-semibold">
-                <div>难度 (DC): <span className="text-amber-700 dark:text-amber-400 font-bold">{adv.difficulty}</span></div>
+                <div>难度 (DC): <span className="font-bold text-inherit">{adv.difficulty}</span></div>
                 <div>护甲阈值: {adv.thresholdMinor}/{adv.thresholdMajor}</div>
-                <div>生命值 (HP): <span className="text-red-600 font-bold">{adv.hp}</span></div>
-                <div>压力 (Stress): <span className="text-amber-600 font-bold">{adv.stress}</span></div>
+                <div>生命值 (HP): <span className="text-red-500 font-bold">{adv.hp}</span></div>
+                <div>压力 (Stress): <span className="text-amber-500 font-bold">{adv.stress}</span></div>
               </div>
 
               {/* Dots display mode */}
               {(adv.healthDisplay === 'dots' || adv.healthDisplay === 'both') && (
                 <div className="pt-1 space-y-1 border-t border-current/10">
                   <div className="flex items-center gap-1 text-[10px]">
-                    <span className="font-bold text-red-700">生命槽:</span>
+                    <span className="font-bold text-red-500">生命槽:</span>
                     <div className="dh-dots-container">
                       {Array.from({ length: Math.min(24, adv.hp || 5) }).map((_, dIdx) => (
                         <span key={`hp-${dIdx}`} className="dh-dot-hp" />
@@ -289,7 +355,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-[10px]">
-                    <span className="font-bold text-amber-700">压力槽:</span>
+                    <span className="font-bold text-amber-500">压力槽:</span>
                     <div className="dh-dots-container">
                       {Array.from({ length: Math.min(18, adv.stress || 4) }).map((_, dIdx) => (
                         <span key={`str-${dIdx}`} className="dh-dot-stress" />
@@ -301,7 +367,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
               {adv.attack && (
                 <div className="text-xs pt-1 border-t border-current/10">
-                  <strong className="text-red-700 dark:text-red-400">{parseInline(adv.attack)}</strong>
+                  <strong className="text-red-500 dark:text-red-400">{parseInline(adv.attack)}</strong>
                 </div>
               )}
             </div>
@@ -312,7 +378,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 <div className="text-xs font-bold uppercase tracking-wider opacity-70">特性与动作:</div>
                 {adv.traits.map((tr: any, tIdx: number) => (
                   <div key={tIdx} className="text-xs leading-relaxed">
-                    <span className="font-bold text-amber-900 dark:text-amber-200">
+                    <span className="font-bold text-inherit">
                       {tr.name} {tr.type ? `[${tr.type.toUpperCase()}]` : ''}:
                     </span>{' '}
                     <span>{parseInline(tr.desc)}</span>
@@ -338,11 +404,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                   <div className="flex gap-1 shrink-0">
                     {entry.tags?.map((tag: string, tagIdx: number) => {
                       const tagColor = 
-                        tag === 'hope' ? 'bg-amber-500/20 text-amber-700 border-amber-400' :
-                        tag === 'fear' ? 'bg-purple-500/20 text-purple-700 border-purple-400' :
-                        tag === 'success' ? 'bg-emerald-500/20 text-emerald-700 border-emerald-400' :
-                        tag === 'failure' ? 'bg-red-500/20 text-red-700 border-red-400' :
-                        'bg-yellow-500/30 text-yellow-800 border-yellow-500';
+                        tag === 'hope' ? 'bg-amber-500/20 text-amber-600 border-amber-400' :
+                        tag === 'fear' ? 'bg-purple-500/20 text-purple-600 border-purple-400' :
+                        tag === 'success' ? 'bg-emerald-500/20 text-emerald-600 border-emerald-400' :
+                        tag === 'failure' ? 'bg-red-500/20 text-red-600 border-red-400' :
+                        'bg-yellow-500/30 text-yellow-700 border-yellow-500';
                       return (
                         <span key={tagIdx} className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${tagColor}`}>
                           {tag.toUpperCase()}
@@ -363,13 +429,13 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         return (
           <div key={`env-${bIdx}`} className="dh-environment">
             <h3 className="font-bold text-base text-inherit flex items-center gap-1.5 mb-1">
-              <ShieldAlert size={15} className="text-sky-600" />
+              <ShieldAlert size={15} className="text-sky-500" />
               {env.title}
             </h3>
             {env.tierEvent && <div className="text-xs italic opacity-80 mb-1">{env.tierEvent}</div>}
             <div className="dh-descriptive text-xs space-y-1">
-              <div>难度 (DC): <span className="font-bold text-sky-600">{env.difficulty}</span></div>
-              {env.countdown && <div>危机倒计时: <span className="font-bold text-amber-600">{env.countdown} 格</span></div>}
+              <div>难度 (DC): <span className="font-bold text-sky-500">{env.difficulty}</span></div>
+              {env.countdown && <div>危机倒计时: <span className="font-bold text-amber-500">{env.countdown} 格</span></div>}
             </div>
             <div className="text-xs mt-1 leading-relaxed">{parseInline(block.content || '')}</div>
           </div>
@@ -381,7 +447,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         return (
           <div key={`cyb-${bIdx}`} className="dh-cyberware">
             <h3 className="font-bold text-base text-inherit flex items-center gap-1.5 mb-1">
-              <Cpu size={15} className="text-pink-600" />
+              <Cpu size={15} className="text-pink-500" />
               {cyb.name} <span className="text-xs opacity-70 font-normal">({cyb.tier} · {cyb.zone})</span>
             </h3>
             <div className="dh-descriptive text-xs space-y-0.5">

@@ -1,24 +1,31 @@
 /* ==========================================================================
    Daggerheart V3 Homebrewery Theme & Scoped Layout Engine
-   Scoped strictly under .dh-book-viewport to prevent polluting external IDE
+   Strictly 1:1 mapped to original mature THEMES palette from campaign-editor-app
    ========================================================================== */
 
 .dh-book-viewport {
-  --dh-page-bg: #f7f5ef;
+  /* Default: Daggerheart Original Parchment */
+  --dh-page-bg: #ffffff;
   --dh-page-text: #1c1917;
-  --dh-page-border: #dacdb3;
-  --dh-accent: #8a1c1c;
-  --dh-chapter-accent: #536537;
+  --dh-page-border: #c2b49d;
+  --dh-accent: #b45309;
+  --dh-chapter-accent: #8a1c1c;
   --dh-tab-bg: #967b2f;
-  --dh-card-bg: #f5f1e8;
+  --dh-card-bg: #f7f5ef;
   --dh-card-inner: #ffffff;
-  --dh-card-border: #dacdb3;
+  --dh-card-border: #c2b49d;
   --dh-card-text: #1c1917;
-  --dh-table-header-bg: #000000;
+  --dh-enemy-bar: #8a1c1c;
+  --dh-env-bar: #1c538a;
+  --dh-table-header-bg: #1c1917;
   --dh-table-header-text: #ffffff;
   --dh-table-stripe: rgba(0, 0, 0, 0.03);
   --dh-quote-border: #b45309;
   --dh-quote-bg: rgba(180, 83, 9, 0.06);
+  --dh-dot-hp-border: #dc2626;
+  --dh-dot-hp-bg: rgba(220, 38, 38, 0.2);
+  --dh-dot-stress-border: #d97706;
+  --dh-dot-stress-bg: rgba(217, 119, 6, 0.2);
   --dh-font-title: 'Cinzel', 'MedievalSharp', 'Songti SC', 'Source Han Serif SC', serif;
   --dh-font-body: 'Crimson Pro', 'Spectral', 'Source Han Serif SC', serif;
   --dh-font-stat: 'Slabo 27px', 'Roboto Slab', serif;
@@ -29,25 +36,32 @@
   box-sizing: border-box;
 }
 
-/* --- Theme Variable Overrides for 8 Distinct Themes (No-Invert) --- */
+/* 1. gothic: 黑紫哥特 */
 .dh-book-viewport[data-theme='gothic'] {
   --dh-page-bg: #14121e;
   --dh-page-text: #f5edff;
-  --dh-page-border: #6b21a8;
+  --dh-page-border: #7e22ce;
   --dh-accent: #c084fc;
   --dh-chapter-accent: #a855f7;
   --dh-tab-bg: #7e22ce;
   --dh-card-bg: #181622;
   --dh-card-inner: #110e1a;
-  --dh-card-border: #4c1d95;
+  --dh-card-border: #6b21a8;
   --dh-card-text: #f3e8ff;
+  --dh-enemy-bar: #ef4444;
+  --dh-env-bar: #a855f7;
   --dh-table-header-bg: #2e1065;
   --dh-table-header-text: #f5edff;
   --dh-table-stripe: rgba(168, 85, 247, 0.08);
   --dh-quote-border: #c084fc;
   --dh-quote-bg: rgba(192, 132, 252, 0.1);
+  --dh-dot-hp-border: #f87171;
+  --dh-dot-hp-bg: rgba(239, 68, 68, 0.3);
+  --dh-dot-stress-border: #fde047;
+  --dh-dot-stress-bg: rgba(234, 179, 8, 0.3);
 }
 
+/* 2. fairytale: 粉蓝童话 */
 .dh-book-viewport[data-theme='fairytale'] {
   --dh-page-bg: #faf8f5;
   --dh-page-text: #1e293b;
@@ -57,103 +71,144 @@
   --dh-tab-bg: #f472b6;
   --dh-card-bg: #ffffff;
   --dh-card-inner: #f8fafc;
-  --dh-card-border: #fbcfe8;
+  --dh-card-border: #f472b6;
   --dh-card-text: #334155;
+  --dh-enemy-bar: #f43f5e;
+  --dh-env-bar: #0284c7;
   --dh-table-header-bg: #0f172a;
   --dh-table-header-text: #ffffff;
   --dh-table-stripe: rgba(244, 114, 182, 0.06);
   --dh-quote-border: #db2777;
   --dh-quote-bg: rgba(219, 39, 119, 0.06);
+  --dh-dot-hp-border: #f43f5e;
+  --dh-dot-hp-bg: rgba(244, 63, 94, 0.2);
+  --dh-dot-stress-border: #d97706;
+  --dh-dot-stress-bg: rgba(217, 119, 6, 0.2);
 }
 
+/* 3. chinese: 红黄中国 */
 .dh-book-viewport[data-theme='chinese'] {
-  --dh-page-bg: #fdfbf7;
-  --dh-page-text: #1a1612;
-  --dh-page-border: #c2410c;
-  --dh-accent: #b91c1c;
-  --dh-chapter-accent: #b45309;
-  --dh-tab-bg: #b91c1c;
-  --dh-card-bg: #f7f2ea;
-  --dh-card-inner: #ffffff;
-  --dh-card-border: #e2d7c5;
-  --dh-card-text: #1a1612;
-  --dh-table-header-bg: #450a0a;
-  --dh-table-header-text: #fef08a;
-  --dh-table-stripe: rgba(185, 28, 28, 0.05);
-  --dh-quote-border: #b91c1c;
-  --dh-quote-bg: rgba(185, 28, 28, 0.06);
-}
-
-.dh-book-viewport[data-theme='cyberpunk'] {
-  --dh-page-bg: #0a0a0f;
-  --dh-page-text: #e0f2fe;
-  --dh-page-border: #00f0ff;
-  --dh-accent: #ff007f;
-  --dh-chapter-accent: #00f0ff;
-  --dh-tab-bg: #ff007f;
-  --dh-card-bg: #12111a;
-  --dh-card-inner: #06060a;
-  --dh-card-border: #ff007f;
-  --dh-card-text: #e0f2fe;
-  --dh-table-header-bg: #ff007f;
-  --dh-table-header-text: #ffffff;
-  --dh-table-stripe: rgba(0, 240, 255, 0.08);
-  --dh-quote-border: #00f0ff;
-  --dh-quote-bg: rgba(0, 240, 255, 0.08);
-}
-
-.dh-book-viewport[data-theme='darkfantasy'] {
-  --dh-page-bg: #121214;
-  --dh-page-text: #e4e4e7;
-  --dh-page-border: #52525b;
-  --dh-accent: #dc2626;
-  --dh-chapter-accent: #71717a;
+  --dh-page-bg: #faf7f0;
+  --dh-page-text: #1c1917;
+  --dh-page-border: #991b1b;
+  --dh-accent: #991b1b;
+  --dh-chapter-accent: #991b1b;
   --dh-tab-bg: #991b1b;
-  --dh-card-bg: #18181b;
-  --dh-card-inner: #09090b;
-  --dh-card-border: #3f3f46;
-  --dh-card-text: #f4f4f5;
-  --dh-table-header-bg: #000000;
-  --dh-table-header-text: #f4f4f5;
-  --dh-table-stripe: rgba(255, 255, 255, 0.04);
-  --dh-quote-border: #dc2626;
-  --dh-quote-bg: rgba(220, 38, 38, 0.08);
+  --dh-card-bg: #faf6ed;
+  --dh-card-inner: #fffdf8;
+  --dh-card-border: #991b1b;
+  --dh-card-text: #292524;
+  --dh-enemy-bar: #991b1b;
+  --dh-env-bar: #065f46;
+  --dh-table-header-bg: #991b1b;
+  --dh-table-header-text: #fef08a;
+  --dh-table-stripe: rgba(153, 27, 27, 0.05);
+  --dh-quote-border: #991b1b;
+  --dh-quote-bg: rgba(153, 27, 27, 0.06);
+  --dh-dot-hp-border: #991b1b;
+  --dh-dot-hp-bg: rgba(153, 27, 27, 0.2);
+  --dh-dot-stress-border: #b45309;
+  --dh-dot-stress-bg: rgba(180, 83, 9, 0.2);
 }
 
+/* 4. cyberpunk: 电驭朋克 (严格采用原版黄色重点#facc15+青色边框#00e5ff) */
+.dh-book-viewport[data-theme='cyberpunk'] {
+  --dh-page-bg: #0a0a14;
+  --dh-page-text: #f1f5f9;
+  --dh-page-border: #facc15;
+  --dh-accent: #facc15;
+  --dh-chapter-accent: #00e5ff;
+  --dh-tab-bg: #facc15;
+  --dh-card-bg: #0c0c1e;
+  --dh-card-inner: #060612;
+  --dh-card-border: #00e5ff;
+  --dh-card-text: #e2e8f0;
+  --dh-enemy-bar: #ff0055;
+  --dh-env-bar: #00e5ff;
+  --dh-table-header-bg: #14142b;
+  --dh-table-header-text: #facc15;
+  --dh-table-stripe: rgba(0, 229, 255, 0.06);
+  --dh-quote-border: #00e5ff;
+  --dh-quote-bg: rgba(0, 229, 255, 0.08);
+  --dh-dot-hp-border: #ff0055;
+  --dh-dot-hp-bg: rgba(255, 0, 85, 0.3);
+  --dh-dot-stress-border: #f5e642;
+  --dh-dot-stress-bg: rgba(245, 230, 66, 0.3);
+}
+
+/* 5. darkfantasy: 深渊传奇 */
+.dh-book-viewport[data-theme='darkfantasy'] {
+  --dh-page-bg: #140e06;
+  --dh-page-text: #fef3c7;
+  --dh-page-border: #b45309;
+  --dh-accent: #f59e0b;
+  --dh-chapter-accent: #d97706;
+  --dh-tab-bg: #b45309;
+  --dh-card-bg: #1a140a;
+  --dh-card-inner: #0f0b05;
+  --dh-card-border: #855a1e;
+  --dh-card-text: #e8d5b5;
+  --dh-enemy-bar: #dc2626;
+  --dh-env-bar: #16a34a;
+  --dh-table-header-bg: #24190c;
+  --dh-table-header-text: #fbbf24;
+  --dh-table-stripe: rgba(245, 158, 11, 0.05);
+  --dh-quote-border: #f59e0b;
+  --dh-quote-bg: rgba(245, 158, 11, 0.08);
+  --dh-dot-hp-border: #f87171;
+  --dh-dot-hp-bg: rgba(220, 38, 38, 0.3);
+  --dh-dot-stress-border: #fde047;
+  --dh-dot-stress-bg: rgba(234, 179, 8, 0.3);
+}
+
+/* 6. blocky: 砖石矿界 */
 .dh-book-viewport[data-theme='blocky'] {
-  --dh-page-bg: #ffffff;
-  --dh-page-text: #09090b;
-  --dh-page-border: #18181b;
-  --dh-accent: #0284c7;
-  --dh-chapter-accent: #0284c7;
-  --dh-tab-bg: #0f172a;
-  --dh-card-bg: #f4f4f5;
-  --dh-card-inner: #ffffff;
-  --dh-card-border: #18181b;
-  --dh-card-text: #09090b;
-  --dh-table-header-bg: #18181b;
-  --dh-table-header-text: #ffffff;
-  --dh-table-stripe: rgba(0, 0, 0, 0.04);
-  --dh-quote-border: #18181b;
-  --dh-quote-bg: #f4f4f5;
+  --dh-page-bg: #262626;
+  --dh-page-text: #f5f5f4;
+  --dh-page-border: #65a30d;
+  --dh-accent: #a3e635;
+  --dh-chapter-accent: #84cc16;
+  --dh-tab-bg: #65a30d;
+  --dh-card-bg: #282828;
+  --dh-card-inner: #1a1a1a;
+  --dh-card-border: #65a30d;
+  --dh-card-text: #f0eee6;
+  --dh-enemy-bar: #ef4444;
+  --dh-env-bar: #84cc16;
+  --dh-table-header-bg: #1a1a1a;
+  --dh-table-header-text: #a3e635;
+  --dh-table-stripe: rgba(163, 230, 53, 0.05);
+  --dh-quote-border: #65a30d;
+  --dh-quote-bg: rgba(101, 163, 13, 0.1);
+  --dh-dot-hp-border: #f87171;
+  --dh-dot-hp-bg: rgba(239, 68, 68, 0.3);
+  --dh-dot-stress-border: #fde047;
+  --dh-dot-stress-bg: rgba(234, 179, 8, 0.3);
 }
 
+/* 7. nightracer: 极速深夜 */
 .dh-book-viewport[data-theme='nightracer'] {
-  --dh-page-bg: #09090b;
-  --dh-page-text: #f4f4f5;
-  --dh-page-border: #eab308;
-  --dh-accent: #eab308;
-  --dh-chapter-accent: #facc15;
-  --dh-tab-bg: #ca8a04;
-  --dh-card-bg: #18181b;
-  --dh-card-inner: #09090b;
-  --dh-card-border: #ca8a04;
-  --dh-card-text: #fef08a;
-  --dh-table-header-bg: #ca8a04;
-  --dh-table-header-text: #000000;
-  --dh-table-stripe: rgba(234, 179, 8, 0.08);
-  --dh-quote-border: #eab308;
-  --dh-quote-bg: rgba(234, 179, 8, 0.08);
+  --dh-page-bg: #080912;
+  --dh-page-text: #f8fafc;
+  --dh-page-border: #ff6b00;
+  --dh-accent: #ff6b00;
+  --dh-chapter-accent: #ff6b00;
+  --dh-tab-bg: #ff6b00;
+  --dh-card-bg: #080914;
+  --dh-card-inner: #05060d;
+  --dh-card-border: #ff6b00;
+  --dh-card-text: #e2e8f0;
+  --dh-enemy-bar: #ff2a5f;
+  --dh-env-bar: #ff6b00;
+  --dh-table-header-bg: #121528;
+  --dh-table-header-text: #ff6b00;
+  --dh-table-stripe: rgba(255, 107, 0, 0.08);
+  --dh-quote-border: #ff6b00;
+  --dh-quote-bg: rgba(255, 107, 0, 0.08);
+  --dh-dot-hp-border: #ff2a5f;
+  --dh-dot-hp-bg: rgba(255, 42, 95, 0.3);
+  --dh-dot-stress-border: #ffb703;
+  --dh-dot-stress-bg: rgba(255, 183, 3, 0.3);
 }
 
 /* --- A4 Page Container & Multi-Column Layout --- */
@@ -183,7 +238,7 @@
 .dh-book-viewport .dh-wide {
   column-span: all;
   -webkit-column-span: all;
-  margin: 1em 0;
+  margin: 0.8em 0;
   width: 100%;
 }
 
@@ -342,6 +397,16 @@
   break-inside: avoid;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+.dh-book-viewport .dh-adversary-header {
+  background-color: var(--dh-enemy-bar);
+  color: #ffffff;
+  padding: 4px 8px;
+  margin: -0.7em -0.8em 0.6em -0.8em;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .dh-book-viewport .dh-adversary .dh-descriptive {
   background: var(--dh-card-inner);
   border-top: 1px solid var(--dh-card-border);
@@ -362,16 +427,16 @@
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  border: 1.5px solid #dc2626;
-  background-color: rgba(220, 38, 38, 0.25);
+  border: 1.5px solid var(--dh-dot-hp-border);
+  background-color: var(--dh-dot-hp-bg);
   display: inline-block;
 }
 .dh-book-viewport .dh-dot-stress {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  border: 1.5px solid #d97706;
-  background-color: rgba(217, 119, 6, 0.25);
+  border: 1.5px solid var(--dh-dot-stress-border);
+  background-color: var(--dh-dot-stress-bg);
   display: inline-block;
 }
 
@@ -403,6 +468,13 @@
   padding: 0.7em 0.8em;
   margin: 0.8em 0;
   break-inside: avoid;
+}
+.dh-book-viewport .dh-environment-header {
+  background-color: var(--dh-env-bar);
+  color: #ffffff;
+  padding: 4px 8px;
+  margin: -0.7em -0.8em 0.6em -0.8em;
+  border-radius: 4px 4px 0 0;
 }
 
 /* --- Cyberware Component --- */

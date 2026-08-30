@@ -1,7 +1,18 @@
 import { ProjectData, DynamicSection, ContentBlock } from '../types';
 
 /**
- * Serialize a full ProjectData object into standard Homebrewery V3 + Daggerheart Markdown
+ * Clean long Base64 payload into clean semantic tag for human readability
+ */
+function cleanImageUrl(url: string | undefined, tag: string): string {
+  if (!url) return '';
+  if (url.startsWith('data:') || url.length > 250) {
+    return `[${tag}]`;
+  }
+  return url;
+}
+
+/**
+ * Serialize a full ProjectData object into clean, human-readable Homebrewery V3 Markdown
  */
 export function serializeProjectDataToV3Markdown(project: ProjectData): string {
   if (!project) return '';
@@ -10,15 +21,17 @@ export function serializeProjectDataToV3Markdown(project: ProjectData): string {
 
   // 1. Cover Page
   if (project.coverPage?.enabled) {
+    const coverImgTag = project.coverPage.coverImage
+      ? `\n![封面插画](${cleanImageUrl(project.coverPage.coverImage, '战役封面')}){position:cover}\n`
+      : '';
+
     chunks.push(`{{frontCover}}
 # ${project.coverPage.title || project.title || '战役名称'}
 ## ${project.coverPage.subtitle || '战役副标题与简介'}
 
 **作者：** ${project.coverPage.authorLine || project.author || '匿名'}
 ${project.coverPage.footerText ? `*${project.coverPage.footerText}*` : ''}
-
-${project.coverPage.coverImage ? `![封面插画](${project.coverPage.coverImage}){position:absolute,left:0,bottom:0,width:100%,z-index:-1}` : ''}
-\\page
+${coverImgTag}\\page
 `);
   }
 
@@ -89,8 +102,10 @@ function serializeBlockToMarkdown(block: ContentBlock): string {
     case 'divider':
       return `---`;
 
-    case 'image':
-      return `![${block.caption || '插画'}](${block.url})`;
+    case 'image': {
+      const imgRef = cleanImageUrl(block.url, `插画:${block.id}`);
+      return `![${block.caption || '插画'}](${imgRef})`;
+    }
 
     case 'read_aloud':
       return `> ${block.content}`;
@@ -119,8 +134,11 @@ function serializeBlockToMarkdown(block: ContentBlock): string {
         ).join('\n');
       }
 
+      const avatarShape = block.avatarShape || 'circle';
+      const cleanAvatar = cleanImageUrl(block.avatarUrl, `头像:${block.id}`);
+
       return `{{adversary\n## ${block.name}\n### Tier ${block.tier} ${block.enemyType || ''}\n` +
-        (block.avatarUrl ? `avatar: ${block.avatarUrl} (${block.avatarShape || 'circle'})\n` : '') +
+        (cleanAvatar ? `avatar: ${cleanAvatar} (${avatarShape})\n` : '') +
         (block.healthDisplay ? `healthDisplay: ${block.healthDisplay}\n` : '') +
         (block.flavor ? `*${block.flavor}*\n` : '') +
         `**动机与战术：** ${block.tactics || '无'}\n\n` +
@@ -168,7 +186,7 @@ export function generateTocSnippet(project: ProjectData): string {
   if (!project) return '';
 
   let toc = `{{toc\n# ${project.title || '战役'} · 目录 (Contents)\n`;
-  let pageCounter = 2; // Assume Page 1 is cover or intro
+  let pageCounter = 2;
 
   if (project.concept || project.introduction) {
     toc += `- #### [{{ 战役框架与概述}}{{ ${pageCounter}} }](#s_intro)\n`;

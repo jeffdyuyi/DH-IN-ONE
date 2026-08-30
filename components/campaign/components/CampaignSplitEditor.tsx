@@ -242,6 +242,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
                 content={fullMarkdownText}
                 theme={activeTheme}
                 isBookMode={true}
+                projectData={projectData}
                 className="w-full"
               />
             </div>
