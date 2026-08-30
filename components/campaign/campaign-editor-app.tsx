@@ -1019,19 +1019,19 @@ const MainContent = () => {
       />
 
       <div className="flex-1 flex overflow-hidden relative print:block print:h-auto print:overflow-visible">
-        {viewMode === 'split' ? (
-          <div className="flex-1 p-2 md:p-4 overflow-hidden">
+        {viewMode === 'edit' ? (
+          <div className="flex-1 p-2 md:p-3 overflow-hidden">
             <CampaignSplitEditor
               projectData={projectData}
               fullMarkdownText={splitMarkdownText || serializeProjectDataToV3Markdown(projectData)}
               onChangeMarkdown={setSplitMarkdownText}
               activeTheme={projectData.theme}
               onChangeTheme={(t) => updateField('theme', t)}
+              onOpenVault={() => setIsVaultModalOpen(true)}
               onGenerateToc={() => {
                 const toc = generateTocSnippet(projectData);
                 setSplitMarkdownText((prev) => `${toc}\n\n${prev || serializeProjectDataToV3Markdown(projectData)}`);
               }}
-              onCloseSplitView={() => setViewMode('edit')}
             />
           </div>
         ) : viewMode === 'preview' ? (
@@ -1408,75 +1408,92 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
         <div className="hidden md:block">
           <h1 className="font-serif font-bold text-lg tracking-wide text-stone-200">不咕鸟匕心写作模板</h1>
         </div>
+
+        <div className="hidden lg:flex items-center gap-2 border-l border-stone-800 pl-3">
+          <input
+            type="text"
+            value={currentData.title || ''}
+            onChange={(e) => updateField('title', e.target.value)}
+            placeholder="输入战役标题..."
+            className="bg-stone-800/80 hover:bg-stone-800 text-xs font-bold text-amber-200 px-2.5 py-1 rounded-lg border border-stone-700/60 focus:border-amber-500 outline-none w-48 sm:w-60 truncate transition-colors"
+            title="点击重命名战役标题"
+          />
+        </div>
+      </div>
+
+      {/* Center: Classic 2-Mode Segmented Switcher */}
+      <div className="flex bg-stone-950 p-1 rounded-xl border border-stone-800 shadow-inner">
+        <button 
+          onClick={() => setViewMode('edit')} 
+          title="分屏一体化编辑模式" 
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            viewMode === 'edit'
+              ? 'bg-amber-600 text-white shadow-md ring-1 ring-amber-400' 
+              : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+          }`}
+        >
+          <Edit3 className="w-3.5 h-3.5" />
+          <span>编辑模式</span>
+        </button>
+
+        <button 
+          onClick={() => setViewMode('preview')} 
+          title="纯净手册阅读、打印与PDF导出" 
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            viewMode === 'preview'
+              ? 'bg-amber-600 text-white shadow-md ring-1 ring-amber-400' 
+              : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+          }`}
+        >
+          <Eye className="w-3.5 h-3.5" />
+          <span>预览与导出</span>
+        </button>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-2 sm:gap-3">
-         {/* Vault Button */}
-         <button 
-            onClick={onOpenVault}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
-            title="从公共卡牌库 (Vault) 插入官方与工坊卡牌"
-         >
-            <Database className="w-4 h-4" />
-            <span className="hidden sm:inline">公共卡牌库</span>
-         </button>
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Theme Selector */}
+        <div className="flex items-center gap-1.5 bg-stone-800/90 rounded-lg p-1 px-2.5 border border-stone-700/60 hover:border-stone-600 transition-colors">
+          <Palette className="w-3.5 h-3.5 text-stone-400" />
+          <select 
+            className="bg-transparent text-xs text-stone-300 font-bold outline-none cursor-pointer hover:text-white border-none focus:ring-0 w-24 sm:w-28 appearance-none"
+            value={currentData.theme}
+            onChange={(e) => updateField('theme', e.target.value)}
+            title="选择战役视觉主题"
+          >
+            {Object.entries(THEMES).map(([k, v]: any) => (
+              <option key={k} value={k} className="bg-stone-800 text-stone-300">
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-         {/* Library Button */}
-         <button 
-            onClick={onOpenLibrary}
-            className="flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-stone-700"
-            title="打开本地作品库 (按ID进行存档管理)"
-         >
-            <Folder className="w-4 h-4 text-amber-300" />
-            <span className="hidden sm:inline">作品库</span>
-         </button>
+        {/* Library Button */}
+        <button 
+          onClick={onOpenLibrary}
+          className="flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-stone-700"
+          title="打开本地作品库 (管理与切换存档)"
+        >
+          <Folder className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden sm:inline">作品库</span>
+        </button>
 
-         {lastAutoSaveTime && (
-            <span className="text-[10px] text-amber-400/90 font-mono hidden lg:inline bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50" title="上次自动保存时间 (每5分钟自动保存)">
-               已自动保存 {new Date(lastAutoSaveTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-         )}
+        {/* Print / Export PDF */}
+        <button 
+          onClick={() => window.print()}
+          className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+          title="打印或导出 A4 实体手册 PDF"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden md:inline">打印 / 导出 PDF</span>
+        </button>
 
-         {/* Theme Selector */}
-         <div className="flex items-center gap-2 bg-stone-800 rounded-lg p-1.5 px-3 border border-stone-700/50 hover:border-stone-600 transition-colors">
-            <Palette className="w-4 h-4 text-stone-400" />
-            <select 
-               className="bg-transparent text-xs text-stone-300 font-bold outline-none cursor-pointer hover:text-white border-none focus:ring-0 w-28 appearance-none"
-               value={currentData.theme}
-               onChange={(e) => updateField('theme', e.target.value)}
-            >
-               {Object.entries(THEMES).map(([k, v]: any) => <option key={k} value={k} className="bg-stone-800 text-stone-300">{v.name}</option>)}
-            </select>
-         </div>
-
-         <div className="h-6 w-px bg-stone-800"></div>
-
-         {/* View Toggle */}
-         <div className="flex bg-stone-800 p-1 rounded-lg gap-1 border border-stone-700/50">
-            <button onClick={() => setViewMode('edit')} title="积木表单编辑" className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='edit'?'bg-stone-700 text-white shadow-sm ring-1 ring-stone-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
-               <Edit3 className="w-3.5 h-3.5" />
-               <span className="text-xs font-bold hidden md:inline">积木表单</span>
-            </button>
-            <button 
-               onClick={() => {
-                  if (viewMode !== 'split') {
-                     setViewMode('split');
-                  } else {
-                     setViewMode('edit');
-                  }
-               }} 
-               title="一页流 · 左右所见即所得工作台" 
-               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='split'?'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400 font-bold':'text-amber-400 hover:text-white hover:bg-stone-800'}`}
-            >
-               <Columns className="w-3.5 h-3.5" />
-               <span className="text-xs font-bold hidden md:inline">分屏 (一页流)</span>
-            </button>
-            <button onClick={() => setViewMode('preview')} title="手册全览" className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all ${viewMode==='preview'?'bg-amber-700 text-white shadow-sm ring-1 ring-amber-600':'text-stone-400 hover:text-stone-200 hover:bg-stone-800'}`}>
-               <Eye className="w-3.5 h-3.5" />
-               <span className="text-xs font-bold hidden md:inline">手册全览</span>
-            </button>
-         </div>
+        {lastAutoSaveTime && (
+          <span className="text-[10px] text-amber-400/90 font-mono hidden xl:inline bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50" title="上次自动保存时间 (每5分钟自动保存)">
+            已保存 {new Date(lastAutoSaveTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        )}
       </div>
     </nav>
   );
