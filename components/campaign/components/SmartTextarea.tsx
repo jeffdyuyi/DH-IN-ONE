@@ -262,7 +262,7 @@ export const SmartTextarea: React.FC<SmartTextareaProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         placeholder={placeholder || "支持标准 Markdown 与 Homebrewery V3 语法，输入 '/' 唤出快捷选单..."}
-        className={`w-full bg-transparent border border-stone-200 dark:border-stone-700 p-3 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-sans text-sm leading-relaxed shadow-xs placeholder:text-stone-300 dark:placeholder:text-stone-600 resize-y whitespace-pre-wrap break-words ${
+        className={`w-full ${className.includes('bg-') ? '' : 'bg-transparent'} ${className.includes('text-') ? '' : 'text-stone-800 dark:text-stone-100'} border border-stone-200 dark:border-stone-700 p-3 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-sans text-sm leading-relaxed shadow-xs placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-y whitespace-pre-wrap break-words ${
           showToolbar ? 'rounded-b-lg border-t-0' : 'rounded-lg'
         } ${className}`}
         style={{

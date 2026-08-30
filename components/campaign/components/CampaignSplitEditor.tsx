@@ -590,7 +590,9 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           <div
             ref={editorContainerRef}
             onScroll={handleEditorScroll}
-            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col bg-stone-100 text-stone-900 border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
+            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col ${
+              editStyle === 'visual' ? 'bg-stone-100 text-stone-900' : 'bg-stone-950 text-stone-100'
+            } border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
           >
             {editStyle === 'visual' ? (
               <VisualBlockStream
@@ -599,14 +601,22 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
                 onRegisterFocus={handleRegisterFocus}
               />
             ) : (
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col bg-stone-950 rounded-xl border border-stone-800 overflow-hidden shadow-inner">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-stone-900/90 border-b border-stone-800 text-[11px] text-stone-400">
+                  <span className="font-mono flex items-center gap-1.5 text-stone-300">
+                    <Code size={12} className="text-amber-400" /> Markdown 源码模式
+                  </span>
+                  <span className="text-[10px] text-stone-500 font-mono">
+                    {fullMarkdownText.length} 字符 · {fullMarkdownText.split('\n').length} 行
+                  </span>
+                </div>
                 <SmartTextarea
                   value={fullMarkdownText}
                   onChangeValue={onChangeMarkdown}
                   showToolbar={false}
                   minRows={30}
                   onGenerateToc={onGenerateToc}
-                  className="flex-1 min-h-[calc(100vh-210px)] font-mono text-xs leading-relaxed bg-stone-950 border-stone-800 text-stone-200 focus:ring-amber-500/30"
+                  className="flex-1 min-h-[calc(100vh-250px)] font-mono text-sm leading-relaxed !bg-stone-950 !text-stone-100 selection:bg-amber-600 selection:text-white caret-amber-400 placeholder:text-stone-600 border-0 focus:ring-0 p-4"
                   placeholder="在这里畅快书写你的长篇战役... 支持标准 Markdown 语法，输入 '/' 唤出快捷选单..."
                 />
               </div>
