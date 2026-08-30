@@ -117,6 +117,26 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        parchment: {
+          50: '#fcfaf6',
+          100: '#f7f3eb',
+          200: '#ede5d8',
+          300: '#dfd2be',
+          400: '#cdba9f',
+          500: '#bba082',
+        },
+        obsidian: {
+          600: '#323644',
+          700: '#252834',
+          800: '#1b1d27',
+          900: '#12141c',
+          950: '#0b0c12',
+        },
+        ink: {
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+        },
         gray: {
           800: "#333333",
           700: "#4a4a4a",

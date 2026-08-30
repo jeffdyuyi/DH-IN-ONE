@@ -163,15 +163,15 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
   };
 
   return (
-    <div className="min-h-screen bg-parchment-50 dark:bg-obsidian-900 transition-colors duration-500 flex flex-col relative">
-         <header className="h-16 flex items-center justify-between px-4 md:px-8 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-20">
+    <div className="min-h-screen bg-parchment-50 dark:bg-obsidian-950 transition-colors duration-500 flex flex-col relative text-slate-900 dark:text-zinc-100">
+         <header className="h-16 flex items-center justify-between px-4 md:px-8 border-b border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm sticky top-0 z-20">
              <div className="flex items-center gap-4">
                 <button onClick={onGoHome} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
-                   <ChevronLeft size={24} className="text-slate-600 dark:text-zinc-400" />
+                   <ChevronLeft size={24} className="text-slate-700 dark:text-zinc-300" />
                 </button>
                 <div className="flex items-center gap-2">
-                   <Library size={24} className="text-blue-900 dark:text-amber-500" />
-                   <h1 className="text-xl font-serif font-bold text-slate-800 dark:text-zinc-200">
+                   <Library size={24} className="text-amber-700 dark:text-amber-400" />
+                   <h1 className="text-xl font-serif font-bold text-slate-900 dark:text-zinc-100">
                      本地库
                    </h1>
                 </div>
@@ -183,7 +183,7 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                         setIsExportMode(!isExportMode);
                         setSelectedIds(new Set());
                       }} 
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${isExportMode ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 hover:bg-rose-200' : 'bg-blue-50 text-blue-700 dark:bg-zinc-900 dark:text-amber-500 hover:bg-blue-100 dark:hover:bg-zinc-800 border border-transparent dark:border-zinc-800'}`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${isExportMode ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 hover:bg-rose-200' : 'bg-amber-50 text-amber-800 dark:bg-zinc-900 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-zinc-800 border border-amber-200 dark:border-zinc-800'}`}
                    >
                       {isExportMode ? (
                         <>
@@ -196,21 +196,21 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                       )}
                    </button>
                 )}
-                <button onClick={onToggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                <button onClick={onToggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300">
+                   {isDark ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-700" />}
                 </button>
              </div>
          </header>
 
          {/* Selection Mode Action Bar */}
          {isExportMode && (
-            <div className="bg-blue-50 dark:bg-zinc-900 border-b border-blue-100 dark:border-zinc-800 py-3 px-4 md:px-8 flex flex-wrap gap-4 items-center justify-between">
-               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400">
-                  <span className="font-bold text-blue-800 dark:text-amber-500">已选择 {selectedIds.size} 张卡牌</span>
+            <div className="bg-amber-50 dark:bg-zinc-900 border-b border-amber-200 dark:border-zinc-800 py-3 px-4 md:px-8 flex flex-wrap gap-4 items-center justify-between">
+               <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
+                  <span className="font-bold text-amber-800 dark:text-amber-400">已选择 {selectedIds.size} 张卡牌</span>
                   <span className="opacity-40">|</span>
-                  <button onClick={selectAllFiltered} className="text-blue-600 dark:text-amber-400 hover:underline">全选当前分类</button>
+                  <button onClick={selectAllFiltered} className="text-amber-700 dark:text-amber-400 hover:underline font-medium">全选当前分类</button>
                   <span className="opacity-40">|</span>
-                  <button onClick={deselectAllFiltered} className="text-slate-500 hover:underline">取消全选</button>
+                  <button onClick={deselectAllFiltered} className="text-slate-600 dark:text-zinc-400 hover:underline">取消全选</button>
                </div>
                <button 
                   onClick={handleStartExport}
@@ -222,28 +222,32 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
             </div>
          )}
 
-         <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-            <div className="mb-8 overflow-x-auto pb-4 no-scrollbar">
-               <div className="flex gap-2">
-                 <button onClick={() => setLibFilter('all')} className={`px-4 py-2 rounded-full font-bold transition-all border flex items-center gap-2 ${libFilter === 'all' ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-600 dark:text-white dark:border-amber-600 shadow-md' : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}>
-                    全部 <span className="ml-1 opacity-70 text-xs bg-black/20 px-1.5 rounded-full">{library.length}</span>
-                 </button>
-                 {libraryTypes.map(type => (
-                    <button key={type} onClick={() => setLibFilter(type)} className={`px-4 py-2 rounded-full font-bold transition-all border flex items-center gap-2 ${libFilter === type ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-600 dark:text-white dark:border-amber-600 shadow-md' : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}>
-                       <span className={`${libFilter === type ? 'text-white' : TOOL_CONFIG[type].color}`}>{renderToolIcon(type, { size: 16 })}</span>
-                       {TOOL_CONFIG[type].label}
-                       <span className="ml-1 opacity-70 text-xs bg-black/20 px-1.5 rounded-full">{typeCounts[type]}</span>
-                    </button>
-                 ))}
+         <div className="container mx-auto px-4 py-8 max-w-7xl flex-1 flex flex-col">
+            {/* Filter Pills */}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-zinc-800">
+               <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={() => setLibFilter('all')}
+                    className={`px-4 py-2 rounded-full font-bold transition-all border ${libFilter === 'all' ? 'bg-amber-600 text-white border-amber-600 shadow-md' : 'bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}
+                  >
+                     全部 ({library.length})
+                  </button>
+                  {libraryTypes.map(type => (
+                     <button key={type} onClick={() => setLibFilter(type)} className={`px-4 py-2 rounded-full font-bold transition-all border flex items-center gap-2 ${libFilter === type ? 'bg-amber-600 text-white border-amber-600 shadow-md' : 'bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}>
+                        <span className={`${libFilter === type ? 'text-white' : TOOL_CONFIG[type].color}`}>{renderToolIcon(type, { size: 16 })}</span>
+                        {TOOL_CONFIG[type].label}
+                        <span className="ml-1 opacity-80 text-xs bg-black/20 px-1.5 rounded-full">{typeCounts[type]}</span>
+                     </button>
+                  ))}
                </div>
             </div>
 
             {filteredLibrary.length === 0 ? (
-               <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-zinc-600">
+               <div className="flex flex-col items-center justify-center py-20 text-slate-500 dark:text-zinc-500">
                   <div className="p-6 rounded-full bg-slate-100 dark:bg-zinc-900 mb-4">
                      <Filter size={48} className="opacity-50" />
                   </div>
-                  <h3 className="text-lg font-bold">暂无内容</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-200">暂无内容</h3>
                   <p className="text-sm">该分类下没有保存的卡牌</p>
                </div>
             ) : (
@@ -254,7 +258,7 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                         <div 
                            key={item.id} 
                            onClick={() => handleCardClick(item)} 
-                           className={`group relative bg-white dark:bg-zinc-900 rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-[180px] ${isExportMode ? (isSelected ? 'border-amber-500 ring-2 ring-amber-500/25 dark:border-amber-600 dark:ring-amber-600/30' : 'border-slate-200 dark:border-zinc-800') : 'border-slate-200 dark:border-zinc-800'}`}
+                           className={`group relative bg-white dark:bg-zinc-900/90 rounded-xl border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-[180px] ${isExportMode ? (isSelected ? 'border-amber-500 ring-2 ring-amber-500/25 dark:border-amber-600 dark:ring-amber-600/30' : 'border-slate-200 dark:border-zinc-800') : 'border-slate-200 dark:border-zinc-800'}`}
                         >
                            {/* Checkbox Overlay in Export Mode */}
                            {isExportMode && (
@@ -262,7 +266,7 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                                  {isSelected ? (
                                     <CheckSquare className="text-amber-500 dark:text-amber-500" size={20} />
                                  ) : (
-                                    <Square className="text-slate-300 dark:text-zinc-700" size={20} />
+                                    <Square className="text-slate-400 dark:text-zinc-600" size={20} />
                                  )}
                               </div>
                            )}
@@ -272,20 +276,20 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                                    {renderToolIcon(item.data.type, { size: 28 })}
                                </div>
                                <div className="flex-1 min-w-0 pr-6">
-                                   <h3 className="font-bold text-lg text-slate-800 dark:text-zinc-200 truncate">{item.data.name}</h3>
-                                   <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-500">
+                                   <h3 className="font-bold text-base text-slate-900 dark:text-zinc-100 truncate">{item.data.name}</h3>
+                                   <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
                                        {TOOL_CONFIG[item.data.type].label}
                                    </span>
                                </div>
                            </div>
                            <div className="p-4 flex-1 flex flex-col justify-between">
-                               <p className="text-sm text-slate-500 dark:text-zinc-500 line-clamp-2 italic">
+                               <p className="text-sm text-slate-600 dark:text-zinc-400 line-clamp-2 italic">
                                    "{item.data.description || '无描述'}"
                                </p>
-                               <div className="flex justify-between items-center text-xs text-slate-400 dark:text-zinc-600 mt-2">
+                               <div className="flex justify-between items-center text-xs text-slate-500 dark:text-zinc-500 mt-2">
                                    <span>{new Date(item.updatedAt).toLocaleDateString()}</span>
                                    {!isExportMode && (
-                                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 dark:text-amber-500 font-bold flex items-center gap-1">
+                                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
                                           点击查看详情 <ArrowRight size={12} />
                                       </span>
                                    )}
@@ -296,7 +300,7 @@ const LibraryView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoHome
                   })}
                </div>
             )}
-         </main>
+         </div>
 
          {/* Secondary Confirmation Modal for Export */}
          {showExportModal && (
