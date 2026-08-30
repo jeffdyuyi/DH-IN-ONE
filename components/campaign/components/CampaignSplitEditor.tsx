@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Columns, Eye, Code, ZoomIn, ZoomOut, RotateCcw, 
-  Printer, BookOpen, Layers, CheckCircle2, Copy,
+  BookOpen, Layers, CheckCircle2, Copy,
   ListTree, Plus, Database, ChevronLeft, ChevronRight,
   Sparkles, FileText, SplitSquareVertical, FilePlus,
   SlidersHorizontal, ToggleLeft, ToggleRight, Settings
 } from 'lucide-react';
 import { SmartTextarea } from './SmartTextarea';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownToolbar } from './MarkdownToolbar';
 import { ProjectData } from '../types';
 import { THEMES } from '../campaign-editor-app';
 
@@ -119,10 +120,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     });
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleAddChapter = () => {
@@ -352,7 +349,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           )}
         </div>
 
-        {/* Right: Zoom & Export Actions */}
+        {/* Right: Zoom & Copy Action (Unified export is in top navbar) */}
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg px-1.5 py-0.5 gap-1 text-stone-400">
             <button
@@ -391,18 +388,19 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             {copySuccess ? <CheckCircle2 size={13} className="text-emerald-400" /> : <Copy size={13} />}
             <span className="hidden sm:inline">{copySuccess ? '已复制' : '复制代码'}</span>
           </button>
-
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="flex items-center gap-1 px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-bold text-xs transition-colors cursor-pointer shadow-xs"
-            title="打印或导出 A4 实体手册 PDF"
-          >
-            <Printer size={13} />
-            <span>打印 / 导出 PDF</span>
-          </button>
         </div>
       </div>
+
+      {/* Full-Width Sticky Top Toolbar spanning across both editor and preview (100% width) */}
+      {(viewMode === 'split' || viewMode === 'editor') && (
+        <div className="w-full shrink-0 sticky top-0 z-30">
+          <MarkdownToolbar
+            value={fullMarkdownText}
+            onChange={onChangeMarkdown}
+            onGenerateToc={onGenerateToc}
+          />
+        </div>
+      )}
 
       {/* Main Studio Body */}
       <div className="flex flex-1 w-full overflow-hidden relative">
@@ -476,7 +474,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           </aside>
         )}
 
-        {/* Center: Smart Continuous Markdown Editor Pane */}
+        {/* Center: Smart Continuous Markdown Editor Pane (without duplicate internal toolbar) */}
         {(viewMode === 'split' || viewMode === 'editor') && (
           <div
             ref={editorContainerRef}
@@ -486,10 +484,10 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             <SmartTextarea
               value={fullMarkdownText}
               onChangeValue={onChangeMarkdown}
-              showToolbar={true}
+              showToolbar={false}
               minRows={30}
               onGenerateToc={onGenerateToc}
-              className="min-h-[calc(100vh-170px)] font-mono text-xs leading-relaxed bg-stone-950/70 border-stone-800 text-stone-200 focus:ring-amber-500/30"
+              className="min-h-[calc(100vh-210px)] font-mono text-xs leading-relaxed bg-stone-950/70 border-stone-800 text-stone-200 focus:ring-amber-500/30"
               placeholder="在这里畅快书写你的长篇战役... 支持标准 Markdown 语法，输入 '/' 唤出快捷选单..."
             />
           </div>

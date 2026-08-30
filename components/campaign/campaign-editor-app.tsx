@@ -15,7 +15,7 @@ import {
   Folder, Clock, Save, Bold, Strikethrough,
   Quote, List, ListOrdered, Code, Split, Highlighter, Copy,
   ShieldCheck, Scale, Check, CheckCircle2, Sparkles, FileCheck,
-  Cpu, Database, Columns
+  Cpu, Database, Columns, FilePlus
 } from 'lucide-react';
 import { 
   ProjectData, DynamicSection, DEFAULT_PROJECT,
@@ -861,8 +861,11 @@ const MainContent = () => {
     }
   }, [projectData]);
 
-  // 5-minute Auto-Save Timer
+  const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState<boolean>(false);
+
+  // 5-minute Auto-Save Timer (Only runs when isAutoSaveEnabled is true)
   useEffect(() => {
+    if (!isAutoSaveEnabled) return;
     const AUTO_SAVE_INTERVAL = 5 * 60 * 1000;
 
     const timer = setInterval(() => {
@@ -870,7 +873,23 @@ const MainContent = () => {
     }, AUTO_SAVE_INTERVAL);
 
     return () => clearInterval(timer);
-  }, [saveToLibrary]);
+  }, [isAutoSaveEnabled, saveToLibrary]);
+
+  // Create clean new project with fresh ID and default blank template
+  const handleCreateNewProject = useCallback(() => {
+    if (window.confirm('确定要新建战役文档吗？未保存的修改请先保存到作品库。')) {
+      const newId = 'doc_' + generateId();
+      const freshProject: ProjectData = {
+        ...DEFAULT_PROJECT,
+        id: newId,
+        title: '未命名战役',
+      };
+      setProjectData(freshProject);
+      setSplitMarkdownText(serializeProjectDataToV3Markdown(freshProject));
+      setIsAutoSaveEnabled(false);
+      setActiveSectionId(null);
+    }
+  }, [setProjectData]);
 
   const saveCurrentAsNew = useCallback((customTitle?: string) => {
     const newId = 'doc_' + generateId();
@@ -988,6 +1007,9 @@ const MainContent = () => {
         currentData={projectData}
         updateField={updateField}
         loadProject={loadProject}
+        onCreateNew={handleCreateNewProject}
+        isAutoSaveEnabled={isAutoSaveEnabled}
+        onToggleAutoSave={() => setIsAutoSaveEnabled(prev => !prev)}
         onOpenLibrary={() => setIsLibraryOpen(true)}
         onOpenVault={() => setIsVaultModalOpen(true)}
         onSaveCurrent={overwriteCurrent}
@@ -1125,7 +1147,20 @@ export default CampaignEditorApp;
 
 // --- Layout Components ---
 
-const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, loadProject, onOpenLibrary, onOpenVault, onSaveCurrent, lastAutoSaveTime }: any) => {
+const Navbar = React.memo(({ 
+  viewMode, 
+  setViewMode, 
+  currentData, 
+  updateField, 
+  loadProject, 
+  onCreateNew,
+  isAutoSaveEnabled,
+  onToggleAutoSave,
+  onOpenLibrary, 
+  onOpenVault, 
+  onSaveCurrent, 
+  lastAutoSaveTime 
+}: any) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1357,7 +1392,11 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
           {isMenuOpen && (
             <div className="absolute top-full left-0 mt-3 w-64 bg-white text-stone-800 rounded-xl shadow-2xl border border-stone-200 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="p-2 space-y-1">
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">作品库与连携</div>
+                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">战役创作与存档</div>
+                    <button onClick={() => { onCreateNew?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                        <FilePlus className="w-4 h-4 text-amber-500" />
+                        <span>➕ 新建空白战役文档</span>
+                    </button>
                     <button onClick={() => { onOpenVault?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
                         <Database className="w-4 h-4 text-amber-500" />
                         <span>从公共卡牌库插入 (Vault)</span>
@@ -1475,6 +1514,30 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
           </select>
         </div>
 
+        {/* Create New Project Button */}
+        <button 
+          onClick={onCreateNew}
+          className="flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-stone-700 hover:border-amber-500/50"
+          title="新建空白战役模组文档"
+        >
+          <FilePlus className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden sm:inline">新建战役</span>
+        </button>
+
+        {/* Auto-Save Toggle Pill */}
+        <button
+          onClick={onToggleAutoSave}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border ${
+            isAutoSaveEnabled
+              ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-300 ring-1 ring-emerald-500/30'
+              : 'bg-stone-800 border-stone-700 text-stone-400 hover:text-stone-200'
+          }`}
+          title={isAutoSaveEnabled ? '自动保存：已开启 (每5分钟自动备份到作品库)' : '自动保存：已关闭 (点击开启)'}
+        >
+          <Clock className="w-3.5 h-3.5 text-amber-400" />
+          <span>{isAutoSaveEnabled ? '自动保存: 开' : '自动保存: 关'}</span>
+        </button>
+
         {/* Library Button */}
         <button 
           onClick={onOpenLibrary}
@@ -1485,7 +1548,7 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
           <span className="hidden sm:inline">作品库</span>
         </button>
 
-        {/* Print / Export PDF */}
+        {/* Single Unified Print / Export PDF */}
         <button 
           onClick={() => window.print()}
           className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
@@ -1495,9 +1558,9 @@ const Navbar = React.memo(({ viewMode, setViewMode, currentData, updateField, lo
           <span className="hidden md:inline">打印 / 导出 PDF</span>
         </button>
 
-        {lastAutoSaveTime && (
+        {lastAutoSaveTime && isAutoSaveEnabled && (
           <span className="text-[10px] text-amber-400/90 font-mono hidden xl:inline bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50" title="上次自动保存时间 (每5分钟自动保存)">
-            已保存 {new Date(lastAutoSaveTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+            已存 {new Date(lastAutoSaveTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
       </div>
