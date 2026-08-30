@@ -106,7 +106,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         return <span key={`spacer-${bIdx}`} className={`dh-spacer dh-spacer-${block.level || 1}`} />;
 
       case 'heading': {
-        const Comp = `h${block.level || 2}` as keyof JSX.IntrinsicElements;
+        const Comp = `h${block.level || 2}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
         return (
           <Comp key={`h-${bIdx}`} className="text-inherit">
             {parseInline(block.content || '')}
@@ -153,7 +153,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               if (wLine.startsWith('#')) {
                 const match = wLine.match(/^(#{1,6})\s+(.*)$/);
                 if (match) {
-                  const Comp = `h${match[1].length}` as keyof JSX.IntrinsicElements;
+                  const Comp = `h${match[1].length}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
                   return <Comp key={wIdx}>{parseInline(match[2])}</Comp>;
                 }
               }
