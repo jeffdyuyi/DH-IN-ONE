@@ -1110,14 +1110,15 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
         {/* Header (含正方形 Icon 徽章) */}
         <div className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3">
           {/* 左侧正方形 Icon 徽章 */}
-          <div className="w-11 h-11 rounded-lg border-2 border-[#0D0D0D] bg-[#0D0D0D] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-mono select-none">
+          <div className="w-11 h-11 rounded-lg border-2 border-[#0D0D0D] bg-[#0D0D0D] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
             {d.icon ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={d.icon} alt={d.name || ''} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[11px] font-black text-[#FCEE0A] text-center leading-none tracking-tight">
-                {(d.name || '元件').slice(0, 4)}
-              </span>
+              <div className="flex flex-col items-center justify-center text-[#FCEE0A] font-black text-center leading-[1.1] tracking-wider select-none">
+                <span className="text-[11px] font-black">{(d.name || '微型').slice(0, 2)}</span>
+                <span className="text-[11px] font-black">{(d.name || '皮下').slice(2, 4) || (d.name || '元件').slice(0, 2)}</span>
+              </div>
             )}
           </div>
 
