@@ -36,22 +36,52 @@ ${coverImgTag}\\page
   }
 
   // 2. Overview / Concept
-  const showIntro = project.settings?.showConcept || project.settings?.showIntroduction || project.settings?.showToneThemes;
-  if (showIntro) {
-    chunks.push(`{{Intro}}
-# ${project.title || '战役概述'}
+  const s = project.settings || {};
+  const hasVisibleOverview = 
+    (s.showConcept && project.concept) ||
+    (s.showIntroduction && project.introduction) ||
+    (s.showSummary && project.summary) ||
+    (s.showPrologue && project.prologue) ||
+    (s.showToneThemes && (project.tone || project.themes || project.inspiration));
 
-${project.concept ? `**核心概念：** ${project.concept}\n` : ''}
-${project.settings?.showComplexity ? `**复杂度评级：** ${'⏺ '.repeat(project.complexity || 3)} (${project.complexity || 3}/5)\n` : ''}
-${project.levelRange ? `**适用等级：** ${project.levelRange}\n` : ''}
-${project.tone || project.themes ? `**基调与主题：** ${project.tone || ''} ${project.themes ? `· ${project.themes}` : ''}\n` : ''}
-${project.inspiration ? `**参考灵感：** ${project.inspiration}\n` : ''}
+  if (hasVisibleOverview) {
+    const overviewLines: string[] = [];
+    overviewLines.push(`{{Intro}}\n# ${project.title || '战役概述'}\n`);
 
-${project.introduction ? `### 简介与导言\n${project.introduction}\n` : ''}
-${project.summary ? `### 模组概要\n${project.summary}\n` : ''}
-${project.prologue ? `### 序章开场白\n${project.prologue}\n` : ''}
-\\page
-`);
+    if (s.showConcept && project.concept) {
+      overviewLines.push(`*${project.concept}*\n`);
+    }
+
+    if (s.showComplexity) {
+      overviewLines.push(`**复杂度评级：** ${'★'.repeat(project.complexity || 3)}${'☆'.repeat(5 - (project.complexity || 3))} (${project.complexity || 3}/5)`);
+    }
+
+    if (s.showLevelRange && project.levelRange) {
+      overviewLines.push(`**适用等级：** ${project.levelRange}`);
+    }
+
+    if (s.showIntroduction && project.introduction) {
+      overviewLines.push(`\n### 简介\n${project.introduction}`);
+    }
+
+    if (s.showSummary && project.summary) {
+      overviewLines.push(`\n### 概要\n${project.summary}`);
+    }
+
+    if (s.showPrologue && project.prologue) {
+      overviewLines.push(`\n### 序言\n${project.prologue}`);
+    }
+
+    if (s.showToneThemes && (project.tone || project.themes || project.inspiration)) {
+      let toneText = '\n{{block\n';
+      if (project.tone) toneText += `**基调：** ${project.tone}\n\n`;
+      if (project.themes) toneText += `**主题：** ${project.themes}\n\n`;
+      if (project.inspiration) toneText += `**灵感：** ${project.inspiration}\n`;
+      toneText += '}}';
+      overviewLines.push(toneText);
+    }
+
+    chunks.push(overviewLines.join('\n'));
   }
 
   // 3. Dynamic Sections

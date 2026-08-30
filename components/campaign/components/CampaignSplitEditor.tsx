@@ -3,11 +3,13 @@ import {
   Columns, Eye, Code, ZoomIn, ZoomOut, RotateCcw, 
   Printer, BookOpen, Layers, CheckCircle2, Copy,
   ListTree, Plus, Database, ChevronLeft, ChevronRight,
-  Sparkles, FileText, SplitSquareVertical, FilePlus
+  Sparkles, FileText, SplitSquareVertical, FilePlus,
+  SlidersHorizontal, ToggleLeft, ToggleRight, Settings
 } from 'lucide-react';
 import { SmartTextarea } from './SmartTextarea';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { ProjectData } from '../types';
+import { THEMES } from '../campaign-editor-app';
 
 interface CampaignSplitEditorProps {
   projectData: ProjectData;
@@ -16,6 +18,7 @@ interface CampaignSplitEditorProps {
   onSyncBackToSections?: () => void;
   activeTheme: string;
   onChangeTheme?: (t: any) => void;
+  onUpdateSettings?: (key: string, val: boolean) => void;
   onGenerateToc?: () => void;
   onOpenVault?: () => void;
   onCloseSplitView?: () => void;
@@ -28,19 +31,24 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
   onSyncBackToSections,
   activeTheme = 'default',
   onChangeTheme,
+  onUpdateSettings,
   onGenerateToc,
   onOpenVault,
   onCloseSplitView,
 }) => {
   const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
+  const [previewStyle, setPreviewStyle] = useState<'long' | 'a4'>('long'); // default to authentic long-vertical
   const [splitRatio, setSplitRatio] = useState<'50:50' | '60:40' | '40:60'>('50:50');
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [copySuccess, setCopySuccess] = useState(false);
 
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef<'editor' | 'preview' | null>(null);
+
+  const settings = projectData.settings || {};
 
   // Extract Heading Outline from Markdown Text
   const outlineItems = useMemo(() => {
@@ -62,7 +70,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
     const lines = fullMarkdownText.split('\n');
     const charIndex = lines.slice(0, lineIndex).join('\n').length;
     
-    // Scroll editor
     const textarea = document.querySelector('.dh-split-editor textarea') as HTMLTextAreaElement;
     if (textarea) {
       textarea.focus();
@@ -124,6 +131,12 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
     onChangeMarkdown(fullMarkdownText + newChapterText);
   };
 
+  const toggleSetting = (key: string) => {
+    if (onUpdateSettings) {
+      onUpdateSettings(key, !settings[key as keyof typeof settings]);
+    }
+  };
+
   // Calculate layout widths
   const editorWidthClass = 
     viewMode === 'editor' ? 'w-full max-w-5xl mx-auto' :
@@ -161,6 +174,75 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               </span>
             )}
           </button>
+
+          {/* Layout Settings Toggle Popover Trigger */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
+                isSettingsOpen 
+                  ? 'bg-amber-600 text-white border-amber-500 shadow-xs' 
+                  : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-700'
+              }`}
+              title="版面显示设置 (控制8项元数据开关)"
+            >
+              <SlidersHorizontal size={13} />
+              <span>版面显示开关</span>
+            </button>
+
+            {/* Settings Popup Modal */}
+            {isSettingsOpen && (
+              <div className="absolute top-full left-0 mt-2 w-72 bg-stone-900 text-stone-200 rounded-xl shadow-2xl border border-stone-700 p-3.5 z-50 animate-in fade-in zoom-in-95">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-stone-800 text-stone-400">
+                  <span className="font-bold text-xs flex items-center gap-1 text-amber-400">
+                    <Settings size={13} /> 版面显示开关设置
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsSettingsOpen(false)}
+                    className="text-stone-500 hover:text-white text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 text-xs">
+                  {[
+                    { key: 'showConcept', label: '1. 核心概念' },
+                    { key: 'showComplexity', label: '2. 复杂度' },
+                    { key: 'showLevelRange', label: '3. 适用等级' },
+                    { key: 'showIntroduction', label: '4. 简介与导言' },
+                    { key: 'showSummary', label: '5. 模组概要' },
+                    { key: 'showPrologue', label: '6. 序言开场白' },
+                    { key: 'showToneThemes', label: '7. 基调/主题/灵感' },
+                    { key: 'showCopyright', label: '8. DPCGL 版权声明' },
+                  ].map(({ key, label }) => {
+                    const isChecked = !!settings[key as keyof typeof settings];
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleSetting(key)}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                          isChecked 
+                            ? 'bg-amber-500/15 border-amber-500/40 text-amber-200 font-semibold' 
+                            : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:bg-stone-800'
+                        }`}
+                      >
+                        <span>{label}</span>
+                        {isChecked ? (
+                          <ToggleRight size={16} className="text-amber-400" />
+                        ) : (
+                          <ToggleLeft size={16} className="text-stone-600" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {onOpenVault && (
             <button
@@ -216,6 +298,30 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             </button>
           </div>
 
+          {/* Preview Style Toggle: Long Vertical vs A4 Physical Book */}
+          <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-[11px]">
+            <button
+              type="button"
+              onClick={() => setPreviewStyle('long')}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                previewStyle === 'long' ? 'bg-amber-600 text-white font-bold' : 'text-stone-400 hover:text-stone-200'
+              }`}
+              title="原创长竖版自适应流式排版 (参考图3标准)"
+            >
+              长竖版
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewStyle('a4')}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                previewStyle === 'a4' ? 'bg-amber-600 text-white font-bold' : 'text-stone-400 hover:text-stone-200'
+              }`}
+              title="实体 A4 双栏物理分页排版"
+            >
+              实体A4
+            </button>
+          </div>
+
           {viewMode === 'split' && (
             <div className="hidden lg:flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-[11px] text-stone-400">
               <button
@@ -248,7 +354,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
 
         {/* Right: Zoom & Export Actions */}
         <div className="flex items-center gap-2">
-          {/* Zoom controls */}
           <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg px-1.5 py-0.5 gap-1 text-stone-400">
             <button
               type="button"
@@ -281,7 +386,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             type="button"
             onClick={handleCopySource}
             className="flex items-center gap-1 px-2.5 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg border border-stone-700 font-medium text-xs transition-colors cursor-pointer"
-            title="复制 Homebrewery V3 完整源码"
+            title="复制完整 Markdown 源码"
           >
             {copySuccess ? <CheckCircle2 size={13} className="text-emerald-400" /> : <Copy size={13} />}
             <span className="hidden sm:inline">{copySuccess ? '已复制' : '复制代码'}</span>
@@ -385,12 +490,12 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               minRows={30}
               onGenerateToc={onGenerateToc}
               className="min-h-[calc(100vh-170px)] font-mono text-xs leading-relaxed bg-stone-950/70 border-stone-800 text-stone-200 focus:ring-amber-500/30"
-              placeholder="在这里畅快书写你的长篇战役... 支持标准 Markdown 与 Homebrewery V3 语法，输入 '/' 唤出快捷选单..."
+              placeholder="在这里畅快书写你的长篇战役... 支持标准 Markdown 语法，输入 '/' 唤出快捷选单..."
             />
           </div>
         )}
 
-        {/* Right: Live A4 Physical Book Preview Pane */}
+        {/* Right: Live Preview Pane (Defaults to authentic long vertical Image 3 style) */}
         {(viewMode === 'split' || viewMode === 'preview') && (
           <div
             ref={previewContainerRef}
@@ -405,13 +510,25 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               }}
               className="w-full flex flex-col items-center"
             >
-              <MarkdownRenderer
-                content={fullMarkdownText}
-                theme={activeTheme}
-                isBookMode={true}
-                projectData={projectData}
-                className="w-full"
-              />
+              {previewStyle === 'long' ? (
+                <div className={`${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).bg} ${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).text} ${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).fontBody} w-full max-w-4xl p-6 sm:p-12 rounded-2xl shadow-2xl transition-colors duration-300 leading-relaxed border border-current/10`}>
+                  <MarkdownRenderer
+                    content={fullMarkdownText}
+                    theme={activeTheme}
+                    isBookMode={false}
+                    projectData={projectData}
+                    className="w-full"
+                  />
+                </div>
+              ) : (
+                <MarkdownRenderer
+                  content={fullMarkdownText}
+                  theme={activeTheme}
+                  isBookMode={true}
+                  projectData={projectData}
+                  className="w-full max-w-4xl"
+                />
+              )}
             </div>
           </div>
         )}

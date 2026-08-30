@@ -65,7 +65,7 @@ const Styles = {
   secondaryBtn: "flex items-center gap-2 bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm",
 };
 
-const THEMES: Record<ThemeType, any> = {
+export const THEMES: Record<ThemeType, any> = {
   default: { 
     name: '默认 (Daggerheart)', 
     fontHead: 'font-serif', 
@@ -1027,6 +1027,12 @@ const MainContent = () => {
               onChangeMarkdown={setSplitMarkdownText}
               activeTheme={projectData.theme}
               onChangeTheme={(t) => updateField('theme', t)}
+              onUpdateSettings={(key, val) => {
+                const newSettings = { ...projectData.settings, [key]: val };
+                const updatedData = { ...projectData, settings: newSettings };
+                setProjectData(updatedData);
+                setSplitMarkdownText(serializeProjectDataToV3Markdown(updatedData));
+              }}
               onOpenVault={() => setIsVaultModalOpen(true)}
               onGenerateToc={() => {
                 const toc = generateTocSnippet(projectData);
