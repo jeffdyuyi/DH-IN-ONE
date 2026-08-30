@@ -1047,6 +1047,13 @@ const MainContent = () => {
               projectData={projectData}
               fullMarkdownText={splitMarkdownText || serializeProjectDataToV3Markdown(projectData)}
               onChangeMarkdown={setSplitMarkdownText}
+              onUpdateProject={(updater) => {
+                setProjectData((prev) => {
+                  const next = typeof updater === 'function' ? updater(prev) : updater;
+                  setSplitMarkdownText(serializeProjectDataToV3Markdown(next));
+                  return next;
+                });
+              }}
               activeTheme={projectData.theme}
               onChangeTheme={(t) => updateField('theme', t)}
               onUpdateSettings={(key, val) => {
