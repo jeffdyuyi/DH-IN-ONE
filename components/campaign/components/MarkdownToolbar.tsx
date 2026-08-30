@@ -277,6 +277,55 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         </button>
       </div>
 
+      {/* Official Term Dropdown */}
+      <select
+        onChange={handleSelectSnippet}
+        defaultValue=""
+        className="px-1.5 py-0.5 bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 rounded text-[11px] text-stone-700 dark:text-stone-200 outline-none hover:border-amber-400 font-sans cursor-pointer transition-colors shadow-2xs"
+        title="选择插入官方术语"
+      >
+        <option value="" disabled>🏷️ 官方术语库...</option>
+        <optgroup label="希望点与恐惧点">
+          <option value="【花费 1 希望点】">【花费 1 希望点】</option>
+          <option value="【获得 1 希望点】">【获得 1 希望点】</option>
+          <option value="【花费 1 恐惧点】">【花费 1 恐惧点】</option>
+          <option value="【获得 1 恐惧点】">【获得 1 恐惧点】</option>
+          <option value="【清除 1 恐惧点】">【清除 1 恐惧点】</option>
+        </optgroup>
+        <optgroup label="生命、压力与护甲">
+          <option value="【标记 1 压力点】">【标记 1 压力点】</option>
+          <option value="【清除 1 压力点】">【清除 1 压力点】</option>
+          <option value="【标记 1 生命点】">【标记 1 生命点】</option>
+          <option value="【恢复 1 生命点】">【恢复 1 生命点】</option>
+          <option value="【标记 1 护甲槽】">【标记 1 护甲槽】</option>
+          <option value="【清除 1 护甲槽】">【清除 1 护甲槽】</option>
+        </optgroup>
+        <optgroup label="距离与范围">
+          <option value="【近战范围】">【近战范围】</option>
+          <option value="【邻近范围】">【邻近范围】</option>
+          <option value="【近距离范围】">【近距离范围】</option>
+          <option value="【远距离范围】">【远距离范围】</option>
+          <option value="【极远范围】">【极远范围】</option>
+        </optgroup>
+      </select>
+
+      {/* Rule Sentence Snippets */}
+      <select
+        onChange={handleSelectSnippet}
+        defaultValue=""
+        className="px-1.5 py-0.5 bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 rounded text-[11px] text-stone-700 dark:text-stone-200 outline-none hover:border-amber-400 font-sans cursor-pointer transition-colors shadow-2xs"
+        title="选择插入规则描述常用句式"
+      >
+        <option value="" disabled>📝 规则常用句式...</option>
+        <option value="对近距离范围内的一个目标进行一次敏捷掷骰（难度 12）。">对近距离目标进行敏捷掷骰(难度 12)</option>
+        <option value="成功时，目标处于【脆弱】状态；失败时，游戏主持人获得 1 恐惧点。">成功/失败分歧结算模板</option>
+        <option value="造成 1d8+3 点物理伤害。">造成 1d8+3 点物理伤害</option>
+        <option value="造成 2d6 点魔法伤害，并将其击退至近距离范围处。">造成 2d6 魔法伤害并击退</option>
+        <option value="在其下一次动作掷骰中获得优势。">下一次动作掷骰获得优势</option>
+        <option value="标记 1 压力点以少标记 1 生命点。">标记 1 压力以少标记 1 生命</option>
+        <option value="与游戏主持人一起描述该物品并将其加入物品栏。">与GM共创确定物品句式</option>
+      </select>
+
       {/* Dropdown for More Templates & Sections */}
       <select
         onChange={handleSelectSnippet}

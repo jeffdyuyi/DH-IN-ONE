@@ -179,6 +179,29 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         );
       }
 
+      case 'divider':
+        return <hr key={`divider-${bIdx}`} className="my-4 border-t border-current/20 border-dashed" />;
+
+      case 'list': {
+        const { ordered, items } = block.data || { ordered: false, items: [] };
+        if (ordered) {
+          return (
+            <ol key={`ol-${bIdx}`} className="list-decimal list-inside space-y-1 my-2 pl-2 text-inherit">
+              {items.map((it: string, itIdx: number) => (
+                <li key={itIdx} className="leading-relaxed">{parseInline(it)}</li>
+              ))}
+            </ol>
+          );
+        }
+        return (
+          <ul key={`ul-${bIdx}`} className="list-disc list-inside space-y-1 my-2 pl-2 text-inherit">
+            {items.map((it: string, itIdx: number) => (
+              <li key={itIdx} className="leading-relaxed">{parseInline(it)}</li>
+            ))}
+          </ul>
+        );
+      }
+
       case 'paragraph':
         return (
           <p key={`p-${bIdx}`} className="leading-relaxed mb-2 text-inherit">

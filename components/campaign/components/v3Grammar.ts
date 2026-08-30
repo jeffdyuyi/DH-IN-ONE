@@ -11,6 +11,8 @@ export interface ParsedBlock {
     | 'spacer' 
     | 'heading' 
     | 'paragraph' 
+    | 'list'
+    | 'divider'
     | 'blockquote' 
     | 'note' 
     | 'table' 
@@ -394,11 +396,49 @@ export function parseDocumentToPages(fullText: string): ParsedPage[] {
         }
       }
 
+      // Divider: --- or ***
+      if (trimmed === '---' || trimmed === '***') {
+        blocks.push({ type: 'divider' });
+        i++;
+        continue;
+      }
+
+      // Unordered or Ordered List
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || /^\d+\.\s+/.test(trimmed)) {
+        const isOrdered = /^\d+\.\s+/.test(trimmed);
+        const listItems: string[] = [];
+        let j = i;
+        while (j < lines.length) {
+          const lTrim = lines[j].trim();
+          if (isOrdered && /^\d+\.\s+/.test(lTrim)) {
+            listItems.push(lTrim.replace(/^\d+\.\s+/, ''));
+            j++;
+          } else if (!isOrdered && (lTrim.startsWith('- ') || lTrim.startsWith('• '))) {
+            listItems.push(lTrim.replace(/^[-•]\s+/, ''));
+            j++;
+          } else {
+            break;
+          }
+        }
+        blocks.push({
+          type: 'list',
+          data: { ordered: isOrdered, items: listItems },
+        });
+        i = j;
+        continue;
+      }
+
       // Regular Paragraph
       if (trimmed) {
         blocks.push({
           type: 'paragraph',
           content: line,
+        });
+      } else {
+        // Empty line spacer
+        blocks.push({
+          type: 'spacer',
+          level: 1,
         });
       }
 
