@@ -3,6 +3,7 @@ import './daggerheart-v3.css';
 import { parseDocumentToPages, ParsedBlock, ParsedPage } from './v3Grammar';
 import { Skull, ShieldAlert, Compass, Cpu, BookOpen, Quote, StickyNote, Sparkles, Flame, Zap, Heart, Shield } from 'lucide-react';
 import { ProjectData } from '../types';
+import { getLogoUrl } from '../dpcglHelper';
 
 interface MarkdownRendererProps {
   content: string;
@@ -476,23 +477,87 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   if (isBookMode) {
     return (
       <div className={`dh-book-viewport ${className}`} data-theme={theme}>
-        {parsedPages.map((page) => (
-          <div key={page.pageIndex} className="dh-page" id={`p${page.pageIndex}`}>
-            {/* Side tab for chapter indicator */}
-            {page.chapterTab && <div className="dh-side-tab" title={`Chapter ${page.chapterTab}`} />}
+        {parsedPages.map((page) => {
+          if (page.isFrontCover) {
+            const rawCover = page.coverData?.coverImage || projectData?.coverPage?.coverImage;
+            const coverImage = resolveImageUrl(rawCover || '');
+            const logoUrl = getLogoUrl(
+              projectData?.coverPage?.dpcglLogo || 'dh_bottle_white_color',
+              projectData?.coverPage?.customLogoUrl
+            );
+            const title = page.coverData?.title || projectData?.coverPage?.title || projectData?.title || '战役名称';
+            const subtitle = page.coverData?.subtitle || projectData?.coverPage?.subtitle;
+            const author = page.coverData?.author || projectData?.coverPage?.authorLine || projectData?.author || '匿名';
+            const footerText = page.coverData?.footerText || projectData?.coverPage?.footerText;
 
-            {/* A4 Double Column Content Flow */}
-            <div className="dh-page-content">
-              {page.blocks.map((block, bIdx) => renderBlock(block, bIdx))}
-            </div>
+            return (
+              <div
+                key={page.pageIndex}
+                className="relative w-full min-h-[297mm] mx-auto max-w-[210mm] shadow-2xl rounded-2xl overflow-hidden flex flex-col mb-6 print:break-after-page print:rounded-none print:shadow-none"
+                style={
+                  coverImage
+                    ? { backgroundImage: `url(${coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                    : { background: 'linear-gradient(160deg, #1c1917 0%, #292524 60%, #44403c 100%)' }
+                }
+              >
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/75" />
 
-            {/* Footer with Footnote and Page Number */}
-            <div className="dh-page-footer">
-              <span>{page.footnote || 'Daggerheart Campaign Book'}</span>
-              <span>第 {page.pageIndex} 页</span>
+                {/* DPCGL Official Compliance Logo */}
+                {logoUrl && (
+                  <div className="absolute z-20 top-6 right-6">
+                    <img
+                      src={logoUrl}
+                      alt="DPCGL Compliance Logo"
+                      className="w-20 sm:w-24 object-contain drop-shadow-md"
+                    />
+                  </div>
+                )}
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Bottom text */}
+                <div className="relative z-10 text-white text-center px-12 pb-20 space-y-3">
+                  {subtitle && (
+                    <p className="text-sm font-medium text-white/60 uppercase tracking-[0.3em]">{subtitle}</p>
+                  )}
+                  <h1 className="text-5xl font-black tracking-tight leading-tight drop-shadow-2xl font-serif">
+                    {title}
+                  </h1>
+                  <p className="text-base text-white/75 font-medium tracking-wide">
+                    By {author}
+                  </p>
+                </div>
+
+                {/* Footer bar */}
+                {footerText && (
+                  <div className="relative z-10 text-center text-[11px] text-white/50 border-t border-white/15 py-4 px-8">
+                    {footerText}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <div key={page.pageIndex} className="dh-page" id={`p${page.pageIndex}`}>
+              {/* Side tab for chapter indicator */}
+              {page.chapterTab && <div className="dh-side-tab" title={`Chapter ${page.chapterTab}`} />}
+
+              {/* A4 Double Column Content Flow */}
+              <div className="dh-page-content">
+                {page.blocks.map((block, bIdx) => renderBlock(block, bIdx))}
+              </div>
+
+              {/* Footer with Footnote and Page Number */}
+              <div className="dh-page-footer">
+                <span>{page.footnote || 'Daggerheart Campaign Book'}</span>
+                <span>第 {page.pageIndex} 页</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }

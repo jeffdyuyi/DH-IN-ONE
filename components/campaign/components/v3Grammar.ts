@@ -36,6 +36,14 @@ export interface ParsedPage {
   pageIndex: number;
   chapterTab?: string;
   footnote?: string;
+  isFrontCover?: boolean;
+  coverData?: {
+    title?: string;
+    subtitle?: string;
+    author?: string;
+    footerText?: string;
+    coverImage?: string;
+  };
   blocks: ParsedBlock[];
 }
 
@@ -164,6 +172,29 @@ export function parseDocumentToPages(fullText: string): ParsedPage[] {
   return rawPages.map((pageText, pageIdx) => {
     let footnote = '';
     let chapterTab = '';
+    let isFrontCover = false;
+    let coverData: any = null;
+
+    // Check if this page is a FrontCover page
+    if (pageText.includes('{{frontCover') || pageText.includes('{{coverPage')) {
+      isFrontCover = true;
+      coverData = {};
+      
+      const titleMatch = pageText.match(/^#\s+(.+)$/m);
+      if (titleMatch) coverData.title = titleMatch[1].trim();
+
+      const subtitleMatch = pageText.match(/^##\s+(.+)$/m);
+      if (subtitleMatch) coverData.subtitle = subtitleMatch[1].trim();
+
+      const authorMatch = pageText.match(/\*\*作者[：:]\*\*\s*([^\n*]+)/) || pageText.match(/By\s+([^\n*]+)/);
+      if (authorMatch) coverData.author = authorMatch[1].trim();
+
+      const footerMatch = pageText.match(/\*([^*]+)\*$/m);
+      if (footerMatch && !footerMatch[1].includes('作者')) coverData.footerText = footerMatch[1].trim();
+
+      const imgMatch = pageText.match(/!\[.*?\]\((.*?)\)/);
+      if (imgMatch) coverData.coverImage = imgMatch[1].trim();
+    }
 
     // Extract footnote or pageNumber
     pageText = pageText.replace(/\{\{footnote(?:,([a-zA-Z0-9_-]+))?\s+([^}]+)\}\}/g, (_, variant, text) => {
@@ -378,6 +409,8 @@ export function parseDocumentToPages(fullText: string): ParsedPage[] {
       pageIndex: pageIdx + 1,
       chapterTab,
       footnote,
+      isFrontCover,
+      coverData,
       blocks,
     };
   });

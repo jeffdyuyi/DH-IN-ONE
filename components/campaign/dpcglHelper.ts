@@ -258,7 +258,10 @@ export function getLogoUrl(logoType?: DPCGLLogoType, customUrl?: string): string
   if (!logoType || logoType === 'none') return '';
   if (logoType === 'custom') return customUrl || '';
   const item = DPCGL_LOGOS.find(l => l.id === logoType);
-  return item ? item.previewUrl : '';
+  if (!item || !item.previewUrl) return '';
+  const bp = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BASE_PATH) || '';
+  const cleanUrl = item.previewUrl.replace(/^\.?\//, '');
+  return `${bp}/${cleanUrl}`;
 }
 
 export function getPositionClass(position?: LogoPosition): string {
