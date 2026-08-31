@@ -484,27 +484,44 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       {/* Main Studio Body */}
       <div className="flex flex-1 w-full overflow-hidden relative">
         
-        {/* Leftmost: Collapsible Chapter Outline Tree */}
-        {isOutlineOpen && (
-          <aside className="w-56 shrink-0 h-full bg-stone-950/80 border-r border-stone-800 flex flex-col p-3 text-xs overflow-y-auto animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-stone-800 text-stone-400">
-              <span className="font-bold flex items-center gap-1 text-stone-300">
-                <BookOpen size={13} className="text-amber-400" /> 章节大纲
-              </span>
-              <button
-                type="button"
-                onClick={handleAddChapter}
-                className="p-1 hover:bg-stone-800 text-amber-400 hover:text-amber-300 rounded cursor-pointer"
-                title="新建章节"
-              >
-                <Plus size={14} />
-              </button>
+        {/* Leftmost: Collapsible Pinned Chapter Outline Drawer */}
+        {isOutlineOpen ? (
+          <aside className="w-64 shrink-0 h-full bg-stone-900 border-r border-stone-800 flex flex-col text-xs z-20 shadow-xl transition-all duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b border-stone-800/80 bg-stone-950/70 shrink-0">
+              <div className="flex items-center gap-2">
+                <BookOpen size={14} className="text-amber-400" />
+                <span className="font-bold text-stone-200 tracking-wide">章节大纲</span>
+                {outlineItems.length > 0 && (
+                  <span className="px-1.5 py-0.2 bg-stone-800 text-amber-300 rounded text-[10px] font-mono">
+                    {outlineItems.length}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleAddChapter}
+                  className="p-1 hover:bg-stone-800 text-amber-400 hover:text-amber-300 rounded cursor-pointer transition-colors"
+                  title="新建章节"
+                >
+                  <Plus size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOutlineOpen(false)}
+                  className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded cursor-pointer transition-colors"
+                  title="收起大纲 (释放编辑空间)"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+              </div>
             </div>
 
-            {/* Outline list */}
-            <div className="flex-1 space-y-1 overflow-y-auto pr-1">
+            {/* Scrollable Outline List */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
               {outlineItems.length === 0 ? (
-                <div className="text-[11px] text-stone-500 italic py-4 text-center">
+                <div className="text-[11px] text-stone-500 italic py-6 text-center">
                   暂无章节，点击下方 + 即可新建
                 </div>
               ) : (
@@ -513,44 +530,65 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
                     key={oIdx}
                     type="button"
                     onClick={() => handleJumpToSection(item)}
-                    className={`w-full text-left truncate px-2 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    className={`w-full text-left truncate px-2.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-2 group ${
                       item.level === 1 
-                        ? 'font-bold text-amber-300 hover:bg-stone-800' 
+                        ? 'font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20' 
                         : item.level === 2 
-                        ? 'pl-4 text-stone-300 hover:bg-stone-800/80' 
-                        : 'pl-6 text-stone-400 hover:bg-stone-800/60 text-[11px]'
+                        ? 'pl-5 text-stone-300 hover:bg-stone-800/80 hover:text-white' 
+                        : 'pl-8 text-stone-400 hover:bg-stone-800/60 hover:text-stone-200 text-[11px]'
                     }`}
                     title={`跳转至: ${item.title}`}
                   >
-                    <span className="text-stone-600 font-mono text-[10px]">
+                    <span className={`font-mono text-[10px] px-1 py-0.5 rounded shrink-0 ${
+                      item.level === 1 ? 'bg-amber-500/20 text-amber-400 font-bold' : 'text-stone-500'
+                    }`}>
                       {item.level === 1 ? 'H1' : item.level === 2 ? 'H2' : 'H3'}
                     </span>
-                    <span className="truncate">{item.title}</span>
+                    <span className="truncate flex-1">{item.title}</span>
                   </button>
                 ))
               )}
             </div>
 
-            {/* Outline quick actions footer */}
-            <div className="pt-2 mt-2 border-t border-stone-800 space-y-1.5 shrink-0">
+            {/* Pinned Bottom Actions */}
+            <div className="p-2.5 border-t border-stone-800/80 bg-stone-950/80 space-y-1.5 shrink-0">
               <button
                 type="button"
                 onClick={handleAddChapter}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded font-medium text-[11px] transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg font-bold text-xs transition-colors cursor-pointer border border-stone-700 hover:border-amber-500/40"
               >
-                <Plus size={12} className="text-amber-400" /> + 新建章节
+                <Plus size={13} className="text-amber-400" /> 新建章节
               </button>
               {onGenerateToc && (
                 <button
                   type="button"
                   onClick={onGenerateToc}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-700/50 rounded font-medium text-[11px] transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-gradient-to-r from-amber-950/50 to-orange-950/50 hover:from-amber-900/60 hover:to-orange-900/60 text-amber-300 border border-amber-700/50 rounded-lg font-bold text-xs transition-all cursor-pointer shadow-xs"
                 >
-                  <Sparkles size={12} /> 一键生成全书目录
+                  <Sparkles size={13} className="text-amber-400" /> 一键生成全书目录
                 </button>
               )}
             </div>
           </aside>
+        ) : (
+          /* Collapsed State: Slim Pinned Vertical Strip */
+          <button
+            type="button"
+            onClick={() => setIsOutlineOpen(true)}
+            className="w-8 shrink-0 h-full bg-stone-900/90 hover:bg-stone-800/90 border-r border-stone-800 flex flex-col items-center py-4 gap-2 text-stone-400 hover:text-amber-300 transition-all cursor-pointer group z-20"
+            title="展开章节大纲 (目录树)"
+          >
+            <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform text-amber-400" />
+            <BookOpen size={14} />
+            <span className="[writing-mode:vertical-lr] text-[11px] font-bold tracking-widest text-stone-400 group-hover:text-stone-200 mt-2">
+              章节大纲
+            </span>
+            {outlineItems.length > 0 && (
+              <span className="mt-1 px-1 py-0.5 bg-stone-800 text-amber-300 rounded text-[9px] font-mono">
+                {outlineItems.length}
+              </span>
+            )}
+          </button>
         )}
 
         {/* Center: Visual Block Stream OR Smart Textarea Code Editor */}
