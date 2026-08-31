@@ -12,6 +12,11 @@ import {
   CyberwareBlock
 } from '../types';
 import { SmartTextarea } from './SmartTextarea';
+import { 
+  CoverPageCard, 
+  CreditsPageCard, 
+  CopyrightPageCard 
+} from './SpecialPagesEditor';
 
 // Block type metadata
 export const BLOCK_TYPE_CONFIGS: { type: BlockType; label: string; icon: any; color: string; badgeColor: string }[] = [
@@ -360,8 +365,15 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
   return (
     <div className="w-full space-y-6 pb-20 select-text">
       
+      {/* 0. Dedicated Cover & Compliance Page Card */}
+      <CoverPageCard 
+        projectData={projectData} 
+        onUpdateProject={onUpdateProject} 
+        onFocusPreview={() => onFocusItem?.('cover-page')} 
+      />
+
       {/* 1. Story Metadata & Overview Card (Respects 8 switches) */}
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden transition-all duration-200">
+      <div id="editor-special-overview" className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden transition-all duration-200">
         <div 
           onClick={() => setIsOverviewOpen(!isOverviewOpen)}
           className="flex items-center justify-between p-4 bg-stone-50/80 hover:bg-stone-50 cursor-pointer border-b border-stone-100"
@@ -751,6 +763,19 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
           <span>+ 新建章节小节</span>
         </button>
       </div>
+
+      {/* 3. Special End Pages: Credits & DPCGL Copyright */}
+      <CreditsPageCard 
+        projectData={projectData} 
+        onUpdateProject={onUpdateProject} 
+        onFocusPreview={() => onFocusItem?.('credits-page')} 
+      />
+
+      <CopyrightPageCard 
+        projectData={projectData} 
+        onUpdateProject={onUpdateProject} 
+        onFocusPreview={() => onFocusItem?.('credits-page')} 
+      />
     </div>
   );
 };

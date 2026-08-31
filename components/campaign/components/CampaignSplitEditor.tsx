@@ -117,7 +117,15 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       target = previewContainerRef.current.querySelector(`#preview-block-${blockId}`);
     }
     if (!target && secId) {
-      target = previewContainerRef.current.querySelector(`#preview-section-${secId}, #section-${secId}`);
+      if (secId === 'cover-page') {
+        target = previewContainerRef.current.querySelector('#preview-cover-page');
+      } else if (secId === 'credits-page') {
+        target = previewContainerRef.current.querySelector('#preview-credits-page');
+      } else if (secId === 'content') {
+        target = previewContainerRef.current.querySelector('#preview-content');
+      } else {
+        target = previewContainerRef.current.querySelector(`#preview-section-${secId}, #section-${secId}`);
+      }
     }
     
     if (target) {
@@ -487,10 +495,58 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               </div>
             </div>
 
+            {/* Special Pages Top Entries */}
+            <div className="px-2 pt-2 pb-1.5 space-y-1 border-b border-stone-800/80 bg-stone-950/40">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('editor-special-cover');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  handleFocusItem('cover-page');
+                }}
+                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer ${
+                  projectData.coverPage?.enabled 
+                    ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' 
+                    : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800/60'
+                }`}
+                title="编辑全彩/插画封面与 DPCGL 徽标"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span>🎨</span>
+                  <span className="truncate">封面与合规</span>
+                </div>
+                <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                  projectData.coverPage?.enabled ? 'bg-amber-500 text-stone-950' : 'text-stone-500 bg-stone-800'
+                }`}>
+                  {projectData.coverPage?.enabled ? '已启用' : '关闭'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('editor-special-overview');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  handleFocusItem('content');
+                }}
+                className="w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-between text-stone-400 hover:text-stone-200 hover:bg-stone-800/60 transition-colors cursor-pointer"
+                title="编辑战役背景概念、故事梗概与安全工具"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span>📜</span>
+                  <span className="truncate">战役概览</span>
+                </div>
+                <span className="text-[9px] text-stone-500 font-mono">元数据</span>
+              </button>
+            </div>
+
             {/* Scrollable Outline List */}
             <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
+              <div className="text-[10px] font-bold text-stone-500 uppercase px-1 py-0.5 tracking-wider">
+                章节目录 ({outlineItems.length})
+              </div>
               {outlineItems.length === 0 ? (
-                <div className="text-[11px] text-stone-500 italic py-6 text-center">
+                <div className="text-[11px] text-stone-500 italic py-4 text-center">
                   暂无章节，点击下方 + 即可新建
                 </div>
               ) : (
@@ -517,6 +573,59 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
                   </button>
                 ))
               )}
+            </div>
+
+            {/* Special Pages Bottom Entries */}
+            <div className="px-2 pt-1.5 pb-2 space-y-1 border-t border-stone-800/80 bg-stone-950/40">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('editor-special-credits');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  handleFocusItem('credits-page');
+                }}
+                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer ${
+                  projectData.creditsPage?.enabled 
+                    ? 'text-purple-300 bg-purple-500/15 border border-purple-500/30' 
+                    : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800/60'
+                }`}
+                title="编辑作品结尾致谢词与测试人员名单"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span>🏆</span>
+                  <span className="truncate">致谢与后记</span>
+                </div>
+                <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                  projectData.creditsPage?.enabled ? 'bg-purple-500 text-white' : 'text-stone-500 bg-stone-800'
+                }`}>
+                  {projectData.creditsPage?.enabled ? '已启用' : '关闭'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('editor-special-copyright');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  handleFocusItem('credits-page');
+                }}
+                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer ${
+                  projectData.creditsPage?.copyright?.enabled !== false 
+                    ? 'text-teal-300 bg-teal-500/15 border border-teal-500/30' 
+                    : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800/60'
+                }`}
+                title="配置 DPCGL 官方合规版权声明"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span>⚖️</span>
+                  <span className="truncate">DPCGL 声明</span>
+                </div>
+                <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${
+                  projectData.creditsPage?.copyright?.enabled !== false ? 'bg-teal-600 text-white' : 'text-stone-500 bg-stone-800'
+                }`}>
+                  {projectData.creditsPage?.copyright?.enabled !== false ? '已启用' : '关闭'}
+                </span>
+              </button>
             </div>
 
             {/* Pinned Bottom Actions */}
