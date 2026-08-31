@@ -171,7 +171,7 @@ export interface DynamicSection {
   blocks: ContentBlock[];
 }
 
-export type ThemeType = 'default' | 'gothic' | 'fairytale' | 'chinese' | 'cyberpunk' | 'darkfantasy' | 'blocky' | 'nightracer';
+export type ThemeType = 'default' | 'parchment' | 'gothic' | 'fairytale' | 'chinese' | 'cyberpunk' | 'darkfantasy' | 'blocky' | 'nightracer';
 
 // --- Cover, Credits & DPCGL Copyright Settings ---
 
