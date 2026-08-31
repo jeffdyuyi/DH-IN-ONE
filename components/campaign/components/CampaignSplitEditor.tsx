@@ -47,7 +47,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
   const [editStyle, setEditStyle] = useState<'visual' | 'code'>('visual'); // 'visual' (积木流) by default
-  const [previewStyle, setPreviewStyle] = useState<'long' | 'a4'>('long'); // default to authentic long-vertical
   const [splitRatio, setSplitRatio] = useState<'50:50' | '60:40' | '40:60'>('50:50');
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -396,30 +395,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             </button>
           </div>
 
-          {/* Preview Style Toggle: Long Vertical vs A4 Physical Book */}
-          <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-[11px]">
-            <button
-              type="button"
-              onClick={() => setPreviewStyle('long')}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                previewStyle === 'long' ? 'bg-amber-600 text-white font-bold' : 'text-stone-400 hover:text-stone-200'
-              }`}
-              title="原创长竖版自适应流式排版 (参考图3标准)"
-            >
-              长竖版
-            </button>
-            <button
-              type="button"
-              onClick={() => setPreviewStyle('a4')}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                previewStyle === 'a4' ? 'bg-amber-600 text-white font-bold' : 'text-stone-400 hover:text-stone-200'
-              }`}
-              title="实体 A4 双栏物理分页排版"
-            >
-              实体A4
-            </button>
-          </div>
-
           {viewMode === 'split' && (
             <div className="hidden lg:flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-[11px] text-stone-400">
               <button
@@ -635,7 +610,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               <CampaignPreviewEngine
                 data={projectData}
                 activeSectionId={activeSectionId}
-                viewStyle={previewStyle}
               />
             </div>
           </div>
