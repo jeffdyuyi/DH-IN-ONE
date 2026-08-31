@@ -152,6 +152,7 @@ interface VisualBlockStreamProps {
   projectData: ProjectData;
   onUpdateProject: (updater: (prev: ProjectData) => ProjectData) => void;
   onRegisterFocus?: (ref: any, setter: (val: string) => void) => void;
+  onFocusItem?: (secId?: string, blockId?: string) => void;
   onScrollToSection?: string | null;
 }
 
@@ -159,6 +160,7 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
   projectData,
   onUpdateProject,
   onRegisterFocus,
+  onFocusItem,
   onScrollToSection,
 }) => {
   const [isOverviewOpen, setIsOverviewOpen] = useState(true);
@@ -461,6 +463,8 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
           <section 
             key={sec.id} 
             id={`editor-section-${sec.id}`}
+            onClick={() => onFocusItem?.(sec.id)}
+            onFocusCapture={() => onFocusItem?.(sec.id)}
             className="bg-white rounded-2xl border border-stone-200/90 shadow-sm p-4 sm:p-6 space-y-4 transition-all duration-200 relative group/section"
           >
             {/* Section Header Bar */}
@@ -553,6 +557,15 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
                 return (
                   <React.Fragment key={block.id}>
                     <div 
+                      id={`editor-block-${block.id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFocusItem?.(sec.id, block.id);
+                      }}
+                      onFocusCapture={(e) => {
+                        e.stopPropagation();
+                        onFocusItem?.(sec.id, block.id);
+                      }}
                       className="group/block relative bg-white rounded-xl border border-stone-200/90 shadow-2xs hover:shadow-md hover:border-amber-400/60 focus-within:shadow-md focus-within:ring-2 focus-within:ring-amber-500/20 focus-within:border-amber-400 transition-all duration-200 overflow-hidden"
                     >
                       {/* Quiet Header: Type Badge (Left) & Elevated Actions (Right - Fades in on Hover/Focus) */}

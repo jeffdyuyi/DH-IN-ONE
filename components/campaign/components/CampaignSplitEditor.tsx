@@ -55,7 +55,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
 
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const isScrollingRef = useRef<'editor' | 'preview' | null>(null);
 
   // Track focused active input for top toolbar text injections
   const activeInputRef = useRef<{
@@ -110,13 +109,34 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
     return items;
   }, [editStyle, projectData.sections, fullMarkdownText]);
 
-  // Jump to specific outline heading in editor
+  const handleFocusItem = useCallback((secId?: string, blockId?: string) => {
+    if (!previewContainerRef.current) return;
+    
+    let target: HTMLElement | null = null;
+    if (blockId) {
+      target = previewContainerRef.current.querySelector(`#preview-block-${blockId}`);
+    }
+    if (!target && secId) {
+      target = previewContainerRef.current.querySelector(`#preview-section-${secId}, #section-${secId}`);
+    }
+    
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('ring-2', 'ring-amber-500/80', 'ring-offset-2', 'transition-all');
+      setTimeout(() => {
+        target?.classList.remove('ring-2', 'ring-amber-500/80', 'ring-offset-2');
+      }, 1200);
+    }
+  }, []);
+
+  // Jump to specific outline heading in editor & auto-align preview
   const handleJumpToSection = (item: { id?: string; lineIndex: number }) => {
     if (editStyle === 'visual' && item.id) {
       const el = document.getElementById(`editor-section-${item.id}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+      handleFocusItem(item.id);
       return;
     }
 
@@ -130,41 +150,9 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       const linePct = item.lineIndex / Math.max(1, lines.length);
       textarea.scrollTop = linePct * textarea.scrollHeight;
     }
-  };
-
-  // Sync scroll between Editor and Preview
-  const handleEditorScroll = () => {
-    if (isScrollingRef.current === 'preview') return;
-    isScrollingRef.current = 'editor';
-
-    const editorEl = editorContainerRef.current;
-    const previewEl = previewContainerRef.current;
-
-    if (editorEl && previewEl) {
-      const scrollPct = editorEl.scrollTop / (editorEl.scrollHeight - editorEl.clientHeight || 1);
-      previewEl.scrollTop = scrollPct * (previewEl.scrollHeight - previewEl.clientHeight);
+    if (item.id) {
+      handleFocusItem(item.id);
     }
-
-    setTimeout(() => {
-      isScrollingRef.current = null;
-    }, 50);
-  };
-
-  const handlePreviewScroll = () => {
-    if (isScrollingRef.current === 'editor') return;
-    isScrollingRef.current = 'preview';
-
-    const editorEl = editorContainerRef.current;
-    const previewEl = previewContainerRef.current;
-
-    if (editorEl && previewEl) {
-      const scrollPct = previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight || 1);
-      editorEl.scrollTop = scrollPct * (editorEl.scrollHeight - editorEl.clientHeight);
-    }
-
-    setTimeout(() => {
-      isScrollingRef.current = null;
-    }, 50);
   };
 
   const handleCopySource = () => {
@@ -576,7 +564,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
         {(viewMode === 'split' || viewMode === 'editor') && (
           <div
             ref={editorContainerRef}
-            onScroll={handleEditorScroll}
             className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col ${
               editStyle === 'visual' ? 'bg-stone-100 text-stone-900' : 'bg-stone-950 text-stone-100'
             } border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
@@ -586,6 +573,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
                 projectData={projectData}
                 onUpdateProject={handleUpdateProject}
                 onRegisterFocus={handleRegisterFocus}
+                onFocusItem={handleFocusItem}
               />
             ) : (
               <div className="flex-1 flex flex-col bg-stone-950 rounded-xl border border-stone-800 overflow-hidden shadow-inner">
@@ -615,7 +603,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
         {viewMode === 'split' && (
           <div
             ref={previewContainerRef}
-            onScroll={handlePreviewScroll}
             className={`h-full overflow-y-auto p-4 md:p-8 bg-stone-950/90 transition-all ${previewWidthClass}`}
           >
             <div

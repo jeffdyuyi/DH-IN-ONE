@@ -262,7 +262,7 @@ export const CampaignPreviewEngine: React.FC<CampaignPreviewEngineProps> = ({
           {layoutGroups.map((group, gIdx) => (
             <div key={gIdx} className={group.type === 'cols' ? 'columns-1 md:columns-2 gap-8 space-y-8' : 'w-full mb-8'}>
               {group.items.map(section => (
-                <div key={section.id} id={`preview-section-${section.id}`} className="break-inside-avoid mb-8">
+                <div key={section.id} id={`preview-section-${section.id}`} className="break-inside-avoid mb-8 scroll-mt-16 transition-all rounded-xl">
                   <div className={`mb-4 ${section.level === 1 ? `border-b-2 ${theme.border}` : ''}`}>
                      <h2 className={`${theme.fontHead} ${
                        section.level === 1 ? `text-4xl font-black ${theme.accent} tracking-tight` : 
@@ -276,7 +276,11 @@ export const CampaignPreviewEngine: React.FC<CampaignPreviewEngineProps> = ({
                      {section.italicNote && <p className="italic text-sm mb-3 opacity-60 font-serif">{section.italicNote}</p>}
                   </div>
                   <div className="space-y-4 text-justify">
-                     {section.blocks?.map(block => <BlockRenderer key={block.id} block={block} theme={theme} />)}
+                     {section.blocks?.map(block => (
+                       <div key={block.id} id={`preview-block-${block.id}`} data-block-id={block.id} className="scroll-mt-16 transition-all rounded-xl">
+                         <BlockRenderer block={block} theme={theme} />
+                       </div>
+                     ))}
                   </div>
                 </div>
               ))}
