@@ -239,27 +239,8 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       {/* Top Studio Control Bar */}
       <div className="flex items-center justify-between px-3 py-2 bg-stone-950/95 border-b border-stone-800 shrink-0 text-xs flex-wrap gap-2">
         
-        {/* Left: Outline Toggle & Layout Switches */}
+        {/* Left: Layout Switches & Insert Tools */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsOutlineOpen(!isOutlineOpen)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
-              isOutlineOpen 
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-xs' 
-                : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-700'
-            }`}
-            title="展开/收起章节大纲目录"
-          >
-            <ListTree size={14} />
-            <span>章节大纲</span>
-            {outlineItems.length > 0 && (
-              <span className="ml-0.5 px-1.5 py-0.2 bg-black/40 rounded-full text-[10px] text-amber-300 font-mono">
-                {outlineItems.length}
-              </span>
-            )}
-          </button>
-
           {/* Layout Settings Toggle Popover Trigger */}
           <div className="relative">
             <button
