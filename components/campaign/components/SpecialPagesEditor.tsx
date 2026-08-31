@@ -16,15 +16,7 @@ import {
   DPCGL_LOGOS, DPCGL_TEMPLATES, 
   getLogoUrl, getPositionClass, getSizeClass 
 } from '../dpcglHelper';
-
-export const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-};
+import { fileToBase64 } from '../utils';
 
 // ==========================================
 // 1. 封面与 DPCGL 合规配置卡片 (Cover Card)

@@ -33,7 +33,8 @@ export const BLOCK_TYPE_CONFIGS: { type: BlockType; label: string; icon: any; co
   { type: 'divider', label: '分割线', icon: Minus, color: 'text-stone-600 hover:text-stone-800 bg-stone-100 hover:bg-stone-200', badgeColor: 'bg-stone-100 text-stone-600 border-stone-200' },
 ];
 
-export const generateBlockId = () => 'b_' + Math.random().toString(36).substring(2, 9);
+import { generateBlockId } from '../utils';
+export { generateBlockId };
 
 export const createDefaultContentBlock = (type: BlockType): ContentBlock => {
   let b: any = { id: generateBlockId(), type };
