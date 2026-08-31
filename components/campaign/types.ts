@@ -173,6 +173,54 @@ export interface DynamicSection {
 
 export type ThemeType = 'default' | 'gothic' | 'fairytale' | 'chinese' | 'cyberpunk' | 'darkfantasy' | 'blocky' | 'nightracer';
 
+export interface ThemeCardConfig {
+  isDark: boolean;
+  bg: string;
+  border: string;
+  text: string;
+  textMuted: string;
+  enemyBar: string;
+  envBar: string;
+  nameText: string;
+  nameEnText: string;
+  badgeTier: string;
+  badgeTypeEnemy: string;
+  badgeTypeEnv: string;
+  badgeNpc: string;
+  avatarBorder: string;
+  metaBox: string;
+  metaLabelEnemy: string;
+  metaLabelEnv: string;
+  metaText: string;
+  statBox: string;
+  statItem: string;
+  statLabel: string;
+  statVal: string;
+  statHpVal: string;
+  statStressVal: string;
+  hpDot: string;
+  stressDot: string;
+  attackName: string;
+  attackTypeMagic: string;
+  attackTypePhys: string;
+  attackStats: string;
+  traitName: string;
+  [key: string]: any;
+}
+
+export interface ThemeConfig {
+  name: string;
+  fontHead: string;
+  fontBody: string;
+  bg: string;
+  text: string;
+  accent: string;
+  border: string;
+  metaBg: string;
+  card: ThemeCardConfig;
+  [key: string]: any;
+}
+
 // --- Cover, Credits & DPCGL Copyright Settings ---
 
 export type DPCGLLogoType = 

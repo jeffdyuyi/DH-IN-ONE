@@ -20,7 +20,7 @@ import {
 import { 
   ProjectData, DynamicSection, DEFAULT_PROJECT,
   ContentBlock, BlockType, EnemyBlock, EnvironmentBlock, 
-  OutcomeBlock, OutcomeEntry, ThemeType, Trait, CyberwareBlock,
+  OutcomeBlock, OutcomeEntry, ThemeType, ThemeConfig, Trait, CyberwareBlock,
   ProjectSettings, OutcomeTag, SavedProject, CoverPage, CreditsPage,
   DPCGLLogoType, DPCGLTemplateType, CopyrightSettings, LogoPosition, LogoSize
 } from './types';
@@ -66,7 +66,7 @@ const Styles = {
   secondaryBtn: "flex items-center gap-2 bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm",
 };
 
-export const THEMES: Record<ThemeType, any> = {
+export const THEMES: Record<ThemeType, ThemeConfig> = {
   default: { 
     name: '默认 (Daggerheart)', 
     fontHead: 'font-serif', 
@@ -785,24 +785,34 @@ const MainContent = () => {
   const [splitMarkdownText, setSplitMarkdownText] = useState<string>('');
   const [projectData, setProjectData] = usePersistentState<ProjectData>('dh_project_v1', DEFAULT_PROJECT);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
-  const [activeSpecialPage, setActiveSpecialPage] = useState<'coverPage' | 'creditsPage' | 'copyrightPage' | null>(null);
-  const [lastEditedSectionId, setLastEditedSectionId] = useState<string | null>(null);
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-  const [lastAutoSaveTime, setLastAutoSaveTime] = useState<number | null>(null);
-  const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null);
+  const debounceMarkdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleUpdateProject = useCallback((updater: React.SetStateAction<ProjectData>) => {
+    setProjectData((prev) => {
+      const next = typeof updater === 'function' ? (updater as (p: ProjectData) => ProjectData)(prev) : updater;
+      if (debounceMarkdownTimerRef.current) {
+        clearTimeout(debounceMarkdownTimerRef.current);
+      }
+      debounceMarkdownTimerRef.current = setTimeout(() => {
+        setSplitMarkdownText(serializeProjectDataToV3Markdown(next));
+      }, 250);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceMarkdownTimerRef.current) {
+        clearTimeout(debounceMarkdownTimerRef.current);
+      }
+    };
+  }, []);
 
   // Sync markdown text when entering split mode
   const handleEnterSplitMode = useCallback(() => {
     setSplitMarkdownText(serializeProjectDataToV3Markdown(projectData));
     setViewMode('split');
   }, [projectData]);
-
-  // Track last edited section ID so returning to outline centers on it
-  useEffect(() => {
-    if (activeSectionId) {
-      setLastEditedSectionId(activeSectionId);
-    }
-  }, [activeSectionId]);
 
   // Ensure current project has a valid ID
   useEffect(() => {
@@ -863,6 +873,10 @@ const MainContent = () => {
   }, [projectData]);
 
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState<boolean>(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [lastAutoSaveTime, setLastAutoSaveTime] = useState<number | null>(null);
+  const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null);
+  const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
 
   // 5-minute Auto-Save Timer (Only runs when isAutoSaveEnabled is true)
   useEffect(() => {
@@ -911,71 +925,6 @@ const MainContent = () => {
   const updateField = useCallback((field: string, value: any) => {
     setProjectData((prev: any) => ({ ...prev, [field]: value }));
   }, [setProjectData]);
-  
-  const updateSettings = useCallback((key: keyof ProjectSettings, value: boolean) => {
-    setProjectData((prev: any) => ({ ...prev, settings: { ...prev.settings, [key]: value } }));
-  }, [setProjectData]);
-
-  const addSectionAt = useCallback((atIndex?: number, level: 1 | 2 | 3 | 4 | 5 = 3, columnMode?: 'full' | 'cols') => {
-    const newSec: DynamicSection = { 
-      id: generateId(), 
-      title: "新章节", 
-      level, 
-      columnMode: columnMode || (level === 5 ? 'cols' : 'full'),
-      blocks: [{ id: generateId(), type: 'text', content: "" }] 
-    };
-    setProjectData((prev: any) => {
-      const newSections = [...prev.sections];
-      if (typeof atIndex === 'number' && atIndex >= 0 && atIndex <= newSections.length) {
-        newSections.splice(atIndex, 0, newSec);
-      } else {
-        newSections.push(newSec);
-      }
-      return { ...prev, sections: newSections };
-    });
-    setActiveSectionId(newSec.id);
-  }, [setProjectData]);
-
-  const loadProject = useCallback((newData: ProjectData) => {
-    setProjectData(newData);
-    setActiveSectionId(null);
-    setActiveSpecialPage(null);
-    setViewMode('edit');
-  }, [setProjectData]);
-
-  const updateCoverPage = useCallback((updates: Partial<CoverPage>) => {
-    setProjectData((prev: any) => ({
-      ...prev,
-      coverPage: { ...(prev.coverPage || { enabled: false }), ...updates }
-    }));
-  }, [setProjectData]);
-
-  const updateCreditsPage = useCallback((updates: Partial<CreditsPage>) => {
-    setProjectData((prev: any) => ({
-      ...prev,
-      creditsPage: { ...(prev.creditsPage || { enabled: false }), ...updates }
-    }));
-  }, [setProjectData]);
-
-  const updateCopyrightPage = useCallback((updates: Partial<CopyrightSettings>) => {
-    setProjectData((prev: any) => {
-      const curCopyright = prev.copyrightPage || prev.creditsPage?.copyright || {
-        enabled: true,
-        template: 'dh_bilingual',
-        year: '2026',
-        showDPCGLLogo: true,
-        dpcglLogo: 'dh_bottle_white_color'
-      };
-      const merged = { ...curCopyright, ...updates };
-      return {
-        ...prev,
-        copyrightPage: merged,
-        creditsPage: prev.creditsPage ? { ...prev.creditsPage, copyright: merged } : prev.creditsPage
-      };
-    });
-  }, [setProjectData]);
-
-  const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
 
   const handleInsertVaultBlock = useCallback((sectionIndex: number, block: ContentBlock) => {
     setProjectData((prev: any) => {
@@ -1007,7 +956,7 @@ const MainContent = () => {
         setViewMode={setViewMode}
         currentData={projectData}
         updateField={updateField}
-        loadProject={loadProject}
+        loadProject={setProjectData}
         onCreateNew={handleCreateNewProject}
         isAutoSaveEnabled={isAutoSaveEnabled}
         onToggleAutoSave={() => setIsAutoSaveEnabled(prev => !prev)}
@@ -1028,7 +977,7 @@ const MainContent = () => {
         isOpen={isLibraryOpen}
         onClose={() => setIsLibraryOpen(false)}
         currentData={projectData}
-        onLoadProject={loadProject}
+        onLoadProject={setProjectData}
         onSaveCurrentAsNew={saveCurrentAsNew}
         onOverwriteCurrent={overwriteCurrent}
         lastAutoSaveTime={lastAutoSaveTime}
@@ -1048,13 +997,7 @@ const MainContent = () => {
               projectData={projectData}
               fullMarkdownText={splitMarkdownText || serializeProjectDataToV3Markdown(projectData)}
               onChangeMarkdown={setSplitMarkdownText}
-              onUpdateProject={(updater) => {
-                setProjectData((prev) => {
-                  const next = typeof updater === 'function' ? updater(prev) : updater;
-                  setSplitMarkdownText(serializeProjectDataToV3Markdown(next));
-                  return next;
-                });
-              }}
+              onUpdateProject={handleUpdateProject}
               activeTheme={projectData.theme}
               activeSectionId={activeSectionId}
               onChangeTheme={(t) => updateField('theme', t)}
