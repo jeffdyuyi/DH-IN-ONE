@@ -148,6 +148,83 @@ const GhostBlockInserter: React.FC<{ onInsert: (t: BlockType) => void }> = ({ on
   );
 };
 
+// --- Helper: Ghost Inserter between sections (大章节/小节间插入器) ---
+const GhostSectionInserter: React.FC<{
+  onInsert: (level: 1 | 2 | 3 | 4 | 5) => void;
+  prevLevel?: 1 | 2 | 3 | 4 | 5;
+}> = ({ onInsert, prevLevel = 2 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const sectionLevelOptions: { level: 1 | 2 | 3 | 4 | 5; label: string; desc: string; badge: string; color: string }[] = [
+    { level: 1, label: 'H1 卷', desc: '大篇章 / 核心大幕 (全幅主标题)', badge: 'bg-stone-900 text-white', color: 'hover:bg-amber-50 hover:border-amber-400' },
+    { level: 2, label: 'H2 幕', desc: '标准剧情章节 / 探索幕 (经典左侧色带)', badge: 'bg-amber-600 text-white', color: 'hover:bg-amber-50 hover:border-amber-400' },
+    { level: 3, label: 'H3 场', desc: '特定遭遇 / 场景机制 (下划线次标题)', badge: 'bg-amber-100 text-amber-900', color: 'hover:bg-amber-50 hover:border-amber-400' },
+    { level: 4, label: 'H4 节', desc: '规则细则 / 附加条目 (紧凑小节)', badge: 'bg-stone-100 text-stone-700', color: 'hover:bg-amber-50 hover:border-amber-400' },
+  ];
+
+  return (
+    <div className="relative py-2 group/ghost-section my-2">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-transparent group-hover/ghost-section:bg-amber-400/50 transition-colors" />
+        
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shadow-xs ${
+            isOpen 
+              ? 'bg-amber-600 text-white border-amber-600 shadow-md opacity-100 scale-100' 
+              : 'opacity-0 group-hover/ghost-section:opacity-100 bg-white hover:bg-amber-50 text-stone-600 hover:text-amber-900 border-stone-200 hover:border-amber-400 hover:shadow-md scale-95 hover:scale-100'
+          }`}
+          title="在此位置插入新章节"
+        >
+          <Plus className="w-3.5 h-3.5 text-amber-600" />
+          <span>{isOpen ? '收起' : '+ 在此插入新章节 / 小节'}</span>
+        </button>
+
+        <div className="flex-1 h-px bg-transparent group-hover/ghost-section:bg-amber-400/50 transition-colors" />
+      </div>
+
+      {isOpen && (
+        <div className="mt-2 p-3.5 bg-white border border-amber-300 rounded-2xl shadow-xl animate-in fade-in slide-in-from-top-1 z-20 space-y-2.5 max-w-xl mx-auto">
+          <div className="flex justify-between items-center px-1">
+            <span className="text-[11px] font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5 text-amber-600" /> 选择新章节的排版层级:
+            </span>
+            <button 
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="text-stone-400 hover:text-stone-600 text-xs font-bold cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {sectionLevelOptions.map(opt => (
+              <button
+                key={opt.level}
+                type="button"
+                onClick={() => {
+                  onInsert(opt.level);
+                  setIsOpen(false);
+                }}
+                className={`flex items-start gap-2.5 p-2.5 rounded-xl border border-stone-200 text-left transition-all cursor-pointer shadow-2xs ${opt.color}`}
+              >
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${opt.badge}`}>
+                  {opt.label}
+                </span>
+                <span className="text-[11px] text-stone-600 leading-tight mt-0.5">
+                  {opt.desc}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface VisualBlockStreamProps {
   projectData: ProjectData;
   onUpdateProject: (updater: (prev: ProjectData) => ProjectData) => void;
@@ -174,23 +251,34 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
     }));
   }, [onUpdateProject]);
 
-  const addSection = useCallback((afterIndex: number = -1) => {
+  const addSection = useCallback((afterIndex: number = -1, level: 1 | 2 | 3 | 4 | 5 = 2) => {
+    const levelNameMap: Record<number, string> = {
+      1: '卷：新的篇章',
+      2: '幕：场景与探索',
+      3: '场：遭遇与机制',
+      4: '节：规则补充',
+      5: '条：注释说明'
+    };
+    const currentCount = (projectData.sections || []).length + 1;
     const newSec: DynamicSection = {
       id: 'sec_' + Math.random().toString(36).substring(2, 9),
-      title: '新章节小节',
-      level: 2,
+      title: `第 ${currentCount} ${levelNameMap[level] || '幕：新章节'}`,
+      level,
+      columnMode: 'full',
       blocks: [createDefaultContentBlock('text')]
     };
     onUpdateProject(prev => {
       const sections = [...(prev.sections || [])];
       if (afterIndex >= 0 && afterIndex < sections.length) {
         sections.splice(afterIndex + 1, 0, newSec);
+      } else if (afterIndex === -2) {
+        sections.unshift(newSec);
       } else {
         sections.push(newSec);
       }
       return { ...prev, sections };
     });
-  }, [onUpdateProject]);
+  }, [onUpdateProject, projectData.sections]);
 
   const removeSection = useCallback((secId: string) => {
     if (window.confirm('确定要删除此章节及其所有内容块吗？')) {
@@ -458,188 +546,197 @@ export const VisualBlockStream: React.FC<VisualBlockStreamProps> = ({
       </div>
 
       {/* 2. Dynamic Sections & Content Blocks Stream */}
+      <GhostSectionInserter onInsert={(lvl) => addSection(-2, lvl)} />
+
       {(projectData.sections || []).map((sec, sIdx) => {
         return (
-          <section 
-            key={sec.id} 
-            id={`editor-section-${sec.id}`}
-            onClick={() => onFocusItem?.(sec.id)}
-            onFocusCapture={() => onFocusItem?.(sec.id)}
-            className="bg-white rounded-2xl border border-stone-200/90 shadow-sm p-4 sm:p-6 space-y-4 transition-all duration-200 relative group/section"
-          >
-            {/* Section Header Bar */}
-            <div className="flex flex-wrap items-center justify-between pb-3 border-b border-stone-100 gap-2">
-              <div className="flex items-center gap-2 flex-1 min-w-[240px]">
-                {/* Level Badges */}
-                <div className="flex items-center gap-0.5 bg-stone-100 p-0.5 rounded-lg shrink-0">
-                  {[
-                    { l: 1 as const, label: 'H1 卷' },
-                    { l: 2 as const, label: 'H2 幕' },
-                    { l: 3 as const, label: 'H3 场' },
-                    { l: 4 as const, label: 'H4 节' },
-                  ].map(opt => (
+          <React.Fragment key={sec.id}>
+            <section 
+              id={`editor-section-${sec.id}`}
+              onClick={() => onFocusItem?.(sec.id)}
+              onFocusCapture={() => onFocusItem?.(sec.id)}
+              className="bg-white rounded-2xl border border-stone-200/90 shadow-sm p-4 sm:p-6 space-y-4 transition-all duration-200 relative group/section"
+            >
+              {/* Section Header Bar */}
+              <div className="flex flex-wrap items-center justify-between pb-3 border-b border-stone-100 gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                  {/* Level Badges */}
+                  <div className="flex items-center gap-0.5 bg-stone-100 p-0.5 rounded-lg shrink-0">
+                    {[
+                      { l: 1 as const, label: 'H1 卷' },
+                      { l: 2 as const, label: 'H2 幕' },
+                      { l: 3 as const, label: 'H3 场' },
+                      { l: 4 as const, label: 'H4 节' },
+                    ].map(opt => (
+                      <button
+                        key={opt.l}
+                        type="button"
+                        onClick={() => updateSection(sec.id, { level: opt.l })}
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                          (sec.level || 2) === opt.l
+                            ? 'bg-amber-600 text-white shadow-xs'
+                            : 'text-stone-500 hover:text-stone-800 hover:bg-stone-200'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <input
+                    type="text"
+                    value={sec.title || ''}
+                    onChange={(e) => updateSection(sec.id, { title: e.target.value })}
+                    className="font-bold text-base text-stone-900 bg-transparent border-b border-transparent hover:border-stone-200 focus:border-amber-500 outline-none flex-1 py-1 px-1 transition-colors"
+                    placeholder="章节/小节标题..."
+                  />
+                </div>
+
+                {/* Section Controls */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Column Mode */}
+                  <div className="flex items-center gap-0.5 bg-stone-100 p-0.5 rounded-lg text-[10px]">
                     <button
-                      key={opt.l}
                       type="button"
-                      onClick={() => updateSection(sec.id, { level: opt.l })}
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
-                        (sec.level || 2) === opt.l
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'text-stone-500 hover:text-stone-800 hover:bg-stone-200'
+                      onClick={() => updateSection(sec.id, { columnMode: 'full' })}
+                      className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                        sec.columnMode !== 'cols' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                       }`}
                     >
-                      {opt.label}
+                      📄 单栏
                     </button>
-                  ))}
-                </div>
-
-                <input
-                  type="text"
-                  value={sec.title || ''}
-                  onChange={(e) => updateSection(sec.id, { title: e.target.value })}
-                  className="font-bold text-base text-stone-900 bg-transparent border-b border-transparent hover:border-stone-200 focus:border-amber-500 outline-none flex-1 py-1 px-1 transition-colors"
-                  placeholder="章节/小节标题..."
-                />
-              </div>
-
-              {/* Section Controls */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                {/* Column Mode */}
-                <div className="flex items-center gap-0.5 bg-stone-100 p-0.5 rounded-lg text-[10px]">
-                  <button
-                    type="button"
-                    onClick={() => updateSection(sec.id, { columnMode: 'full' })}
-                    className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                      sec.columnMode !== 'cols' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
-                    }`}
-                  >
-                    📄 单栏
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateSection(sec.id, { columnMode: 'cols' })}
-                    className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                      sec.columnMode === 'cols' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-stone-500'
-                    }`}
-                  >
-                    📰 双栏
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeSection(sec.id)}
-                  className="p-1 hover:bg-red-50 text-stone-300 hover:text-red-500 rounded transition-colors cursor-pointer"
-                  title="删除此章节"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
-
-            {/* Section Italic Note */}
-            <input
-              type="text"
-              value={sec.italicNote || ''}
-              onChange={(e) => updateSection(sec.id, { italicNote: e.target.value })}
-              className="w-full text-xs italic text-stone-600 bg-transparent border-b border-stone-100 hover:border-stone-200 focus:border-amber-400 py-1 outline-none font-serif placeholder:text-stone-300"
-              placeholder="添加章节引言、场景描述或副标题 (可选)..."
-            />
-
-            {/* Section Content Blocks List with Focus-Driven Elevation */}
-            <div className="space-y-3 pt-2">
-              <GhostBlockInserter onInsert={(t) => insertBlockAt(sec.id, 0, t)} />
-
-              {(sec.blocks || []).map((block, bIdx) => {
-                const config = BLOCK_TYPE_CONFIGS.find(c => c.type === block.type) || BLOCK_TYPE_CONFIGS[0];
-                const Icon = config.icon;
-
-                return (
-                  <React.Fragment key={block.id}>
-                    <div 
-                      id={`editor-block-${block.id}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onFocusItem?.(sec.id, block.id);
-                      }}
-                      onFocusCapture={(e) => {
-                        e.stopPropagation();
-                        onFocusItem?.(sec.id, block.id);
-                      }}
-                      className="group/block relative bg-white rounded-xl border border-stone-200/90 shadow-2xs hover:shadow-md hover:border-amber-400/60 focus-within:shadow-md focus-within:ring-2 focus-within:ring-amber-500/20 focus-within:border-amber-400 transition-all duration-200 overflow-hidden"
+                    <button
+                      type="button"
+                      onClick={() => updateSection(sec.id, { columnMode: 'cols' })}
+                      className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                        sec.columnMode === 'cols' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-stone-500'
+                      }`}
                     >
-                      {/* Quiet Header: Type Badge (Left) & Elevated Actions (Right - Fades in on Hover/Focus) */}
-                      <div className="flex items-center justify-between px-3 py-1.5 bg-stone-50/70 border-b border-stone-100/80 select-none">
-                        <div className="flex items-center gap-1.5">
-                          <GripVertical size={12} className="text-stone-300" />
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${config.badgeColor}`}>
-                            <Icon size={11} />
-                            <span>{config.label}</span>
-                          </span>
-                        </div>
+                      📰 双栏
+                    </button>
+                  </div>
 
-                        {/* Action Buttons: Fades in on Hover/Focus */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 transition-opacity duration-200">
-                          <button
-                            type="button"
-                            onClick={() => duplicateBlock(sec.id, bIdx)}
-                            className="p-1 hover:bg-stone-200 text-stone-500 rounded text-[10px] font-bold flex items-center gap-0.5 cursor-pointer"
-                            title="在下方复制一份"
-                          >
-                            <Copy size={11} />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={bIdx === 0}
-                            onClick={() => moveBlock(sec.id, bIdx, 'up')}
-                            className="p-1 hover:bg-stone-200 text-stone-500 disabled:opacity-20 rounded cursor-pointer"
-                            title="上移"
-                          >
-                            <MoveUp size={11} />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={bIdx === (sec.blocks.length - 1)}
-                            onClick={() => moveBlock(sec.id, bIdx, 'down')}
-                            className="p-1 hover:bg-stone-200 text-stone-500 disabled:opacity-20 rounded cursor-pointer"
-                            title="下移"
-                          >
-                            <MoveDown size={11} />
-                          </button>
-                          <div className="w-px h-2.5 bg-stone-300 mx-0.5" />
-                          <button
-                            type="button"
-                            onClick={() => removeBlock(sec.id, block.id)}
-                            className="p-1 hover:bg-red-50 text-stone-400 hover:text-red-500 rounded cursor-pointer"
-                            title="删除此块"
-                          >
-                            <Trash2 size={11} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Content Form Editor */}
-                      <div className="p-3 sm:p-4">
-                        <VisualBlockItemEditor
-                          block={block}
-                          onUpdate={(updates) => updateBlock(sec.id, block.id, updates)}
-                          onRegisterFocus={onRegisterFocus}
-                        />
-                      </div>
-                    </div>
-
-                    <GhostBlockInserter onInsert={(t) => insertBlockAt(sec.id, bIdx + 1, t)} />
-                  </React.Fragment>
-                );
-              })}
-
-              {(!sec.blocks || sec.blocks.length === 0) && (
-                <div className="text-center py-6 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 text-xs italic">
-                  本章节暂无内容，使用上方的虚线按钮添加第一个积木块
+                  <button
+                    type="button"
+                    onClick={() => removeSection(sec.id)}
+                    className="p-1 hover:bg-red-50 text-stone-300 hover:text-red-500 rounded transition-colors cursor-pointer"
+                    title="删除此章节"
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
-              )}
-            </div>
-          </section>
+              </div>
+
+              {/* Section Italic Note */}
+              <input
+                type="text"
+                value={sec.italicNote || ''}
+                onChange={(e) => updateSection(sec.id, { italicNote: e.target.value })}
+                className="w-full text-xs italic text-stone-600 bg-transparent border-b border-stone-100 hover:border-stone-200 focus:border-amber-400 py-1 outline-none font-serif placeholder:text-stone-300"
+                placeholder="添加章节引言、场景描述或副标题 (可选)..."
+              />
+
+              {/* Section Content Blocks List with Focus-Driven Elevation */}
+              <div className="space-y-3 pt-2">
+                <GhostBlockInserter onInsert={(t) => insertBlockAt(sec.id, 0, t)} />
+
+                {(sec.blocks || []).map((block, bIdx) => {
+                  const config = BLOCK_TYPE_CONFIGS.find(c => c.type === block.type) || BLOCK_TYPE_CONFIGS[0];
+                  const Icon = config.icon;
+
+                  return (
+                    <React.Fragment key={block.id}>
+                      <div 
+                        id={`editor-block-${block.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onFocusItem?.(sec.id, block.id);
+                        }}
+                        onFocusCapture={(e) => {
+                          e.stopPropagation();
+                          onFocusItem?.(sec.id, block.id);
+                        }}
+                        className="group/block relative bg-white rounded-xl border border-stone-200/90 shadow-2xs hover:shadow-md hover:border-amber-400/60 focus-within:shadow-md focus-within:ring-2 focus-within:ring-amber-500/20 focus-within:border-amber-400 transition-all duration-200 overflow-hidden"
+                      >
+                        {/* Quiet Header: Type Badge (Left) & Elevated Actions (Right - Fades in on Hover/Focus) */}
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-stone-50/70 border-b border-stone-100/80 select-none">
+                          <div className="flex items-center gap-1.5">
+                            <GripVertical size={12} className="text-stone-300" />
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${config.badgeColor}`}>
+                              <Icon size={11} />
+                              <span>{config.label}</span>
+                            </span>
+                          </div>
+
+                          {/* Action Buttons: Fades in on Hover/Focus */}
+                          <div className="flex items-center gap-1 opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 transition-opacity duration-200">
+                            <button
+                              type="button"
+                              onClick={() => duplicateBlock(sec.id, bIdx)}
+                              className="p-1 hover:bg-stone-200 text-stone-500 rounded text-[10px] font-bold flex items-center gap-0.5 cursor-pointer"
+                              title="在下方复制一份"
+                            >
+                              <Copy size={11} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={bIdx === 0}
+                              onClick={() => moveBlock(sec.id, bIdx, 'up')}
+                              className="p-1 hover:bg-stone-200 text-stone-500 disabled:opacity-20 rounded cursor-pointer"
+                              title="上移"
+                            >
+                              <MoveUp size={11} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={bIdx === (sec.blocks.length - 1)}
+                              onClick={() => moveBlock(sec.id, bIdx, 'down')}
+                              className="p-1 hover:bg-stone-200 text-stone-500 disabled:opacity-20 rounded cursor-pointer"
+                              title="下移"
+                            >
+                              <MoveDown size={11} />
+                            </button>
+                            <div className="w-px h-2.5 bg-stone-300 mx-0.5" />
+                            <button
+                              type="button"
+                              onClick={() => removeBlock(sec.id, block.id)}
+                              className="p-1 hover:bg-red-50 text-stone-400 hover:text-red-500 rounded cursor-pointer"
+                              title="删除此块"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Content Form Editor */}
+                        <div className="p-3 sm:p-4">
+                          <VisualBlockItemEditor
+                            block={block}
+                            onUpdate={(updates) => updateBlock(sec.id, block.id, updates)}
+                            onRegisterFocus={onRegisterFocus}
+                          />
+                        </div>
+                      </div>
+
+                      <GhostBlockInserter onInsert={(t) => insertBlockAt(sec.id, bIdx + 1, t)} />
+                    </React.Fragment>
+                  );
+                })}
+
+                {(!sec.blocks || sec.blocks.length === 0) && (
+                  <div className="text-center py-6 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 text-xs italic">
+                    本章节暂无内容，使用上方的虚线按钮添加第一个积木块
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Ghost Inserter between this section and next */}
+            <GhostSectionInserter 
+              onInsert={(lvl) => addSection(sIdx, lvl)} 
+              prevLevel={sec.level || 2}
+            />
+          </React.Fragment>
         );
       })}
 
