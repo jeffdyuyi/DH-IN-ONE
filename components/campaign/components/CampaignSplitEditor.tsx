@@ -10,6 +10,7 @@ import {
 import { SmartTextarea } from './SmartTextarea';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { MarkdownToolbar } from './MarkdownToolbar';
+import { CampaignPreviewEngine } from './CampaignPreviewEngine';
 import { VisualBlockStream, createDefaultContentBlock } from './VisualBlockStream';
 import { serializeProjectDataToV3Markdown } from './projectSerializer';
 import { ProjectData, DynamicSection, BlockType } from '../types';
@@ -22,6 +23,7 @@ interface CampaignSplitEditorProps {
   onUpdateProject?: (updater: (prev: ProjectData) => ProjectData) => void;
   onSyncBackToSections?: () => void;
   activeTheme: string;
+  activeSectionId?: string | null;
   onChangeTheme?: (t: any) => void;
   onUpdateSettings?: (key: string, val: boolean) => void;
   onGenerateToc?: () => void;
@@ -36,6 +38,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
   onUpdateProject,
   onSyncBackToSections,
   activeTheme = 'default',
+  activeSectionId = null,
   onChangeTheme,
   onUpdateSettings,
   onGenerateToc,
@@ -373,33 +376,23 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5">
             <button
               type="button"
-              onClick={() => setViewMode('editor')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                viewMode === 'editor' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-stone-400 hover:text-stone-200'
-              }`}
-              title="纯编辑模式"
-            >
-              <Type size={13} /> 纯编辑
-            </button>
-            <button
-              type="button"
               onClick={() => setViewMode('split')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 viewMode === 'split' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-stone-400 hover:text-stone-200'
               }`}
-              title="左右实时分屏"
+              title="左右实时分屏 (左侧编辑 + 右侧成熟出书排版)"
             >
-              <Columns size={13} /> 分屏
+              <Columns size={13} /> 左右分屏
             </button>
             <button
               type="button"
-              onClick={() => setViewMode('preview')}
+              onClick={() => setViewMode('editor')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                viewMode === 'preview' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-stone-400 hover:text-stone-200'
+                viewMode === 'editor' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-stone-400 hover:text-stone-200'
               }`}
-              title="纯手册全览模式"
+              title="专注全宽编辑"
             >
-              <Eye size={13} /> 纯预览
+              <Type size={13} /> 专注编辑
             </button>
           </div>
 
@@ -624,8 +617,8 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           </div>
         )}
 
-        {/* Right: Live Preview Pane (Defaults to authentic long vertical Image 3 style) */}
-        {(viewMode === 'split' || viewMode === 'preview') && (
+        {/* Right: Live Publication Preview Pane (100% unified with PreviewView & Export) */}
+        {viewMode === 'split' && (
           <div
             ref={previewContainerRef}
             onScroll={handlePreviewScroll}
@@ -639,25 +632,11 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
               }}
               className="w-full flex flex-col items-center"
             >
-              {previewStyle === 'long' ? (
-                <div className={`${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).bg} ${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).text} ${(THEMES[activeTheme as keyof typeof THEMES] || THEMES.default).fontBody} w-full max-w-4xl p-6 sm:p-12 rounded-2xl shadow-2xl transition-colors duration-300 leading-relaxed border border-current/10`}>
-                  <MarkdownRenderer
-                    content={fullMarkdownText || serializeProjectDataToV3Markdown(projectData)}
-                    theme={activeTheme}
-                    isBookMode={false}
-                    projectData={projectData}
-                    className="w-full"
-                  />
-                </div>
-              ) : (
-                <MarkdownRenderer
-                  content={fullMarkdownText || serializeProjectDataToV3Markdown(projectData)}
-                  theme={activeTheme}
-                  isBookMode={true}
-                  projectData={projectData}
-                  className="w-full max-w-4xl"
-                />
-              )}
+              <CampaignPreviewEngine
+                data={projectData}
+                activeSectionId={activeSectionId}
+                viewStyle={previewStyle}
+              />
             </div>
           </div>
         )}
