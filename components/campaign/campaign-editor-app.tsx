@@ -1357,7 +1357,7 @@ const Navbar = React.memo(({
       <input type="file" ref={fileInputRef} onChange={handleImportJSON} className="hidden" accept=".json" />
       <input type="file" ref={bgInputRef} onChange={handleBgUpload} className="hidden" accept="image/*" />
       
-      {/* Left: Logo & Menu */}
+      {/* Left: Logo & Dropdown File Hub */}
       <div className="flex items-center gap-3">
         <Link 
           href="/" 
@@ -1365,83 +1365,98 @@ const Navbar = React.memo(({
           title="返回主站门户"
         >
           <span>🏠</span>
-          <span className="hidden sm:inline">主站门户</span>
+          <span className="hidden sm:inline">主站</span>
         </Link>
 
         <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="group relative flex items-center justify-center p-1.5 rounded-xl transition-all hover:bg-stone-800 outline-none"
+            className="group relative flex items-center justify-center p-1.5 rounded-xl transition-all hover:bg-stone-800 outline-none cursor-pointer"
+            title="战役文件与创作菜单"
           >
             <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-lg flex items-center justify-center text-white ring-1 ring-stone-900 group-focus:ring-amber-500/50">
-                <LayoutTemplate className="w-5 h-5" />
+              <LayoutTemplate className="w-5 h-5" />
             </div>
           </button>
 
-          {/* Dropdown Menu */}
+          {/* Unified Dropdown Menu */}
           {isMenuOpen && (
             <div className="absolute top-full left-0 mt-3 w-64 bg-white text-stone-800 rounded-xl shadow-2xl border border-stone-200 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="p-2 space-y-1">
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">战役创作与存档</div>
-                    <button onClick={() => { onCreateNew?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <FilePlus className="w-4 h-4 text-amber-500" />
-                        <span>➕ 新建空白战役文档</span>
-                    </button>
-                    <button onClick={() => { onOpenVault?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <Database className="w-4 h-4 text-amber-500" />
-                        <span>从公共卡牌库插入 (Vault)</span>
-                    </button>
-                    <button onClick={() => { onOpenLibrary(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <Folder className="w-4 h-4 text-amber-600" />
-                        <span>本地作品库 / 存档</span>
-                    </button>
-                    <button onClick={() => { onSaveCurrent(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <Save className="w-4 h-4 text-emerald-600" />
-                        <span>保存当前作品</span>
-                    </button>
+              <div className="p-2 space-y-1">
+                <div className="px-3 py-1.5 text-[10px] font-black text-stone-400 uppercase tracking-widest">战役与存档</div>
+                <button onClick={() => { onCreateNew?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <FilePlus className="w-4 h-4 text-amber-500" />
+                  <span>新建空白战役</span>
+                </button>
+                <button onClick={() => { onSaveCurrent(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <Save className="w-4 h-4 text-emerald-600" />
+                  <span>保存当前作品</span>
+                </button>
+                <button onClick={() => { onOpenLibrary(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <Folder className="w-4 h-4 text-amber-600" />
+                  <span>作品库与存档</span>
+                </button>
+                <button onClick={() => { onOpenVault?.(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <Database className="w-4 h-4 text-sky-600" />
+                  <span>卡牌库插入 (Vault)</span>
+                </button>
+                <button onClick={() => { onToggleAutoSave?.(); }} className={Styles.toolBtn}>
+                  <Clock className="w-4 h-4 text-stone-400" />
+                  <div className="flex items-center justify-between flex-1">
+                    <span>自动保存</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                      isAutoSaveEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-500'
+                    }`}>
+                      {isAutoSaveEnabled ? '开' : '关'}
+                    </span>
+                  </div>
+                </button>
 
-                    <div className="my-1 border-t border-stone-100"></div>
+                <div className="my-1 border-t border-stone-100"></div>
 
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">文件操作</div>
-                    <button onClick={() => { fileInputRef.current?.click(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <Upload className="w-4 h-4 text-stone-400" /> 
-                        <span>导入项目 <span className="text-xs text-stone-400 font-normal ml-1">(.json)</span></span>
-                    </button>
-                    <button onClick={() => { handleExportJSON(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <FileJson className="w-4 h-4 text-stone-400" /> 
-                        <span>导出项目 <span className="text-xs text-stone-400 font-normal ml-1">(.json)</span></span>
-                    </button>
-                    
-                    <div className="my-1 border-t border-stone-100"></div>
-                    
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">导出文档</div>
-                    <button onClick={() => { handleExportMarkdown(currentData); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <Download className="w-4 h-4 text-stone-400" /> 导出 Markdown
-                    </button>
-                    <button 
-                      onClick={() => { handleExportHTML(); setIsMenuOpen(false); }} 
-                      disabled={viewMode !== 'preview'}
-                      className={`${Styles.toolBtn} ${viewMode !== 'preview' ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-stone-600' : ''}`}
-                    >
-                        <FileCode className="w-4 h-4 text-stone-400" /> 
-                        <div className="flex flex-col text-left leading-tight">
-                          <span>导出 HTML</span>
-                          <span className="text-[10px] text-stone-400 font-normal">需在预览模式下使用</span>
-                        </div>
-                    </button>
+                <div className="px-3 py-1.5 text-[10px] font-black text-stone-400 uppercase tracking-widest">导出与分发</div>
+                <button onClick={() => { window.print(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <Download className="w-4 h-4 text-amber-600" />
+                  <span>打印 / 导出 PDF</span>
+                </button>
+                <button onClick={() => { handleExportJSON(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <FileJson className="w-4 h-4 text-stone-400" />
+                  <span>导出项目 (.json)</span>
+                </button>
+                <button onClick={() => { fileInputRef.current?.click(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <Upload className="w-4 h-4 text-stone-400" />
+                  <span>导入项目 (.json)</span>
+                </button>
+                <button onClick={() => { handleExportMarkdown(currentData); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <FileText className="w-4 h-4 text-stone-400" />
+                  <span>导出 Markdown</span>
+                </button>
+                <button 
+                  onClick={() => { handleExportHTML(); setIsMenuOpen(false); }} 
+                  disabled={viewMode !== 'preview'}
+                  className={`${Styles.toolBtn} ${viewMode !== 'preview' ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-stone-600' : ''}`}
+                >
+                  <FileCode className="w-4 h-4 text-stone-400" />
+                  <div className="flex flex-col text-left leading-tight">
+                    <span>导出 HTML</span>
+                    {viewMode !== 'preview' && <span className="text-[9px] text-stone-400 font-normal">需在预览模式下使用</span>}
+                  </div>
+                </button>
 
-                    <div className="my-1 border-t border-stone-100"></div>
-                    
-                    <div className="px-3 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest">资源设置</div>
-                    <button onClick={() => { bgInputRef.current?.click(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
-                        <ImagePlus className="w-4 h-4 text-stone-400" /> 上传背景图
-                    </button>
-                </div>
+                <div className="my-1 border-t border-stone-100"></div>
+
+                <div className="px-3 py-1.5 text-[10px] font-black text-stone-400 uppercase tracking-widest">外观设置</div>
+                <button onClick={() => { bgInputRef.current?.click(); setIsMenuOpen(false); }} className={Styles.toolBtn}>
+                  <ImagePlus className="w-4 h-4 text-stone-400" />
+                  <span>上传背景图</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
+
         <div className="hidden md:block">
-          <h1 className="font-serif font-bold text-lg tracking-wide text-stone-200">不咕鸟匕心写作模板</h1>
+          <h1 className="font-serif font-bold text-base sm:text-lg tracking-wide text-stone-200">不咕鸟匕心写作模板</h1>
         </div>
 
         <div className="hidden lg:flex items-center gap-2 border-l border-stone-800 pl-3">
@@ -1456,7 +1471,7 @@ const Navbar = React.memo(({
         </div>
       </div>
 
-      {/* Center: Classic 2-Mode Segmented Switcher */}
+      {/* Center: Clean 2-Mode Segmented Switcher */}
       <div className="flex bg-stone-950 p-1 rounded-xl border border-stone-800 shadow-inner">
         <button 
           onClick={() => setViewMode('edit')} 
@@ -1485,7 +1500,7 @@ const Navbar = React.memo(({
         </button>
       </div>
 
-      {/* Right Actions */}
+      {/* Right: Concise High-Frequency Actions */}
       <div className="flex items-center gap-2 sm:gap-2.5">
         {/* Theme Selector */}
         <div className="flex items-center gap-1.5 bg-stone-800/90 rounded-lg p-1 px-2.5 border border-stone-700/60 hover:border-stone-600 transition-colors">
@@ -1504,30 +1519,6 @@ const Navbar = React.memo(({
           </select>
         </div>
 
-        {/* Create New Project Button */}
-        <button 
-          onClick={onCreateNew}
-          className="flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border border-stone-700 hover:border-amber-500/50"
-          title="新建空白战役模组文档"
-        >
-          <FilePlus className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">新建战役</span>
-        </button>
-
-        {/* Auto-Save Toggle Pill */}
-        <button
-          onClick={onToggleAutoSave}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer border ${
-            isAutoSaveEnabled
-              ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-300 ring-1 ring-emerald-500/30'
-              : 'bg-stone-800 border-stone-700 text-stone-400 hover:text-stone-200'
-          }`}
-          title={isAutoSaveEnabled ? '自动保存：已开启 (每5分钟自动备份到作品库)' : '自动保存：已关闭 (点击开启)'}
-        >
-          <Clock className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isAutoSaveEnabled ? '自动保存: 开' : '自动保存: 关'}</span>
-        </button>
-
         {/* Library Button */}
         <button 
           onClick={onOpenLibrary}
@@ -1535,21 +1526,21 @@ const Navbar = React.memo(({
           title="打开本地作品库 (管理与切换存档)"
         >
           <Folder className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">作品库</span>
+          <span>作品库</span>
         </button>
 
-        {/* Single Unified Print / Export PDF */}
+        {/* Primary Action Button: Print / Export PDF */}
         <button 
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+          className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md cursor-pointer"
           title="打印或导出 A4 实体手册 PDF"
         >
           <Download className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">打印 / 导出 PDF</span>
+          <span>打印 / 导出 PDF</span>
         </button>
 
         {lastAutoSaveTime && isAutoSaveEnabled && (
-          <span className="text-[10px] text-amber-400/90 font-mono hidden xl:inline bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50" title="上次自动保存时间 (每5分钟自动保存)">
+          <span className="text-[10px] text-amber-400/90 font-mono hidden xl:inline bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50" title="上次自动保存时间">
             已存 {new Date(lastAutoSaveTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
