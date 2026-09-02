@@ -3,7 +3,7 @@ import {
   Plus, Trash2, MoveUp, MoveDown, Copy, GripVertical, 
   MessageSquareQuote, AlertCircle, Swords, Mountain, ListChecks, 
   Table as TableIcon, Image as ImageIcon, Minus, Type, Heading,
-  SlidersHorizontal, Star, Sparkles, BookOpen, ChevronDown, ChevronRight,
+  SlidersHorizontal, Star, Sparkles, BookOpen, ChevronDown, ChevronRight, ChevronLeft,
   Eye, Edit3, SplitSquareVertical, Layers, Check, X, ShieldAlert, Cpu
 } from 'lucide-react';
 import { 
@@ -1096,76 +1096,284 @@ const VisualBlockItemEditor: React.FC<{
       );
 
     case 'table':
-      return (
-        <div className="space-y-2">
-          <div className="overflow-x-auto border border-stone-200 rounded-lg">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-stone-100 border-b border-stone-200 font-bold text-stone-700">
-                <tr>
-                  {(block.headers || []).map((h: string, hi: number) => (
-                    <th key={hi} className="p-2 border-r border-stone-200 last:border-0">
-                      <input
-                        type="text"
-                        value={h}
-                        onChange={(e) => {
-                          const nh = [...block.headers];
-                          nh[hi] = e.target.value;
-                          onUpdate({ headers: nh });
-                        }}
-                        className="w-full bg-transparent font-bold outline-none text-stone-800"
-                        placeholder={`列 ${hi + 1}`}
-                      />
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(block.rows || []).map((row: string[], ri: number) => (
-                  <tr key={ri} className="border-b border-stone-100 last:border-0 bg-white">
-                    {row.map((cell: string, ci: number) => (
-                      <td key={ci} className="p-2 border-r border-stone-100 last:border-0">
-                        <input
-                          type="text"
-                          value={cell}
-                          onChange={(e) => {
-                            const nr = [...block.rows];
-                            nr[ri][ci] = e.target.value;
-                            onUpdate({ rows: nr });
-                          }}
-                          className="w-full bg-transparent outline-none text-stone-700"
-                          placeholder="单元格..."
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onUpdate({ rows: [...(block.rows || []), new Array(block.headers.length).fill('')] })}
-              className="text-[11px] px-2.5 py-1 bg-white hover:bg-stone-50 border border-stone-200 rounded font-bold text-stone-600 cursor-pointer"
-            >
-              + 添加行
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const nh = [...block.headers, '新列'];
-                const nr = (block.rows || []).map((r: string[]) => [...r, '']);
-                onUpdate({ headers: nh, rows: nr });
-              }}
-              className="text-[11px] px-2.5 py-1 bg-white hover:bg-stone-50 border border-stone-200 rounded font-bold text-stone-600 cursor-pointer"
-            >
-              + 添加列
-            </button>
-          </div>
-        </div>
-      );
+      return <TableBlockItemEditor block={block} onUpdate={onUpdate} />;
 
     default:
       return <div className="text-xs text-stone-400 italic">常规内容区块</div>;
   }
+};
+
+// --- Dedicated Table Block Item Editor with Row & Column Copy, Move, Delete ---
+const TableBlockItemEditor: React.FC<{
+  block: any;
+  onUpdate: (updates: any) => void;
+}> = ({ block, onUpdate }) => {
+  const headers: string[] = block.headers && block.headers.length > 0 ? block.headers : ['列 1', '列 2', '列 3'];
+  const rows: string[][] = block.rows && block.rows.length > 0 ? block.rows : [['', '', '']];
+
+  // Column Operations
+  const moveColumn = (index: number, direction: 'left' | 'right') => {
+    const targetIdx = direction === 'left' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= headers.length) return;
+
+    const newHeaders = [...headers];
+    [newHeaders[index], newHeaders[targetIdx]] = [newHeaders[targetIdx], newHeaders[index]];
+
+    const newRows = rows.map((r: string[]) => {
+      const rowCopy = [...(r || [])];
+      while (rowCopy.length < headers.length) rowCopy.push('');
+      [rowCopy[index], rowCopy[targetIdx]] = [rowCopy[targetIdx], rowCopy[index]];
+      return rowCopy;
+    });
+
+    onUpdate({ headers: newHeaders, rows: newRows });
+  };
+
+  const duplicateColumn = (index: number) => {
+    const newHeaders = [...headers];
+    newHeaders.splice(index + 1, 0, `${headers[index] || '列'} (副本)`);
+
+    const newRows = rows.map((r: string[]) => {
+      const rowCopy = [...(r || [])];
+      while (rowCopy.length < headers.length) rowCopy.push('');
+      rowCopy.splice(index + 1, 0, rowCopy[index] || '');
+      return rowCopy;
+    });
+
+    onUpdate({ headers: newHeaders, rows: newRows });
+  };
+
+  const deleteColumn = (index: number) => {
+    if (headers.length <= 1) {
+      alert('表格至少保留 1 列');
+      return;
+    }
+    const newHeaders = headers.filter((_, i) => i !== index);
+    const newRows = rows.map((r: string[]) => {
+      const rowCopy = [...(r || [])];
+      return rowCopy.filter((_, i) => i !== index);
+    });
+    onUpdate({ headers: newHeaders, rows: newRows });
+  };
+
+  const addColumn = () => {
+    const newHeaders = [...headers, `列 ${headers.length + 1}`];
+    const newRows = rows.map((r: string[]) => [...(r || []), '']);
+    onUpdate({ headers: newHeaders, rows: newRows });
+  };
+
+  // Row Operations
+  const moveRow = (index: number, direction: 'up' | 'down') => {
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= rows.length) return;
+
+    const newRows = [...rows];
+    [newRows[index], newRows[targetIdx]] = [newRows[targetIdx], newRows[index]];
+    onUpdate({ rows: newRows });
+  };
+
+  const duplicateRow = (index: number) => {
+    const newRows = [...rows];
+    newRows.splice(index + 1, 0, [...(rows[index] || [])]);
+    onUpdate({ rows: newRows });
+  };
+
+  const deleteRow = (index: number) => {
+    if (rows.length <= 1) {
+      alert('表格至少保留 1 行');
+      return;
+    }
+    const newRows = rows.filter((_, i) => i !== index);
+    onUpdate({ rows: newRows });
+  };
+
+  const addRow = () => {
+    const newRows = [...rows, new Array(headers.length).fill('')];
+    onUpdate({ rows: newRows });
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Scrollable Table Container */}
+      <div className="overflow-x-auto border border-stone-200 rounded-xl bg-white shadow-2xs">
+        <table className="w-full text-xs text-left border-collapse min-w-[500px]">
+          {/* Header Row */}
+          <thead>
+            <tr className="bg-stone-100/90 border-b border-stone-200 text-stone-700">
+              {/* Top-Left Corner (Row Header Marker) */}
+              <th className="w-14 p-2 text-center text-[10px] font-mono text-stone-400 border-r border-stone-200 select-none bg-stone-100">
+                #
+              </th>
+
+              {headers.map((h: string, hi: number) => (
+                <th key={hi} className="p-2.5 border-r border-stone-200 last:border-0 min-w-[140px] group/col">
+                  {/* Column Header Actions Bar */}
+                  <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-stone-200/60 opacity-60 group-hover/col:opacity-100 transition-opacity">
+                    <span className="text-[10px] font-mono text-stone-400 font-normal">C{hi + 1}</span>
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => moveColumn(hi, 'left')}
+                        disabled={hi === 0}
+                        className={`p-1 rounded transition-colors ${hi === 0 ? 'text-stone-300 cursor-not-allowed' : 'text-stone-500 hover:text-stone-800 hover:bg-stone-200 cursor-pointer'}`}
+                        title="向左移动列"
+                      >
+                        <ChevronLeft size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveColumn(hi, 'right')}
+                        disabled={hi === headers.length - 1}
+                        className={`p-1 rounded transition-colors ${hi === headers.length - 1 ? 'text-stone-300 cursor-not-allowed' : 'text-stone-500 hover:text-stone-800 hover:bg-stone-200 cursor-pointer'}`}
+                        title="向右移动列"
+                      >
+                        <ChevronRight size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => duplicateColumn(hi)}
+                        className="p-1 rounded text-stone-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                        title="复制整列"
+                      >
+                        <Copy size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteColumn(hi)}
+                        disabled={headers.length <= 1}
+                        className={`p-1 rounded transition-colors ${headers.length <= 1 ? 'text-stone-300 cursor-not-allowed' : 'text-stone-400 hover:text-red-600 hover:bg-red-50 cursor-pointer'}`}
+                        title="删除整列"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Header Title Input */}
+                  <input
+                    type="text"
+                    value={h}
+                    onChange={(e) => {
+                      const nh = [...headers];
+                      nh[hi] = e.target.value;
+                      onUpdate({ headers: nh });
+                    }}
+                    className="w-full bg-transparent font-bold outline-none text-stone-800 focus:text-amber-900 placeholder:text-stone-300"
+                    placeholder={`列 ${hi + 1}`}
+                  />
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          {/* Table Body Rows */}
+          <tbody>
+            {rows.map((row: string[], ri: number) => (
+              <tr key={ri} className="border-b border-stone-100 last:border-0 bg-white hover:bg-stone-50/50 transition-colors group/row">
+                {/* Row Header Left Cell (Controls) */}
+                <td className="w-14 p-1.5 border-r border-stone-100 bg-stone-50/60 select-none text-center">
+                  <div className="flex flex-col items-center justify-center gap-0.5">
+                    <span className="text-[10px] font-mono text-stone-400 group-hover/row:hidden font-bold">
+                      {ri + 1}
+                    </span>
+                    {/* Hover actions */}
+                    <div className="hidden group-hover/row:flex items-center justify-center gap-0.5">
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          onClick={() => moveRow(ri, 'up')}
+                          disabled={ri === 0}
+                          className={`p-0.5 rounded ${ri === 0 ? 'text-stone-200 cursor-not-allowed' : 'text-stone-400 hover:text-stone-700 cursor-pointer'}`}
+                          title="向上移动行"
+                        >
+                          <MoveUp size={10} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveRow(ri, 'down')}
+                          disabled={ri === rows.length - 1}
+                          className={`p-0.5 rounded ${ri === rows.length - 1 ? 'text-stone-200 cursor-not-allowed' : 'text-stone-400 hover:text-stone-700 cursor-pointer'}`}
+                          title="向下移动行"
+                        >
+                          <MoveDown size={10} />
+                        </button>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          onClick={() => duplicateRow(ri)}
+                          className="p-0.5 rounded text-stone-400 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer"
+                          title="复制整行"
+                        >
+                          <Copy size={10} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteRow(ri)}
+                          disabled={rows.length <= 1}
+                          className={`p-0.5 rounded ${rows.length <= 1 ? 'text-stone-200 cursor-not-allowed' : 'text-stone-400 hover:text-red-500 hover:bg-red-50 cursor-pointer'}`}
+                          title="删除整行"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Data Cells */}
+                {headers.map((_, ci: number) => {
+                  const cell = row[ci] || '';
+                  return (
+                    <td key={ci} className="p-2 border-r border-stone-100 last:border-0">
+                      <input
+                        type="text"
+                        value={cell}
+                        onChange={(e) => {
+                          const nr = rows.map((r: string[]) => [...(r || [])]);
+                          while (nr[ri].length < headers.length) nr[ri].push('');
+                          nr[ri][ci] = e.target.value;
+                          onUpdate({ rows: nr });
+                        }}
+                        className="w-full bg-transparent outline-none text-stone-700 focus:text-stone-900 focus:bg-amber-50/30 px-1 py-0.5 rounded transition-colors placeholder:text-stone-300"
+                        placeholder="单元格..."
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Bottom Action Bar */}
+      <div className="flex items-center justify-between text-xs pt-0.5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={addRow}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-stone-50 border border-stone-200 hover:border-amber-400 rounded-lg font-bold text-stone-700 hover:text-amber-900 transition-all cursor-pointer shadow-2xs"
+          >
+            <Plus size={13} className="text-amber-600" />
+            <span>添加行</span>
+          </button>
+          <button
+            type="button"
+            onClick={addColumn}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-stone-50 border border-stone-200 hover:border-amber-400 rounded-lg font-bold text-stone-700 hover:text-amber-900 transition-all cursor-pointer shadow-2xs"
+          >
+            <Plus size={13} className="text-amber-600" />
+            <span>添加列</span>
+          </button>
+        </div>
+
+        <div className="text-[11px] font-mono text-stone-400 flex items-center gap-2">
+          <span>{rows.length} 行 × {headers.length} 列</span>
+          <span className="hidden sm:inline text-stone-300">|</span>
+          <span className="hidden sm:inline text-[10px] text-stone-400">悬停表头或行首即可复制、移动、删除</span>
+        </div>
+      </div>
+    </div>
+  );
 };
