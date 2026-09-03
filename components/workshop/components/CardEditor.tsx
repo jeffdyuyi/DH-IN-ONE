@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardData, CardType, NpcData, NpcFeature, IngredientData, IngredientFlavor, MealComponent, MealData, SubclassData, TransformationData, TransformationFeature, MaterialData, MaterialFeature, VehicleData, VehicleArmament, VehicleFeature, MadnessData, ClassData, DomainData, CommunityData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, EnvironmentFeature, LandmarkData, RumorData, PriceListItem, PriceListData, CyberwareData } from '../types';
+import { CardData, CardType, LibraryItem, NpcData, NpcFeature, IngredientData, IngredientFlavor, MealComponent, MealData, SubclassData, TransformationData, TransformationFeature, MaterialData, MaterialFeature, VehicleData, VehicleArmament, VehicleFeature, MadnessData, ClassData, DomainData, CommunityData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, EnvironmentFeature, LandmarkData, RumorData, PriceListItem, PriceListData, CyberwareData } from '../types';
 import { TOOL_CONFIG } from '../constants';
 import RichTextArea from './RichTextArea';
 import { getLibrary } from '../utils';
@@ -539,7 +539,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
       case CardType.PRICELIST: {
         const pl = data as PriceListData;
         // Get valid goods from local library
-        const libGoods = getLibrary().filter(item => 
+        const libGoods: LibraryItem[] = getLibrary().filter((item: LibraryItem) => 
           [CardType.WEAPON, CardType.SUB_WEAPON, CardType.ARMOR, CardType.LOOT, CardType.CONSUMABLE].includes(item.data.type)
         );
 

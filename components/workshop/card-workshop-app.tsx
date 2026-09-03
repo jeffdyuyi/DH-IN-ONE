@@ -15,8 +15,8 @@ import LibraryDetailModal from './components/LibraryDetailModal';
 import PortalView from './components/PortalView';
 import LibraryView from './components/LibraryView';
 import { 
-  Download, Upload, Copy, Save, Library, Sun, Moon, X, RotateCcw,
-  Menu, ChevronLeft, Eye, FileJson, AlertCircle, FilePlus, Home
+  Download, Upload, Copy, Save, Library, X, RotateCcw,
+  Menu, ChevronLeft, FileJson, AlertCircle, FilePlus, Home
 } from 'lucide-react';
 
 // Generate a unique ID
