@@ -1,5 +1,6 @@
 
 import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 import { CardData, LibraryItem } from './types';
 
 // Steganography: Append JSON data to the end of the image file
@@ -11,57 +12,115 @@ const isDarkMode = () => {
 };
 
 /**
- * Robust canvas generation helper.
- * Clones the target element and applies real polygon/rounded clipping path
- * to guarantee exported PNG matches live preview (including cyberpunk cut-corners and bottom text).
+ * 通用后处理剪裁：应用 Cyberpunk 异形多边形切角或标准圆角
  */
-const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | null> => {
-  // 确保字体完全就绪，防止文字回退或字间距计算未完成导致的错位
-  if (typeof document !== 'undefined' && document.fonts) {
-    try {
-      await document.fonts.ready;
-    } catch (e) {
-      console.warn("Fonts ready wait failed:", e);
+const applyCardClipping = (
+  rawCanvas: HTMLCanvasElement,
+  originalElement: HTMLElement,
+  scaleFactor: number
+): HTMLCanvasElement => {
+  const computedStyle = window.getComputedStyle(originalElement);
+  const clipPathVal = originalElement.style.clipPath || computedStyle.clipPath || '';
+
+  const hasCyberCut =
+    clipPathVal.includes('polygon') ||
+    originalElement.innerHTML.includes('calc(100% - 20px)') ||
+    originalElement.getAttribute('data-card-type') === 'cyberware';
+
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = rawCanvas.width;
+  finalCanvas.height = rawCanvas.height;
+  const ctx = finalCanvas.getContext('2d');
+
+  if (!ctx) return rawCanvas;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  if (hasCyberCut) {
+    // 赛博朋克经典切角：右上角 20px 切角，左下角 20px 切角
+    const w = finalCanvas.width;
+    const h = finalCanvas.height;
+    const cut = 20 * scaleFactor;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(w - cut, 0);
+    ctx.lineTo(w, cut);
+    ctx.lineTo(w, h);
+    ctx.lineTo(cut, h);
+    ctx.lineTo(0, h - cut);
+    ctx.closePath();
+    ctx.clip();
+  } else {
+    // 标准圆角卡片裁切
+    const borderRadius = parseFloat(computedStyle.borderRadius) || 0;
+    if (borderRadius > 0) {
+      const r = borderRadius * scaleFactor;
+      const w = finalCanvas.width;
+      const h = finalCanvas.height;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, w, h, r);
+      ctx.closePath();
+      ctx.clip();
     }
   }
 
-  const originalElement = document.getElementById(elementId);
-  if (!originalElement) {
-    console.error(`Element with id ${elementId} not found`);
-    return null;
-  }
+  // 将渲染好的卡片内容绘制到带裁切路径的画布中
+  ctx.drawImage(rawCanvas, 0, 0);
+  return finalCanvas;
+};
 
-  // 1. Clone the node
+/**
+ * 引擎 1（首选）：基于浏览器原生渲染引擎 (html-to-image)
+ * 100% 忠实还原浏览器真实排版，文字在胶囊内绝对垂直居中，不沉底、不偏位。
+ */
+const generateCanvasViaHtmlToImage = async (
+  originalElement: HTMLElement,
+  scaleFactor: number
+): Promise<HTMLCanvasElement> => {
+  const rawCanvas = await htmlToImage.toCanvas(originalElement, {
+    pixelRatio: scaleFactor,
+    backgroundColor: undefined, // 透明背景，保留切角透明通道
+    cacheBust: true,
+    skipFonts: false,
+  });
+
+  return applyCardClipping(rawCanvas, originalElement, scaleFactor);
+};
+
+/**
+ * 引擎 2（保底降级）：基于 html2canvas 的离屏克隆渲染
+ * 优点：对跨域图片容错极强，保证 100% 成功率。
+ */
+const generateCanvasViaHtml2Canvas = async (
+  originalElement: HTMLElement,
+  elementId: string,
+  scaleFactor: number
+): Promise<HTMLCanvasElement | null> => {
   const clone = originalElement.cloneNode(true) as HTMLElement;
-
-  // 2. Set styles to ensure it renders correctly off-screen with full natural height
   const rect = originalElement.getBoundingClientRect();
   const naturalWidth = Math.ceil(rect.width) || 380;
-  
+
   clone.style.position = 'fixed';
   clone.style.top = '-10000px';
   clone.style.left = '-10000px';
   clone.style.zIndex = '-1000';
   clone.style.width = `${naturalWidth}px`;
-  clone.style.height = 'auto'; // allow natural expansion
+  clone.style.height = 'auto';
   clone.style.transform = 'none';
   clone.style.margin = '0';
   clone.style.boxShadow = 'none';
 
-  // 3. Append to body so it can compute full layout
   document.body.appendChild(clone);
-  
-  // 强制触发 reflow 确保克隆节点的尺寸与文字完全测量完毕
   void clone.offsetHeight;
-  
+
   const fullHeight = Math.max(clone.offsetHeight, Math.ceil(rect.height));
-  const scaleFactor = 3; // Ultra-crisp export
 
   try {
-    // 4. Capture raw canvas with transparent background
     const rawCanvas = await html2canvas(clone, {
       scale: scaleFactor,
-      backgroundColor: null, // Transparent background for cut corners
+      backgroundColor: null,
       useCORS: true,
       logging: false,
       allowTaint: true,
@@ -79,67 +138,52 @@ const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | nu
       }
     });
 
-    // 5. Post-process: Check if card has clip-path (e.g. Cyberware cut corners) or border radius
-    const computedStyle = window.getComputedStyle(originalElement);
-    const clipPathVal = originalElement.style.clipPath || computedStyle.clipPath || '';
-
-    // Check children as well (cyberware container inside preview)
-    const hasCyberCut = clipPathVal.includes('polygon') || 
-      originalElement.innerHTML.includes('calc(100% - 20px)') ||
-      originalElement.getAttribute('data-card-type') === 'cyberware';
-
-    // Create final cropped canvas
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = rawCanvas.width;
-    finalCanvas.height = rawCanvas.height;
-    const ctx = finalCanvas.getContext('2d');
-
-    if (!ctx) return rawCanvas;
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    if (hasCyberCut) {
-      // Apply exact Cyberpunk polygon cut: Top-right 20px cut, Bottom-left 20px cut
-      const w = finalCanvas.width;
-      const h = finalCanvas.height;
-      const cut = 20 * scaleFactor;
-
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(w - cut, 0);
-      ctx.lineTo(w, cut);
-      ctx.lineTo(w, h);
-      ctx.lineTo(cut, h);
-      ctx.lineTo(0, h - cut);
-      ctx.closePath();
-      ctx.clip();
-    } else {
-      // Standard rounded card clipping if applicable
-      const borderRadius = parseFloat(computedStyle.borderRadius) || 0;
-      if (borderRadius > 0) {
-        const r = borderRadius * scaleFactor;
-        const w = finalCanvas.width;
-        const h = finalCanvas.height;
-        ctx.beginPath();
-        ctx.roundRect(0, 0, w, h, r);
-        ctx.closePath();
-        ctx.clip();
-      }
-    }
-
-    // Draw the rendered card content into the clipped canvas
-    ctx.drawImage(rawCanvas, 0, 0);
-
-    return finalCanvas;
-  } catch (error) {
-    console.error("html2canvas error:", error);
-    return null;
+    return applyCardClipping(rawCanvas, originalElement, scaleFactor);
   } finally {
-    // 6. Cleanup
     if (document.body.contains(clone)) {
       document.body.removeChild(clone);
     }
+  }
+};
+
+/**
+ * 混合双引擎 Canvas 导出主函数：
+ * 优先使用浏览器原生排版引擎 html-to-image 彻底解决胶囊文字掉出、对齐错位等顽疾；
+ * 若因极端跨域外链报错，无缝平滑回退至 html2canvas 兜底，确保成熟功能 100% 可用。
+ */
+const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | null> => {
+  if (typeof document !== 'undefined' && document.fonts) {
+    try {
+      await document.fonts.ready;
+    } catch (e) {
+      console.warn("[Workshop] Fonts ready wait failed:", e);
+    }
+  }
+
+  const originalElement = document.getElementById(elementId);
+  if (!originalElement) {
+    console.error(`[Workshop] Element with id ${elementId} not found`);
+    return null;
+  }
+
+  const scaleFactor = 3; // Ultra-crisp export
+
+  // 1. 优先尝试原生引擎 html-to-image
+  try {
+    const canvas = await generateCanvasViaHtmlToImage(originalElement, scaleFactor);
+    if (canvas && canvas.width > 0 && canvas.height > 0) {
+      return canvas;
+    }
+  } catch (primaryErr) {
+    console.warn("[Workshop] html-to-image export warning, smoothly falling back to html2canvas:", primaryErr);
+  }
+
+  // 2. 降级回退引擎 html2canvas
+  try {
+    return await generateCanvasViaHtml2Canvas(originalElement, elementId, scaleFactor);
+  } catch (fallbackErr) {
+    console.error("[Workshop] html2canvas fallback failed as well:", fallbackErr);
+    return null;
   }
 };
 

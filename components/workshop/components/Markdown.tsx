@@ -48,6 +48,13 @@ export function parseInline(text: string): React.ReactNode[] {
       const innerText = match[2];
       const styleStr = match[3];
       const style = parseStyleString(styleStr);
+      // Defensive styling: if it looks like a pill/badge, ensure inline-flex and line-height: 1
+      if (style.backgroundColor || style.borderRadius || style.padding) {
+        if (!style.display) style.display = 'inline-flex';
+        if (!style.alignItems) style.alignItems = 'center';
+        if (!style.lineHeight) style.lineHeight = '1.2';
+        if (!style.verticalAlign) style.verticalAlign = 'middle';
+      }
       result.push(
         <span key={index} style={style}>
           {parseInline(innerText)}
@@ -160,6 +167,10 @@ export function parseMarkdown(text: string): React.ReactNode {
           <HeadingTag key={`h-${index}`} className={headingClass}>
             {parseInline(content)}
           </HeadingTag>
+        );
+      } else if (line.trim() === '---' || line.trim() === '***') {
+        elements.push(
+          <hr key={`hr-${index}`} className="my-2.5 border-0 border-t border-slate-200 dark:border-zinc-800" />
         );
       } else {
         if (line.trim() === '') {
