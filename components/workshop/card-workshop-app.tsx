@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { CardType, CardData, LibraryItem } from './types';
-import { TOOL_CONFIG, DEFAULT_VALUES, TOOL_CATEGORIES, CATEGORY_CONFIG, CardCategory } from './constants';
+import { TOOL_CONFIG, DEFAULT_VALUES, TOOL_CATEGORIES, CATEGORY_CONFIG, CardCategory, CATEGORY_ORDER } from './constants';
 import { saveCardAsImage, copyImageToClipboard, loadDataFromImage, saveToLibrary, getLibrary, deleteFromLibrary } from './utils';
 import { navigateToPage } from '@/lib/utils';
 import { TOOL_ICONS, renderToolIcon } from './icons';
@@ -41,7 +41,18 @@ export function CardWorkshopApp() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // For mobile sidebar
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const CATEGORY_ORDER = [CardCategory.COLLECTION, CardCategory.WORLD, CardCategory.HERO];
+
+  const handleResetCard = () => {
+    if (confirm("确定要重置当前卡牌的数据为默认模板吗？未保存的更改将会丢失。")) {
+      const defaults = DEFAULT_VALUES[currentTool];
+      const freshData = JSON.parse(JSON.stringify(defaults));
+      setCardData({ 
+        ...freshData,
+        id: uuid(), 
+        type: currentTool 
+      });
+    }
+  };
 
   // Initialization
   useEffect(() => {
@@ -325,18 +336,26 @@ export function CardWorkshopApp() {
                     <span className="hidden sm:inline">主站</span>
                   </Link>
                   <div className="h-6 w-px bg-slate-300 dark:bg-zinc-700 mx-1"></div>
-                  <button onClick={() => selectTool(currentTool)} className="px-3 py-2 text-sm font-medium text-slate-500 hover:text-blue-700 dark:text-zinc-400 dark:hover:text-amber-400 transition-colors" title="重置">
-                    重置
+                  <button 
+                    onClick={handleResetCard} 
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 transition-colors" 
+                    title="重置当前卡牌内容为初始默认模板"
+                  >
+                    <RotateCcw size={14} />
+                    <span>重置</span>
                   </button>
                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/png,application/json" className="hidden" />
-                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
-                    导入卡牌
+                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm">
+                    <Upload size={14} />
+                    <span>导入卡牌</span>
                   </button>
-                  <button onClick={exportJson} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
-                    导出 JSON
+                  <button onClick={exportJson} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm">
+                    <FileJson size={14} />
+                    <span>导出 JSON</span>
                   </button>
-                  <button onClick={handleSaveClick} className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-amber-600 border border-blue-600 dark:border-amber-600 rounded-md hover:bg-blue-700 dark:hover:bg-amber-700 transition-colors shadow-sm">
-                    保存到本地
+                  <button onClick={handleSaveClick} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-amber-600 border border-blue-600 dark:border-amber-600 rounded-md hover:bg-blue-700 dark:hover:bg-amber-700 transition-colors shadow-sm">
+                    <Save size={14} />
+                    <span>保存到本地</span>
                   </button>
               </div>
             </header>
@@ -423,7 +442,7 @@ export function CardWorkshopApp() {
                         <button onClick={() => copyImageToClipboard('preview-mobile')} className="bg-white text-slate-900 px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2">
                             <Copy size={18} /> 复制
                         </button>
-                        <button onClick={() => saveCardAsImage('preview-mobile', cardData, cardData.name)} className="bg-blue-600 text-white px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2">
+                        <button onClick={() => saveCardAsImage('preview-mobile', cardData, cardData.name)} className="bg-blue-600 dark:bg-amber-600 text-white px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 transition-colors">
                             <Download size={18} /> 保存
                         </button>
                     </div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { navigateToPage } from '@/lib/utils';
 import { Library, Sun, Moon, ArrowRight, Home } from 'lucide-react';
 import { CardType, LibraryItem } from '../types';
-import { CATEGORY_CONFIG, TOOL_CATEGORIES, TOOL_CONFIG, CardCategory } from '../constants';
+import { CATEGORY_CONFIG, TOOL_CATEGORIES, TOOL_CONFIG, CardCategory, CATEGORY_ORDER } from '../constants';
 import { TOOL_ICONS, renderToolIcon } from '../icons';
 
 interface Props {
@@ -15,8 +15,6 @@ interface Props {
   onSelectTool: (type: CardType) => void;
   onSelectLibItem: (item: LibraryItem) => void;
 }
-
-const CATEGORY_ORDER = [CardCategory.COLLECTION, CardCategory.WORLD, CardCategory.HERO];
 
 const PortalView: React.FC<Props> = ({ library, isDark, onToggleTheme, onGoToLibrary, onSelectTool, onSelectLibItem }) => {
   return (

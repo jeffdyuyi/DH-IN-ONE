@@ -508,10 +508,10 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
                    </div>
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-slate-200 dark:border-zinc-800/50">
-                    <div className="flex justify-between text-[10px] text-rose-300 dark:text-rose-900 uppercase font-bold tracking-widest">
-                       <span>转变卡</span>
-                       <span>匕首心</span>
+                <div className="mt-auto pt-2">
+                    <div className="flex justify-between text-[10px] text-rose-500/70 dark:text-rose-400/60 uppercase font-bold tracking-widest pb-1">
+                       <span>转变形态</span>
+                       <span>DAGGERHEART</span>
                      </div>
                 </div>
             </>
@@ -653,7 +653,7 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
             <>
                <div className="text-center border-b border-violet-200 dark:border-violet-900/50 pb-4 mb-6">
                   <h2 className="text-2xl font-serif font-bold text-violet-900 dark:text-violet-400 mb-1">{d.name}</h2>
-                  <div className="text-[10px] uppercase tracking-[0.4em] text-slate-400 dark:text-zinc-500">PROPHECY</div>
+                  <div className="text-[10px] uppercase tracking-[0.4em] text-slate-400 dark:text-zinc-500">预言 · 命运启示</div>
                </div>
 
                <div className="mb-8 px-4 text-center">
@@ -926,7 +926,7 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
           <>
             <Header title={pl.name} type="价目表" />
 
-            <div className="flex-grow flex flex-col gap-3 overflow-y-auto no-scrollbar max-h-[380px]">
+            <div className="flex-grow flex flex-col gap-3">
               {pl.items && pl.items.length > 0 ? (
                 <div className="space-y-3">
                   {pl.items.map((item, idx) => {

@@ -7,7 +7,7 @@ import {
   type LucideProps
 } from 'lucide-react';
 
-export const TOOL_ICONS: Record<CardType, any> = {
+export const TOOL_ICONS: Record<CardType, React.ReactElement> = {
   [CardType.WEAPON]: <Sword size={24} strokeWidth={1.5} />,
   [CardType.SUB_WEAPON]: <Swords size={24} strokeWidth={1.5} />,
   [CardType.ARMOR]: <Shield size={24} strokeWidth={1.5} />,

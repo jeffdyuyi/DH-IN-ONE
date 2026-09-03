@@ -2,6 +2,8 @@
 import html2canvas from 'html2canvas';
 import * as htmlToImage from 'html-to-image';
 import { CardData, LibraryItem } from './types';
+import { vaultStorage } from '../../lib/vault/vault-storage';
+import { VaultCard, VAULT_SCHEMA_VERSION } from '../../lib/vault/vault-types';
 
 // Steganography: Append JSON data to the end of the image file
 const SEPARATOR = "||TRPG_DATA||";
@@ -299,9 +301,6 @@ export const getLibrary = (): LibraryItem[] => {
     return [];
   }
 };
-
-import { vaultStorage } from '../../lib/vault/vault-storage';
-import { VaultCard, VAULT_SCHEMA_VERSION } from '../../lib/vault/vault-types';
 
 export const saveToLibrary = (card: CardData) => {
   if (typeof window === 'undefined') return;

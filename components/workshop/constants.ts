@@ -55,6 +55,13 @@ export const TOOL_CATEGORIES: Record<CardCategory, CardType[]> = {
   ]
 };
 
+// Canonical order of categories for dashboards and sidebars
+export const CATEGORY_ORDER: CardCategory[] = [
+  CardCategory.COLLECTION, 
+  CardCategory.WORLD, 
+  CardCategory.HERO
+];
+
 export const TOOL_CONFIG: Record<CardType, { label: string; color: string; description: string }> = {
   [CardType.WEAPON]: { label: "武器", color: "text-red-500", description: "创建致命的武器卡牌" },
   [CardType.SUB_WEAPON]: { label: "副武器", color: "text-rose-400", description: "设计辅助战斗的副武器" },
@@ -68,24 +75,24 @@ export const TOOL_CONFIG: Record<CardType, { label: string; color: string; descr
   [CardType.ANCESTRY]: { label: "种族", color: "text-emerald-500", description: "血统与天赋" },
   [CardType.COMMUNITY]: { label: "社群", color: "text-orange-500", description: "文化背景与出身" },
   [CardType.NPC]: { label: "NPC", color: "text-rose-500", description: "非敌对的非玩家角色" },
-  [CardType.CALAMITY]: { label: "灾厄", color: "text-gray-500", description: "世界性的危机" },
-  [CardType.INGREDIENT]: { label: "食材", color: "text-lime-600", description: "烹饪材料与味型骰" },
-  [CardType.MEAL]: { label: "料理", color: "text-amber-700", description: "烹饪成品与效果" },
+  [CardType.CALAMITY]: { label: "灾厄", color: "text-gray-400", description: "世界性的危机" },
+  [CardType.INGREDIENT]: { label: "食材", color: "text-lime-500", description: "烹饪材料与味型骰" },
+  [CardType.MEAL]: { label: "料理", color: "text-orange-600", description: "烹饪成品与效果" },
   [CardType.TRANSFORMATION]: { label: "转变卡", color: "text-rose-700", description: "变身与特殊形态" },
-  [CardType.MATERIAL]: { label: "材料", color: "text-stone-500", description: "怪物掉落与制作素材" },
+  [CardType.MATERIAL]: { label: "材料", color: "text-stone-400", description: "怪物掉落与制作素材" },
   [CardType.VEHICLE]: { label: "载具", color: "text-sky-600", description: "交通工具与移动堡垒" },
-  [CardType.WHEELCHAIR]: { label: "战斗轮椅", color: "text-sky-500", description: "设计极富战术机动性的战斗轮椅装备" },
-  [CardType.ANOMALY]: { label: "异常", color: "text-purple-500", description: "诡异收容物与超自然奇异现象" },
-  [CardType.STRONGHOLD]: { label: "据点", color: "text-amber-700", description: "营地、要塞等特殊功能建筑与安全区" },
-  [CardType.MADNESS]: { label: "异化", color: "text-fuchsia-600", description: "理智丧失与精神症状" },
+  [CardType.WHEELCHAIR]: { label: "战斗轮椅", color: "text-blue-400", description: "设计极富战术机动性的战斗轮椅装备" },
+  [CardType.ANOMALY]: { label: "异常", color: "text-violet-400", description: "诡异收容物与超自然奇异现象" },
+  [CardType.STRONGHOLD]: { label: "据点", color: "text-amber-800", description: "营地、要塞等特殊功能建筑与安全区" },
+  [CardType.MADNESS]: { label: "异化", color: "text-fuchsia-500", description: "理智丧失与精神症状" },
   [CardType.CLUE]: { label: "线索", color: "text-teal-600", description: "重要的调查信息" },
   [CardType.PROPHECY]: { label: "预言", color: "text-violet-600", description: "命运的启示与后果" },
   [CardType.QUESTION]: { label: "问题", color: "text-indigo-600", description: "建立世界观的引导性问题" },
   [CardType.QUEST]: { label: "任务", color: "text-amber-600", description: "设计冒险任务与赏金合约" },
   [CardType.ENVIRONMENT]: { label: "环境", color: "text-teal-500", description: "设计场景环境与地形江山" },
   [CardType.LANDMARK]: { label: "地标", color: "text-emerald-600", description: "设计与记录地标建筑、地点或区域" },
-  [CardType.RUMOR]: { label: "传闻", color: "text-amber-500", description: "设计和记录世界中的传闻、流言与来源备注" },
-  [CardType.PRICELIST]: { label: "价目表", color: "text-emerald-500", description: "设计商店价目表，选择已有商品或完全自定义商品信息" },
+  [CardType.RUMOR]: { label: "传闻", color: "text-rose-400", description: "设计和记录世界中的传闻、流言与来源备注" },
+  [CardType.PRICELIST]: { label: "价目表", color: "text-amber-500", description: "设计商店价目表，选择已有商品或完全自定义商品信息" },
   [CardType.CYBERWARE]: { label: "赛博义体", color: "text-yellow-400", description: "赛博朋克风格义体、仿生件、消耗品与外置设备卡片" },
 };
 
