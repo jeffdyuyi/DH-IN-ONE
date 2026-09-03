@@ -1101,14 +1101,14 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
       <div
         id={elementId || "card-preview"}
         data-card-type="cyberware"
-        className="relative w-[340px] min-h-[440px] bg-[#0D0D0D] text-white border-2 border-[#1F2229] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
+        className="relative w-[340px] min-h-[440px] bg-white dark:bg-[#0D0D0D] text-slate-900 dark:text-white border-2 border-slate-300 dark:border-[#1F2229] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
         style={{
           clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif'
         }}
       >
         {/* Header (含正方形 Icon 徽章) */}
-        <div className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3">
+        <div className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3 shadow-sm">
           {/* 左侧正方形 Icon 徽章 */}
           <div className="w-11 h-11 rounded-lg border-2 border-[#0D0D0D] bg-[#0D0D0D] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
             {d.icon ? (
@@ -1141,10 +1141,10 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
         {/* Meta Bar */}
         {(zoneVal || slotsVal) ? (
-          <div className="bg-[#15181E] border-t border-b border-[#2B313D] px-4 py-2 flex justify-between items-center shrink-0">
-            <div className="text-[11px] font-bold text-[#00F0FF] flex items-center gap-1">
+          <div className="bg-slate-100 dark:bg-[#15181E] border-t border-b border-slate-200 dark:border-[#2B313D] px-4 py-2 flex justify-between items-center shrink-0">
+            <div className="text-[11px] font-bold text-cyan-700 dark:text-[#00F0FF] flex items-center gap-1">
               {zoneVal ? (
-                <>部位: <span className="text-white font-normal">{zoneVal}</span></>
+                <>部位: <span className="text-slate-900 dark:text-white font-normal">{zoneVal}</span></>
               ) : null}
             </div>
             {slotsVal ? (
@@ -1156,49 +1156,49 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
         ) : null}
 
         {/* Body */}
-        <div className="p-4 flex flex-col gap-3 flex-1 bg-[#0D0D0D]">
+        <div className="p-4 flex flex-col gap-3 flex-1 bg-white dark:bg-[#0D0D0D]">
           {restrictionVal && (
-            <div className="text-[11px] text-[#8F98A3] border-l-2 border-[#00F0FF] pl-2 leading-tight">
+            <div className="text-[11px] text-slate-600 dark:text-[#8F98A3] border-l-2 border-cyan-600 dark:border-[#00F0FF] pl-2 leading-tight">
               {restrictionVal.startsWith('限制') ? restrictionVal : `限制: ${restrictionVal}`}
             </div>
           )}
 
 
           {d.effect && (
-            <div className="text-[13px] leading-relaxed text-[#E1E4EA]">
+            <div className="text-[13px] leading-relaxed text-slate-800 dark:text-[#E1E4EA]">
               <Markdown text={d.effect} />
             </div>
           )}
 
           {d.description && (
-            <div className="text-[12px] italic text-[#8F98A3] pt-1 border-t border-[#1F2229]">
+            <div className="text-[12px] italic text-slate-500 dark:text-[#8F98A3] pt-1 border-t border-slate-200 dark:border-[#1F2229]">
               <Markdown text={d.description} />
             </div>
           )}
 
           {tagVal && (
-            <div className="bg-[rgba(255,0,60,0.15)] border border-[#FF003C] text-[#FF003C] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
+            <div className="bg-rose-50 border border-rose-300 text-rose-700 dark:bg-[rgba(255,0,60,0.15)] dark:border-[#FF003C] dark:text-[#FF003C] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
               {tagVal.startsWith('//') ? tagVal : `// 警告: ${tagVal}`}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="bg-[#08090C] border-t border-[#1F2229] p-3 px-4 flex justify-between text-[11px] shrink-0">
+        <div className="bg-slate-50 dark:bg-[#08090C] border-t border-slate-200 dark:border-[#1F2229] p-3 px-4 flex justify-between text-[11px] shrink-0">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[#8F98A3] text-[9px] uppercase tracking-wider">元件基础价</span>
-            <span className="font-extrabold text-[#FCEE0A]">{d.compCost || '未设定'}</span>
+            <span className="text-slate-500 dark:text-[#8F98A3] text-[9px] uppercase tracking-wider">元件基础价</span>
+            <span className="font-extrabold text-amber-600 dark:text-[#FCEE0A]">{d.compCost || '未设定'}</span>
           </div>
           <div className="flex flex-col gap-0.5 text-right">
-            <span className="text-[#8F98A3] text-[9px] uppercase tracking-wider">安装手术费</span>
-            <span className="font-extrabold text-[#FCEE0A]">{d.surgCost || '未设定'}</span>
+            <span className="text-slate-500 dark:text-[#8F98A3] text-[9px] uppercase tracking-wider">安装手术费</span>
+            <span className="font-extrabold text-amber-600 dark:text-[#FCEE0A]">{d.surgCost || '未设定'}</span>
           </div>
         </div>
 
         {/* Sub-footer for Creator and Owner */}
-        <div className="bg-[#050608] border-t border-[#15181E] px-4 py-1.5 flex justify-between items-center text-[10px] text-[#8F98A3] uppercase tracking-wider shrink-0">
-          <span className="truncate max-w-[48%]">创作者: <span className="text-[#00F0FF] font-semibold">{d.creator || '未知'}</span></span>
-          <span className="truncate max-w-[48%] text-right">所属: <span className="text-[#FCEE0A] font-semibold">{d.owner || '未指定'}</span></span>
+        <div className="bg-slate-100 dark:bg-[#050608] border-t border-slate-200 dark:border-[#15181E] px-4 py-1.5 flex justify-between items-center text-[10px] text-slate-600 dark:text-[#8F98A3] uppercase tracking-wider shrink-0">
+          <span className="truncate max-w-[48%]">创作者: <span className="text-cyan-700 dark:text-[#00F0FF] font-semibold">{d.creator || '未知'}</span></span>
+          <span className="truncate max-w-[48%] text-right">所属: <span className="text-amber-600 dark:text-[#FCEE0A] font-semibold">{d.owner || '未指定'}</span></span>
         </div>
       </div>
     );
@@ -1216,21 +1216,21 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
       <div 
         id={elementId || "card-preview"}
         data-card-type="external-gear"
-        className="relative w-[340px] min-h-[440px] bg-[#070B12] text-white border-2 border-[#1E293B] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
+        className="relative w-[340px] min-h-[440px] bg-[#F8FAFC] dark:bg-[#070B12] text-slate-900 dark:text-white border-2 border-sky-200 dark:border-[#1E293B] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
         style={{
           clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif'
         }}
       >
         {/* Header (含正方形 Icon 徽章与钛空冰青 Banner) */}
-        <div className="bg-gradient-to-r from-[#00E5FF] to-[#38BDF8] text-[#050B14] p-3 px-4 relative shrink-0 flex items-center gap-3 shadow-md">
+        <div className="bg-gradient-to-r from-sky-400 to-cyan-300 dark:from-[#00E5FF] dark:to-[#38BDF8] text-[#041A2E] dark:text-[#050B14] p-3 px-4 relative shrink-0 flex items-center gap-3 shadow-md">
           {/* 左侧正方形 Icon 徽章 */}
-          <div className="w-11 h-11 rounded-lg border-2 border-[#050B14] bg-[#050B14] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
+          <div className="w-11 h-11 rounded-lg border-2 border-[#041A2E] bg-[#041A2E] dark:border-[#050B14] dark:bg-[#050B14] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
             {d.icon ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={d.icon} alt={d.name || ''} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center justify-center text-[#00E5FF] font-black text-center leading-[1.1] tracking-wider select-none">
+              <div className="flex flex-col items-center justify-center text-cyan-300 dark:text-[#00E5FF] font-black text-center leading-[1.1] tracking-wider select-none">
                 <span className="text-[11px] font-black">{(d.name || '外置').slice(0, 2)}</span>
                 <span className="text-[11px] font-black">{(d.name || '战备').slice(2, 4) || (d.name || '装备').slice(0, 2)}</span>
               </div>
@@ -1239,15 +1239,15 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           <div className="flex-1 min-w-0">
             {tierVal ? (
-              <div className="absolute top-0 right-6 bg-[#050B14] text-[#00E5FF] text-[11px] font-black px-2 py-0.5 tracking-wider">
+              <div className="absolute top-0 right-6 bg-[#041A2E] text-cyan-300 dark:bg-[#050B14] dark:text-[#00E5FF] text-[11px] font-black px-2 py-0.5 tracking-wider">
                 {tierVal}
               </div>
             ) : null}
-            <div className={`text-[17px] font-black leading-tight tracking-wide text-[#050B14] truncate ${tierVal ? 'pr-12' : ''}`}>
+            <div className={`text-[17px] font-black leading-tight tracking-wide text-[#041A2E] dark:text-[#050B14] truncate ${tierVal ? 'pr-12' : ''}`}>
               {d.name || '外置战备装备'}
             </div>
             {d.gearType && (
-              <div className="text-[10px] font-bold text-[#064E66] uppercase tracking-wider mt-0.5">
+              <div className="text-[10px] font-bold text-sky-950 dark:text-[#064E66] uppercase tracking-wider mt-0.5">
                 {d.gearType} (EXTERNAL RIG)
               </div>
             )}
@@ -1255,64 +1255,64 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
         </div>
 
         {/* Meta Bar */}
-        <div className="bg-[#0B1320] border-t border-b border-[#1E2D44] px-4 py-2 flex justify-between items-center shrink-0">
-          <div className="text-[11px] font-bold text-[#38BDF8] flex items-center gap-1">
-            类别: <span className="text-white font-normal">{d.gearType || '外置装备'}</span>
+        <div className="bg-sky-50 dark:bg-[#0B1320] border-t border-b border-sky-200 dark:border-[#1E2D44] px-4 py-2 flex justify-between items-center shrink-0">
+          <div className="text-[11px] font-bold text-sky-700 dark:text-[#38BDF8] flex items-center gap-1">
+            类别: <span className="text-slate-900 dark:text-white font-normal">{d.gearType || '外置装备'}</span>
           </div>
           {isFreeSlot ? (
-            <div className="bg-[#10B981] text-black text-[10px] font-black px-2 py-0.5 tracking-wide">
+            <div className="bg-emerald-600 dark:bg-[#10B981] text-white dark:text-black text-[10px] font-black px-2 py-0.5 tracking-wide">
               免激活槽
             </div>
           ) : (
-            <div className="bg-[#0284C7] text-white text-[10px] font-black px-1.5 py-0.5 tracking-wide">
+            <div className="bg-sky-600 dark:bg-[#0284C7] text-white text-[10px] font-black px-1.5 py-0.5 tracking-wide">
               {slotsVal.includes('槽') ? slotsVal : `占用 ${slotsVal} 槽`}
             </div>
           )}
         </div>
 
         {/* Body */}
-        <div className="p-4 flex flex-col gap-3 flex-1 bg-[#070B12]">
+        <div className="p-4 flex flex-col gap-3 flex-1 bg-white dark:bg-[#070B12]">
           {restrictionVal && (
-            <div className="text-[11px] text-[#94A3B8] border-l-2 border-[#38BDF8] pl-2 leading-tight">
+            <div className="text-[11px] text-slate-500 dark:text-[#94A3B8] border-l-2 border-sky-500 dark:border-[#38BDF8] pl-2 leading-tight">
               {restrictionVal.startsWith('限制') ? restrictionVal : `限制: ${restrictionVal}`}
             </div>
           )}
 
           {/* 基础作战 HUD 参数栏 */}
           {(d.damage || d.trait || d.range || d.burden || (d.armorScore !== undefined && d.armorScore !== '') || d.thresholdBonus) ? (
-            <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
+            <div className="bg-sky-50/70 dark:bg-[#0F172A] border border-sky-200 dark:border-[#1E293B] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
               {d.trait && (
-                <span className="bg-[#0284C7]/20 text-[#38BDF8] border border-[#0284C7]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                <span className="bg-sky-100 text-sky-800 border border-sky-300 dark:bg-[#0284C7]/20 dark:text-[#38BDF8] dark:border-[#0284C7]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
                   {d.trait}
                 </span>
               )}
               {d.range && (
-                <span className="bg-[#1E293B] text-slate-300 px-1.5 py-0.5 rounded text-[11px]">
+                <span className="bg-slate-200 text-slate-700 dark:bg-[#1E293B] dark:text-slate-300 px-1.5 py-0.5 rounded text-[11px]">
                   {d.range}
                 </span>
               )}
               {d.damage && (
-                <span className="bg-[#F43F5E]/20 text-[#FB7185] border border-[#F43F5E]/40 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
+                <span className="bg-rose-100 text-rose-800 border border-rose-300 dark:bg-[#F43F5E]/20 dark:text-[#FB7185] dark:border-[#F43F5E]/40 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
                   {d.damage}
                 </span>
               )}
               {d.burden && (
-                <span className="text-slate-400 font-bold text-[11px] px-1">
+                <span className="text-slate-600 dark:text-slate-400 font-bold text-[11px] px-1">
                   {d.burden}
                 </span>
               )}
               {d.damageType && (
-                <span className="text-slate-400 text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">
                   {d.damageType}
                 </span>
               )}
               {d.armorScore !== undefined && d.armorScore !== '' && (
-                <span className="bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                <span className="bg-sky-100 text-sky-800 border border-sky-300 dark:bg-[#38BDF8]/20 dark:text-[#38BDF8] dark:border-[#38BDF8]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
                   护甲: +{d.armorScore}
                 </span>
               )}
               {d.thresholdBonus && (
-                <span className="text-[#38BDF8] font-mono text-[11px] bg-[#38BDF8]/10 px-1.5 py-0.5 rounded">
+                <span className="text-sky-800 font-mono text-[11px] bg-sky-100 dark:text-[#38BDF8] dark:bg-[#38BDF8]/10 px-1.5 py-0.5 rounded">
                   阈值: {d.thresholdBonus}
                 </span>
               )}
@@ -1321,36 +1321,36 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           {/* 普通特性 (常驻生效) */}
           {d.feature && (
-            <div className="text-[13px] leading-relaxed text-[#E2E8F0]">
+            <div className="text-[13px] leading-relaxed text-slate-800 dark:text-[#E2E8F0]">
               <Markdown text={d.feature} />
             </div>
           )}
 
           {/* 激活模态 (激活特性与转置数值) */}
           {(d.activeFeature || d.hasTransposition) && (
-            <div className="bg-[#0284C7]/10 border border-[#0284C7]/40 p-2.5 rounded space-y-1.5 shadow-sm">
-              <div className="flex items-center justify-between text-[11px] font-black text-[#38BDF8]">
+            <div className="bg-sky-50 dark:bg-[#0284C7]/10 border border-sky-200 dark:border-[#0284C7]/40 p-2.5 rounded space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-between text-[11px] font-black text-sky-800 dark:text-[#38BDF8]">
                 <span className="flex items-center gap-1">
                   <span>⚡ 激活特性</span>
                 </span>
-                <span className="text-[9px] bg-[#0284C7]/20 text-[#38BDF8] px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[9px] bg-sky-200/80 text-sky-900 dark:bg-[#0284C7]/20 dark:text-[#38BDF8] px-1.5 py-0.5 rounded font-mono">
                   {isFreeSlot ? '常驻生效' : `需消耗 ${slotsVal} 槽`}
                 </span>
               </div>
 
               {/* 激活转置数值条 */}
               {d.hasTransposition && (d.transDamage || d.transRange || d.transArmorScore || d.transThresholdBonus) && (
-                <div className="bg-[#050B14] border border-[#0284C7]/30 p-1.5 rounded flex flex-wrap items-center gap-2 text-[11px] font-mono text-[#38BDF8]">
-                  <span className="font-bold text-[#38BDF8]">⚡ 激活转置:</span>
-                  {d.transDamage && <span>伤害 {d.damage || '基础'} → <strong className="text-white">{d.transDamage}</strong></span>}
-                  {d.transRange && <span>距离 {d.range || '基础'} → <strong className="text-white">{d.transRange}</strong></span>}
-                  {d.transArmorScore && <span>护甲 +{d.armorScore || 0} → <strong className="text-white">+{d.transArmorScore}</strong></span>}
-                  {d.transThresholdBonus && <span>阈值 {d.thresholdBonus || '-'} → <strong className="text-white">{d.transThresholdBonus}</strong></span>}
+                <div className="bg-sky-100/90 dark:bg-[#050B14] border border-sky-200 dark:border-[#0284C7]/30 p-1.5 rounded flex flex-wrap items-center gap-2 text-[11px] font-mono text-sky-900 dark:text-[#38BDF8]">
+                  <span className="font-bold text-sky-800 dark:text-[#38BDF8]">⚡ 激活转置:</span>
+                  {d.transDamage && <span>伤害 {d.damage || '基础'} → <strong className="text-sky-950 dark:text-white">{d.transDamage}</strong></span>}
+                  {d.transRange && <span>距离 {d.range || '基础'} → <strong className="text-sky-950 dark:text-white">{d.transRange}</strong></span>}
+                  {d.transArmorScore && <span>护甲 +{d.armorScore || 0} → <strong className="text-sky-950 dark:text-white">+{d.transArmorScore}</strong></span>}
+                  {d.transThresholdBonus && <span>阈值 {d.thresholdBonus || '-'} → <strong className="text-sky-950 dark:text-white">{d.transThresholdBonus}</strong></span>}
                 </div>
               )}
 
               {d.activeFeature && (
-                <div className="text-[12px] text-[#E0F2FE] leading-relaxed">
+                <div className="text-[12px] text-slate-700 dark:text-[#E0F2FE] leading-relaxed">
                   <Markdown text={d.activeFeature} />
                 </div>
               )}
@@ -1359,34 +1359,34 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           {/* 补充背景描述 */}
           {d.description && (
-            <div className="text-[12px] italic text-[#94A3B8] pt-1 border-t border-[#1E293B]">
+            <div className="text-[12px] italic text-slate-500 dark:text-[#94A3B8] pt-1 border-t border-slate-200 dark:border-[#1E293B]">
               <Markdown text={d.description} />
             </div>
           )}
 
           {tagVal && (
-            <div className="bg-[#0284C7]/15 border border-[#0284C7]/50 text-[#38BDF8] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
+            <div className="bg-sky-100 border border-sky-300 text-sky-800 dark:bg-[#0284C7]/15 dark:border-[#0284C7]/50 dark:text-[#38BDF8] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
               {tagVal.startsWith('//') ? tagVal : `// 战备: ${tagVal}`}
             </div>
           )}
         </div>
 
         {/* Footer (双栏展示装备采购价与战术规格) */}
-        <div className="bg-[#060911] border-t border-[#1E293B] p-3 px-4 flex justify-between text-[11px] shrink-0">
+        <div className="bg-slate-50 dark:bg-[#060911] border-t border-slate-200 dark:border-[#1E293B] p-3 px-4 flex justify-between text-[11px] shrink-0">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[#94A3B8] text-[9px] uppercase tracking-wider">装备采购价</span>
-            <span className="font-extrabold text-[#38BDF8]">{d.cost || '未设定'}</span>
+            <span className="text-slate-500 dark:text-[#94A3B8] text-[9px] uppercase tracking-wider">装备采购价</span>
+            <span className="font-extrabold text-sky-700 dark:text-[#38BDF8]">{d.cost || '未设定'}</span>
           </div>
           <div className="flex flex-col gap-0.5 text-right">
-            <span className="text-[#94A3B8] text-[9px] uppercase tracking-wider">战术规格</span>
-            <span className="font-extrabold text-[#38BDF8]">{d.burden ? `${d.burden}装备` : (d.gearType || '标准战备')}</span>
+            <span className="text-slate-500 dark:text-[#94A3B8] text-[9px] uppercase tracking-wider">战术规格</span>
+            <span className="font-extrabold text-sky-700 dark:text-[#38BDF8]">{d.burden ? `${d.burden}装备` : (d.gearType || '标准战备')}</span>
           </div>
         </div>
 
         {/* Sub-footer for Creator and Owner */}
-        <div className="bg-[#04060C] border-t border-[#131B2B] px-4 py-1.5 flex justify-between items-center text-[10px] text-[#94A3B8] uppercase tracking-wider shrink-0">
-          <span className="truncate max-w-[48%]">创作者: <span className="text-[#38BDF8] font-semibold">{d.creator || 'GM'}</span></span>
-          <span className="truncate max-w-[48%] text-right">所属: <span className="text-[#FCEE0A] font-semibold">{d.owner || '未指定'}</span></span>
+        <div className="bg-slate-100 dark:bg-[#04060C] border-t border-slate-200 dark:border-[#131B2B] px-4 py-1.5 flex justify-between items-center text-[10px] text-slate-600 dark:text-[#94A3B8] uppercase tracking-wider shrink-0">
+          <span className="truncate max-w-[48%]">创作者: <span className="text-sky-700 dark:text-[#38BDF8] font-semibold">{d.creator || 'GM'}</span></span>
+          <span className="truncate max-w-[48%] text-right">所属: <span className="text-amber-600 dark:text-[#FCEE0A] font-semibold">{d.owner || '未指定'}</span></span>
         </div>
       </div>
     );
