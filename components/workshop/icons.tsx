@@ -3,7 +3,7 @@ import React from 'react';
 import { CardType } from './types';
 import { 
   Sword, Shield, Gem, FlaskConical, Flame, ScrollText, Crown, Sparkles, Dna, Tent, UserCircle2, Skull, Carrot, Utensils,
-  Moon as MoonIcon, Hammer, Ship, Brain, Search, Eye, HelpCircle, Compass, Swords, Accessibility, Ghost, Castle, Mountain, MapPin, MessageSquare, Coins, Cpu,
+  Moon as MoonIcon, Hammer, Ship, Brain, Search, Eye, HelpCircle, Compass, Swords, Accessibility, Ghost, Castle, Mountain, MapPin, MessageSquare, Coins, Cpu, Radio,
   type LucideProps
 } from 'lucide-react';
 
@@ -39,6 +39,7 @@ export const TOOL_ICONS: Record<CardType, React.ReactElement> = {
   [CardType.RUMOR]: <MessageSquare size={24} strokeWidth={1.5} />,
   [CardType.PRICELIST]: <Coins size={24} strokeWidth={1.5} />,
   [CardType.CYBERWARE]: <Cpu size={24} strokeWidth={1.5} />,
+  [CardType.EXTERNAL_GEAR]: <Radio size={24} strokeWidth={1.5} />,
 };
 
 export function renderToolIcon(type: CardType, props?: LucideProps): React.ReactElement {

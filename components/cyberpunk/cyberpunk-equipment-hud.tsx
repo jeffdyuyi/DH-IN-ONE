@@ -102,12 +102,14 @@ export function CyberpunkEquipmentHud({
   const headAugs = cyberpunkData.zones?.head?.augmentations || []
   const torsoAugs = cyberpunkData.zones?.torso?.augmentations || []
 
-  // 外置战术装备列表
+  // 外置装备列表 (仅激活状态且占用槽位 > 0 的计入已用槽位)
   const externalGears = cyberpunkData.externalGear || []
-  const usedExternalSlots = externalGears.reduce(
-    (sum, g) => sum + (g.slots !== undefined ? g.slots : 1),
-    0
-  )
+  const usedExternalSlots = externalGears
+    .filter((g) => g.active)
+    .reduce(
+      (sum, g) => sum + (g.slots !== undefined && !isNaN(Number(g.slots)) ? Math.max(0, Number(g.slots)) : 1),
+      0
+    )
 
   // 主武器、副武器、战术护甲
   const primaryWeapon = formData.equipment?.weaponSlots?.primary

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardData, CardType, LibraryItem, NpcData, NpcFeature, IngredientData, IngredientFlavor, MealComponent, MealData, SubclassData, TransformationData, TransformationFeature, MaterialData, MaterialFeature, VehicleData, VehicleArmament, VehicleFeature, MadnessData, ClassData, DomainData, CommunityData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, EnvironmentFeature, LandmarkData, RumorData, PriceListItem, PriceListData, CyberwareData } from '../types';
+import { CardData, CardType, LibraryItem, NpcData, NpcFeature, IngredientData, IngredientFlavor, MealComponent, MealData, SubclassData, TransformationData, TransformationFeature, MaterialData, MaterialFeature, VehicleData, VehicleArmament, VehicleFeature, MadnessData, ClassData, DomainData, CommunityData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, EnvironmentFeature, LandmarkData, RumorData, PriceListItem, PriceListData, CyberwareData, ExternalGearData } from '../types';
 import { TOOL_CONFIG } from '../constants';
 import RichTextArea from './RichTextArea';
 import { getLibrary } from '../utils';
@@ -903,6 +903,183 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
             <div className="grid grid-cols-2 gap-4 col-span-2">
               <Input label="元件基础价 (Component Cost)" value={cw.compCost || ''} onChange={v => handleChange('compCost', v)} placeholder="例如: 1.5w 信用点" />
               <Input label="安装手术费 (Surgery Cost)" value={cw.surgCost || ''} onChange={v => handleChange('surgCost', v)} placeholder="例如: 5000 信用点" />
+            </div>
+          </>
+        );
+      }
+      case CardType.EXTERNAL_GEAR: {
+        const eg = data as ExternalGearData;
+        const gearTypes = ["主武器", "副武器", "护甲", "其他外置"];
+        const isArmor = eg.gearType === '护甲';
+
+        return (
+          <>
+            {/* 顶部：位阶与装备分类与激活槽位 */}
+            <div className="grid grid-cols-3 gap-3 col-span-2">
+              <div className="flex flex-col gap-1 col-span-1">
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">位阶 (可留空)</label>
+                <div className="flex gap-2">
+                  <select
+                    value={["T1", "T2", "T3", "T4", ""].includes(eg.tier || '') ? (eg.tier || '') : '__custom__'}
+                    onChange={e => {
+                      if (e.target.value !== '__custom__') {
+                        handleChange('tier', e.target.value);
+                      }
+                    }}
+                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
+                  >
+                    <option value="T1">T1</option>
+                    <option value="T2">T2</option>
+                    <option value="T3">T3</option>
+                    <option value="T4">T4</option>
+                    <option value="">无 (留空)</option>
+                    <option value="__custom__">自定义...</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={eg.tier || ''}
+                    onChange={e => handleChange('tier', e.target.value)}
+                    className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2.5 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-amber-500"
+                    placeholder="如 T1"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 col-span-1">
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">装备分类</label>
+                <select
+                  value={gearTypes.includes(eg.gearType || '') ? eg.gearType : '主武器'}
+                  onChange={e => handleChange('gearType', e.target.value)}
+                  className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs font-bold focus:outline-none focus:border-amber-500"
+                >
+                  <option value="主武器">主武器</option>
+                  <option value="副武器">副武器</option>
+                  <option value="护甲">护甲</option>
+                  <option value="其他外置">其他外置</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1 col-span-1">
+                <label className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                  ⚡ 激活占用槽位
+                </label>
+                <input
+                  type="text"
+                  value={eg.activeSlots ?? '1'}
+                  onChange={e => handleChange('activeSlots', e.target.value)}
+                  className="bg-white dark:bg-zinc-900 border border-amber-300 dark:border-amber-600/50 rounded px-3 py-2 text-slate-900 dark:text-zinc-100 text-xs font-bold font-mono focus:outline-none focus:border-amber-500"
+                  placeholder="如 1, 2 (填 0 或留空免槽)"
+                />
+                <span className="text-[10px] text-zinc-400">填 0、空白或 - 代表免占用激活槽</span>
+              </div>
+            </div>
+
+            {/* 基础作战属性面板 */}
+            <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 rounded border border-zinc-200 dark:border-zinc-700 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700 dark:text-zinc-200">
+                  基础性能 (无需激活即可生效)
+                </span>
+                <span className="text-[11px] text-zinc-500">
+                  {isArmor ? '基础护甲与阈值' : '基础关联属性、射程、伤害与负荷'}
+                </span>
+              </div>
+
+              {isArmor ? (
+                <div className="grid grid-cols-3 gap-3">
+                  <Input label="基础护甲值" value={eg.armorScore !== undefined ? String(eg.armorScore) : ''} onChange={v => handleChange('armorScore', v)} placeholder="如: 3" />
+                  <Input label="护甲阈值加成" value={eg.thresholdBonus || ''} onChange={v => handleChange('thresholdBonus', v)} placeholder="如: +1/+2" />
+                  <Input label="价格 / 费用" value={eg.cost || ''} onChange={v => handleChange('cost', v)} placeholder="如: 15,000 信用点" />
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-4 gap-2">
+                    <Input label="关联属性" value={eg.trait || ''} onChange={v => handleChange('trait', v)} placeholder="如: 敏捷/力量/风度" />
+                    <Input label="攻击距离" value={eg.range || ''} onChange={v => handleChange('range', v)} placeholder="如: 近战/邻近/近距离" />
+                    <Input label="基础伤害" value={eg.damage || ''} onChange={v => handleChange('damage', v)} placeholder="如: d10+3 物理" />
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">负荷</label>
+                      <select
+                        value={eg.burden || '单手'}
+                        onChange={e => handleChange('burden', e.target.value)}
+                        className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
+                      >
+                        <option value="单手">单手</option>
+                        <option value="双手">双手</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input label="伤害类型" value={eg.damageType || '物理'} onChange={v => handleChange('damageType', v)} placeholder="物理 / 魔法 / 能量" />
+                    <Input label="价格 / 费用" value={eg.cost || ''} onChange={v => handleChange('cost', v)} placeholder="如: 20,000 信用点" />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 普通特性 (常驻生效) */}
+            <TextArea
+              label="普通特性 (无需激活，常驻生效 - 可选)"
+              value={eg.feature || ''}
+              onChange={v => handleChange('feature', v)}
+              placeholder="无需占用激活槽位即可生效的基础特性，若无则留空..."
+            />
+
+            {/* 激活特性 (必须激活才生效) */}
+            <div className="col-span-2 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-lg border border-amber-500/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <span>⚡ 激活特性 (需占用激活槽生效)</span>
+                </span>
+                <span className="text-[11px] text-amber-600/70 dark:text-amber-400/70">
+                  仅当在角色卡上开启激活且未超槽位上限时生效
+                </span>
+              </div>
+
+              <TextArea
+                label="激活特性机制描述"
+                value={eg.activeFeature || ''}
+                onChange={v => handleChange('activeFeature', v)}
+                placeholder="例如：强力：额外掷一个伤害骰并去掉其中最小的一个。 / 震荡：命中时可消耗压力点触发范围反应检定..."
+              />
+
+              {/* 激活转置模板 */}
+              <div className="pt-2 border-t border-amber-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-700 dark:text-amber-300">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(eg.hasTransposition)}
+                      onChange={e => handleChange('hasTransposition', e.target.checked)}
+                      className="rounded text-amber-500 focus:ring-amber-500"
+                    />
+                    <span>配置激活转置数值 (激活后数值增强或变化)</span>
+                  </label>
+                  <span className="text-[11px] text-zinc-500">如 d8 激活变 d10，或阈值 +1/+1 激活变 +2/+2</span>
+                </div>
+
+                {eg.hasTransposition && (
+                  <div className="grid grid-cols-3 gap-2 p-2 bg-black/20 rounded border border-amber-500/20 animate-in fade-in">
+                    {isArmor ? (
+                      <>
+                        <Input label="转置护甲值" value={eg.transArmorScore !== undefined ? String(eg.transArmorScore) : ''} onChange={v => handleChange('transArmorScore', v)} placeholder="如: 4" />
+                        <Input label="转置护甲阈值" value={eg.transThresholdBonus || ''} onChange={v => handleChange('transThresholdBonus', v)} placeholder="如: +2/+3" />
+                      </>
+                    ) : (
+                      <>
+                        <Input label="转置伤害" value={eg.transDamage || ''} onChange={v => handleChange('transDamage', v)} placeholder="如: d12+3 物理" />
+                        <Input label="转置攻击距离" value={eg.transRange || ''} onChange={v => handleChange('transRange', v)} placeholder="如: 近距离" />
+                        <Input label="转置属性" value={eg.transTrait || ''} onChange={v => handleChange('transTrait', v)} placeholder="留空则不变" />
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 col-span-2">
+              <Input label="前置限制条件 (可选)" value={eg.restriction || ''} onChange={v => handleChange('restriction', v)} placeholder="例如: 需要敏捷 +1 以上" />
+              <Input label="特殊标签 (可选)" value={eg.tag || ''} onChange={v => handleChange('tag', v)} placeholder="例如: 【军规级】" />
             </div>
           </>
         );

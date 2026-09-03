@@ -30,7 +30,8 @@ export enum CardType {
   LANDMARK = 'landmark',
   RUMOR = 'rumor',
   PRICELIST = 'pricelist',
-  CYBERWARE = 'cyberware'
+  CYBERWARE = 'cyberware',
+  EXTERNAL_GEAR = 'external_gear'
 }
 
 export interface BaseCardData {
@@ -314,6 +315,36 @@ export interface CyberwareData extends BaseCardData {
   severeThreshold?: string | number; // 严重阈值加成
 }
 
+export interface ExternalGearData extends BaseCardData {
+  tier: string;              // 位阶: T1, T2, T3... (可留空)
+  gearType: string;          // 主武器, 副武器, 护甲, 其他外置
+  activeSlots: string;       // 激活占用槽位 (如 1, 2, 0, -, 空白)
+  feature: string;           // 普通特性 (常驻生效，无需激活)
+  activeFeature: string;     // 激活特性 (激活时生效)
+  restriction: string;       // 限制与前置条件 (可选)
+  tag: string;               // 特殊标签 (如【军规级】)
+  cost: string;              // 费用/价格
+  // 基础作战属性 (无需激活直接生效)
+  trait?: string;            // 关联属性: 敏捷/力量/灵巧/本能/风度/知识
+  range?: string;            // 攻击距离: 近战/邻近/近距离/远距离/极远
+  damage?: string;           // 基础伤害: 如 d10+3 物理
+  damageType?: string;       // 物理/魔法/能量
+  burden?: string;           // 负荷: 单手/双手
+  armorScore?: string | number; // 基础护甲值: 如 3
+  thresholdBonus?: string;   // 护甲阈值加成: 如 +1/+2
+  majorThreshold?: string | number;
+  severeThreshold?: string | number;
+  // 激活转置属性 (激活后生效，可选)
+  hasTransposition?: boolean;
+  transDamage?: string;      // 激活转置伤害: 如从 d8+1 变为 d10+1
+  transRange?: string;       // 激活转置攻击距离
+  transTrait?: string;       // 激活转置属性
+  transArmorScore?: string | number; // 激活转置护甲值: 如从 3 变为 4
+  transThresholdBonus?: string; // 激活转置护甲阈值: 如从 +1/+2 变为 +2/+3
+  transMajorThreshold?: string | number;
+  transSevereThreshold?: string | number;
+}
+
 // Union type for all card data
 export type CardData = 
   | WeaponData 
@@ -346,7 +377,8 @@ export type CardData =
   | LandmarkData
   | RumorData
   | PriceListData
-  | CyberwareData;
+  | CyberwareData
+  | ExternalGearData;
 
 export interface LibraryItem {
   id: string;

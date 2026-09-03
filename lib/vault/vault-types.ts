@@ -11,6 +11,7 @@ export type VaultCardCategory =
   | 'loot'            // 战利品 (官方d60/自制)
   | 'consumable'      // 消耗品 (官方d60/自制)
   | 'cyberware'       // 赛博装备 (植入体/仿生件等)
+  | 'external_gear'   // 外置装备 (主副武器/护甲/外置设备)
   | 'enemy'           // 敌人 (详版战斗数据)
   | 'environment'     // 环境 (详版险境机制)
   | 'npc'             // 非战斗NPC/剧情角色
@@ -76,6 +77,37 @@ export interface VaultCyberwareData {
   armorScore?: number;
   majorThreshold?: number;
   severeThreshold?: number;
+}
+
+export interface VaultExternalGearData {
+  tier?: string;
+  gearType: string; // 主武器, 副武器, 护甲, 其他外置
+  activeSlots: number; // 激活占用槽位 (0 代表免激活槽)
+  feature?: string; // 普通特性 (常驻生效)
+  activeFeature?: string; // 激活特性 (激活时生效)
+  restriction?: string;
+  tag?: string;
+  cost?: string;
+  // 基础作战属性
+  trait?: string;
+  damage?: string;
+  range?: string;
+  burden?: string;
+  damageType?: string;
+  armorScore?: number;
+  thresholdBonus?: string;
+  majorThreshold?: number;
+  severeThreshold?: number;
+  // 激活转置模板
+  activeTransposition?: {
+    damage?: string;
+    range?: string;
+    trait?: string;
+    armorScore?: number;
+    thresholdBonus?: string;
+    majorThreshold?: number;
+    severeThreshold?: number;
+  };
 }
 
 export interface VaultEnemyTrait {

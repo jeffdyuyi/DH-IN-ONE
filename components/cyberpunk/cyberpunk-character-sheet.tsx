@@ -20,6 +20,7 @@ import { CyberpunkConsumablesBar } from './cyberpunk-consumables-bar'
 import { CyberpunkIllegalModPanel } from './cyberpunk-illegal-mod-panel'
 import { CyberpunkDomainDeck } from './cyberpunk-domain-deck'
 import { CyberpunkEquipmentHud } from './cyberpunk-equipment-hud'
+import { CyberpunkExternalGearPanel } from './cyberpunk-external-gear-panel'
 import { CyberpunkStoryTab } from './cyberpunk-story-tab'
 import { CyberpunkNotebookTab } from './cyberpunk-notebook-tab'
 import { CyberpunkCompanionTab } from './cyberpunk-companion-tab'
@@ -288,7 +289,25 @@ export function CyberpunkCharacterSheet() {
       '风度': 'presence',
       '知识': 'knowledge',
     }
-    const resolvedTrait = traitMap[gear.weaponStats?.trait || ''] || gear.weaponStats?.trait || 'agility'
+
+    const isTrans = Boolean(gear.active && gear.activeTransposition?.weaponStats)
+    const effectiveDamage = (isTrans && gear.activeTransposition?.weaponStats?.damage)
+      ? gear.activeTransposition.weaponStats.damage
+      : (gear.weaponStats?.damage || 'd8')
+    const effectiveRange = (isTrans && gear.activeTransposition?.weaponStats?.range)
+      ? gear.activeTransposition.weaponStats.range
+      : (gear.weaponStats?.range || '近战')
+    const effectiveTraitStr = (isTrans && gear.activeTransposition?.weaponStats?.trait)
+      ? gear.activeTransposition.weaponStats.trait
+      : (gear.weaponStats?.trait || '')
+    const resolvedTrait = traitMap[effectiveTraitStr] || effectiveTraitStr || 'agility'
+
+    const featuresList: string[] = []
+    if (gear.feature) featuresList.push(`[普通特性] ${gear.feature}`)
+    if (gear.active && gear.activeFeature) featuresList.push(`[激活特性] ${gear.activeFeature}`)
+    else if (!gear.active && gear.activeFeature) featuresList.push(`[激活特性(未激活)] ${gear.activeFeature}`)
+    if (gear.effect && !gear.feature && !gear.activeFeature) featuresList.push(gear.effect)
+    if (gear.description) featuresList.push(gear.description)
 
     selectWeapon(
       { slotType: slot },
@@ -300,11 +319,11 @@ export function CyberpunkCharacterSheet() {
           weaponType: slot,
           trait: resolvedTrait as any,
           damageType: (gear.weaponStats?.damageType === '魔法' ? 'magic' : 'physical') as any,
-          range: (gear.weaponStats?.range === '近战' ? 'melee' : gear.weaponStats?.range || 'melee') as any,
+          range: (effectiveRange === '近战' ? 'melee' : effectiveRange || 'melee') as any,
           burden: (gear.weaponStats?.burden === '双手' ? 'twoHanded' : gear.weaponStats?.burden === '副手' ? 'offHand' : 'oneHanded') as any,
-          damage: gear.weaponStats?.damage || 'd8',
+          damage: effectiveDamage,
           featureName: gear.name,
-          description: gear.effect || gear.description || '',
+          description: featuresList.join('\n\n'),
           modifierContributions: [],
         },
       }
@@ -314,18 +333,36 @@ export function CyberpunkCharacterSheet() {
 
   // 将外置装备快速挂载到战术护甲插槽
   const handleEquipExternalToCombatArmor = (gear: CyberpunkExternalGear) => {
+    const isTrans = Boolean(gear.active && gear.activeTransposition?.armorStats)
+    const effectiveArmor = (isTrans && gear.activeTransposition?.armorStats?.armorScore !== undefined)
+      ? gear.activeTransposition.armorStats.armorScore
+      : (gear.armorStats?.armorScore ?? 3)
+    const effectiveMinor = (isTrans && gear.activeTransposition?.armorStats?.majorThreshold !== undefined)
+      ? gear.activeTransposition.armorStats.majorThreshold
+      : (gear.armorStats?.majorThreshold ?? 6)
+    const effectiveMajor = (isTrans && gear.activeTransposition?.armorStats?.severeThreshold !== undefined)
+      ? gear.activeTransposition.armorStats.severeThreshold
+      : (gear.armorStats?.severeThreshold ?? 13)
+
+    const featuresList: string[] = []
+    if (gear.feature) featuresList.push(`[普通特性] ${gear.feature}`)
+    if (gear.active && gear.activeFeature) featuresList.push(`[激活特性] ${gear.activeFeature}`)
+    else if (!gear.active && gear.activeFeature) featuresList.push(`[激活特性(未激活)] ${gear.activeFeature}`)
+    if (gear.effect && !gear.feature && !gear.activeFeature) featuresList.push(gear.effect)
+    if (gear.description) featuresList.push(gear.description)
+
     selectArmorSlot({
       type: 'custom',
       draft: {
         name: gear.name,
         tier: (gear.tier as any) || 'T1',
-        baseArmorMax: gear.armorStats?.armorScore ?? 3,
+        baseArmorMax: effectiveArmor,
         baseThresholds: {
-          minor: gear.armorStats?.majorThreshold ?? 6,
-          major: gear.armorStats?.severeThreshold ?? 13,
+          minor: effectiveMinor,
+          major: effectiveMajor,
         },
         featureName: gear.name,
-        description: gear.effect || gear.description || '',
+        description: featuresList.join('\n\n'),
         modifierContributions: [],
       },
     })
@@ -623,31 +660,41 @@ export function CyberpunkCharacterSheet() {
           </div>
         )}
 
-        {/* ===================== 第二页：装配与义体 (HUD 布局) ===================== */}
+        {/* ===================== 第二页：装配与义体 (HUD 布局与外置装备) ===================== */}
         {activeTab === 'loadout' && (
-          <CyberpunkEquipmentHud
-            cyberpunkData={cyberpunkData}
-            onChangeCyberpunk={handleCyberpunkChange}
-            onOpenSelectModal={(type, zoneKey, slotIndex) => {
-              if (type === 'weapon') {
-                setModalsState((prev) => ({
-                  ...prev,
-                  weaponModalOpen: true,
-                  activeWeaponSlot: (slotIndex ?? 0) === 1 ? 'secondary' : 'primary',
-                }))
-              } else if (type === 'armor') {
-                setModalsState((prev) => ({ ...prev, armorModalOpen: true }))
-              } else if (type === 'augmentation') {
-                setModalsState((prev) => ({
-                  ...prev,
-                  installAugModalOpen: true,
-                  activeZoneKey: (zoneKey as CyberpunkBodyZoneKey) || 'upper_limb',
-                }))
-              } else if (type === 'external') {
-                setModalsState((prev) => ({ ...prev, installExternalGearModalOpen: true }))
-              }
-            }}
-          />
+          <div className="space-y-6">
+            <CyberpunkEquipmentHud
+              cyberpunkData={cyberpunkData}
+              onChangeCyberpunk={handleCyberpunkChange}
+              onOpenSelectModal={(type, zoneKey, slotIndex) => {
+                if (type === 'weapon') {
+                  setModalsState((prev) => ({
+                    ...prev,
+                    weaponModalOpen: true,
+                    activeWeaponSlot: (slotIndex ?? 0) === 1 ? 'secondary' : 'primary',
+                  }))
+                } else if (type === 'armor') {
+                  setModalsState((prev) => ({ ...prev, armorModalOpen: true }))
+                } else if (type === 'augmentation') {
+                  setModalsState((prev) => ({
+                    ...prev,
+                    installAugModalOpen: true,
+                    activeZoneKey: (zoneKey as CyberpunkBodyZoneKey) || 'upper_limb',
+                  }))
+                } else if (type === 'external') {
+                  setModalsState((prev) => ({ ...prev, installExternalGearModalOpen: true }))
+                }
+              }}
+            />
+
+            {/* 外置装备独立面板 (背包收纳/激活管理与双态数值联动) */}
+            <CyberpunkExternalGearPanel
+              cyberpunkData={cyberpunkData}
+              onChange={handleCyberpunkChange}
+              onEquipToCombatWeapon={handleEquipExternalToCombatWeapon}
+              onEquipToCombatArmor={handleEquipExternalToCombatArmor}
+            />
+          </div>
         )}
 
         {/* ===================== 第三页：角色故事 (人物精细档案与传记) ===================== */}

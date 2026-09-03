@@ -144,5 +144,63 @@ describe('卡牌工坊 V3 数据适配器', () => {
     const compiledWeapon = compileVaultToWeapon(cardWithDefaultedBurden)
     expect(compiledWeapon.burden).toBe('twoHanded')
   })
+
+  it('正确解析具有普通特性、激活特性与激活转置的外置装备卡片', () => {
+    const breakerBlade: VaultCard = {
+      id: 'ext_breaker_blade',
+      name: '破甲刀',
+      category: 'external_gear',
+      description: '军用级高频近战刀刃',
+      data: {
+        tier: 'T1',
+        gearType: '主武器',
+        activeSlots: '1',
+        trait: '敏捷',
+        range: '近战',
+        damage: 'd10+3',
+        damageType: '物理',
+        burden: '双手',
+        feature: '锋利：对未装备护甲的目标伤害+2。',
+        activeFeature: '强力：额外掷一个伤害骰并去掉其中最小的一个。',
+        hasTransposition: true,
+        transDamage: 'd12+3',
+      },
+      sourceApp: 'workshop',
+      schemaVersion: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+
+    const compiled = compileVaultToExternalGear(breakerBlade)
+    expect(compiled.name).toBe('破甲刀')
+    expect(compiled.slots).toBe(1)
+    expect(compiled.feature).toBe('锋利：对未装备护甲的目标伤害+2。')
+    expect(compiled.activeFeature).toBe('强力：额外掷一个伤害骰并去掉其中最小的一个。')
+    expect(compiled.weaponStats?.damage).toBe('d10+3')
+    expect(compiled.activeTransposition?.weaponStats?.damage).toBe('d12+3')
+  })
+
+  it('正确识别 0、空白、- 等免激活槽位设定', () => {
+    const freeCard: VaultCard = {
+      id: 'ext_free_item',
+      name: '战术目镜',
+      category: 'external_gear',
+      description: '',
+      data: {
+        gearType: '其他外置',
+        activeSlots: '0',
+        feature: '夜视：黑暗环境中检定不受劣势。',
+      },
+      sourceApp: 'workshop',
+      schemaVersion: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+
+    const compiled = compileVaultToExternalGear(freeCard)
+    expect(compiled.slots).toBe(0)
+    expect(compiled.active).toBe(true) // 免槽位自动常驻激活
+    expect(compiled.feature).toBe('夜视：黑暗环境中检定不受劣势。')
+  })
 })
 

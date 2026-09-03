@@ -88,10 +88,7 @@ export function InstallExternalGearModal({
   // 从公共卡库安装
   const handleSelectFromVault = (card: VaultCard) => {
     const compiled = compileVaultToExternalGear(card)
-    onInstall({
-      ...compiled,
-      active: true,
-    })
+    onInstall(compiled)
     onClose()
   }
 
@@ -140,7 +137,10 @@ export function InstallExternalGearModal({
     e.preventDefault()
     if (!customName.trim()) return
 
-    const slotCount = parseInt(customSlots, 10) || 1
+    const cleanSlots = (customSlots || '').trim()
+    const slotCount = (cleanSlots === '0' || cleanSlots === '-' || cleanSlots === '——' || cleanSlots === '无' || cleanSlots === '' || cleanSlots === '免槽')
+      ? 0
+      : (parseInt(cleanSlots, 10) || 0)
     const textToScan = `${customName} ${customEffect}`
     const isExplicitWeapon = customZone === '主武器' || customZone === '副武器' || Boolean(customDamage || customTrait)
     const isExplicitArmor = customZone === '护甲' || Boolean(customArmor || customMinor || customMajor)
@@ -163,7 +163,7 @@ export function InstallExternalGearModal({
       cyberType: customType,
       zone: customZone,
       slots: slotCount,
-      active: true,
+      active: slotCount === 0,
       effect: customEffect,
       restriction: customRestriction,
       weaponStats: isExplicitWeapon ? {

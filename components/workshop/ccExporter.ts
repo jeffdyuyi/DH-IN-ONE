@@ -32,7 +32,8 @@ export const CHINESE_TYPE_LABELS: Record<CardType, string> = {
   [CardType.LANDMARK]: '地标',
   [CardType.RUMOR]: '传闻',
   [CardType.PRICELIST]: '价目表',
-  [CardType.CYBERWARE]: '赛博义体'
+  [CardType.CYBERWARE]: '赛博义体',
+  [CardType.EXTERNAL_GEAR]: '外置装备'
 };
 
 export interface CCPackMeta {
@@ -506,6 +507,27 @@ export const convertToCCPack = (
               item1: raw.tier || '',
               item2: raw.cyberType || '',
               item3: raw.slots ? `${raw.slots}槽` : ''
+            };
+            break;
+          case CardType.EXTERNAL_GEAR:
+            effectsMarkdown = `***位阶***: ${raw.tier || ''}\n***分类***: ${raw.gearType || ''}\n***激活占用***: ${raw.activeSlots || '0'} 槽\n\n`;
+            if (raw.trait || raw.damage || raw.range || raw.burden) {
+              effectsMarkdown += `***基础性能***: ${raw.trait || ''} ${raw.range || ''} ${raw.damage || ''} ${raw.burden || ''}\n`;
+            }
+            if (raw.armorScore !== undefined || raw.thresholdBonus) {
+              effectsMarkdown += `***基础护甲***: ${raw.armorScore || '0'} | 阈值 ${raw.thresholdBonus || '+0/+0'}\n`;
+            }
+            if (raw.feature) effectsMarkdown += `\n***普通特性***:\n${raw.feature}\n`;
+            if (raw.activeFeature) effectsMarkdown += `\n***激活特性***:\n${raw.activeFeature}\n`;
+            if (raw.hasTransposition) {
+              effectsMarkdown += `\n***激活转置***: 伤害 ${raw.transDamage || '-'} | 护甲 ${raw.transArmorScore || '-'} (阈值 ${raw.transThresholdBonus || '-'})\n`;
+            }
+            if (raw.cost) effectsMarkdown += `\n***价格***: ${raw.cost}\n`;
+            effectsMarkdown += `\n${raw.description || ''}`;
+            briefInfo = {
+              item1: raw.gearType || '',
+              item2: raw.damage || (raw.armorScore ? `护甲+${raw.armorScore}` : ''),
+              item3: raw.activeSlots ? `${raw.activeSlots}槽` : '免槽'
             };
             break;
           default:

@@ -30,7 +30,8 @@ export const TOOL_CATEGORIES: Record<CardCategory, CardType[]> = {
     CardType.INGREDIENT, 
     CardType.MEAL,
     CardType.CLUE,
-    CardType.CYBERWARE
+    CardType.CYBERWARE,
+    CardType.EXTERNAL_GEAR
   ],
   [CardCategory.WORLD]: [
     CardType.NPC, 
@@ -93,7 +94,8 @@ export const TOOL_CONFIG: Record<CardType, { label: string; color: string; descr
   [CardType.LANDMARK]: { label: "地标", color: "text-emerald-600", description: "设计与记录地标建筑、地点或区域" },
   [CardType.RUMOR]: { label: "传闻", color: "text-rose-400", description: "设计和记录世界中的传闻、流言与来源备注" },
   [CardType.PRICELIST]: { label: "价目表", color: "text-amber-500", description: "设计商店价目表，选择已有商品或完全自定义商品信息" },
-  [CardType.CYBERWARE]: { label: "赛博义体", color: "text-yellow-400", description: "赛博朋克风格义体、仿生件、消耗品与外置设备卡片" },
+  [CardType.CYBERWARE]: { label: "赛博义体", color: "text-yellow-400", description: "赛博朋克风格义体、仿生件与植入体卡片" },
+  [CardType.EXTERNAL_GEAR]: { label: "外置装备", color: "text-amber-500", description: "外置武器、护甲及战术外挂，支持普通特性与激活转置" },
 };
 
 export const DEFAULT_VALUES: Record<CardType, Partial<CardData>> = {
@@ -345,6 +347,25 @@ export const DEFAULT_VALUES: Record<CardType, Partial<CardData>> = {
     tag: "",
     compCost: "1.5w 信用点",
     surgCost: "5000 信用点",
+    description: "",
+    creator: "GM",
+    owner: "-"
+  },
+  [CardType.EXTERNAL_GEAR]: {
+    name: "破甲刀",
+    tier: "T1",
+    gearType: "主武器",
+    activeSlots: "1",
+    trait: "敏捷",
+    range: "近战",
+    damage: "d10+3",
+    damageType: "物理",
+    burden: "双手",
+    feature: "",
+    activeFeature: "强力：额外掷一个伤害骰并去掉其中最小的一个。",
+    restriction: "——",
+    tag: "",
+    cost: "20,000 信用点",
     description: "",
     creator: "GM",
     owner: "-"

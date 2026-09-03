@@ -73,36 +73,56 @@ export interface CyberpunkIllegalModData {
   bonus?: string
 }
 
-// 外置装备数据结构 (武器/护甲/副手/无人机/挂载等，具有激活限制)
+// 外置装备数据结构 (武器/护甲/副手/无人机/挂载等，具有基础特性与激活双态机制)
 export interface CyberpunkExternalGear {
   id: string
   name: string
   icon?: string // 自定义正方形图标
   image?: string
   tier?: string
-  cyberType?: string // "外置设备", "战术挂载", "无人机", etc.
-  zone?: string // "主武器", "副武器", "战术护甲", "外置挂载", etc.
-  slots?: number // 占用激活槽位 (默认 1)
+  cyberType?: string // "外置设备", "主武器", "副武器", "护甲", etc.
+  zone?: string // "主武器", "副武器", "护甲", "通用挂载", etc.
+  slots?: number // 占用激活槽位 (0, 1, 2, 3... 0 代表免激活槽)
   slotCost?: number
-  active: boolean // 是否激活并占用位阶激活槽
+  active: boolean // 是否已激活该装备的激活特性与转置
   restriction?: string
-  effect?: string
+  feature?: string // 普通特性 (常驻生效，无需激活即可拥有)
+  effect?: string // 兼容描述文本
+  activeFeature?: string // 激活特性 (仅当激活并占用槽位时触发)
   description?: string
   tag?: string
   compCost?: string
   surgCost?: string
-  // 作战属性 (如果是武器或护甲)
+  cost?: string
+  // 基础作战属性 (无需激活直接生效)
   weaponStats?: {
     trait?: string // 敏捷, 力量, 灵巧, 本能, 风度, 知识
-    damage?: string // 如 d10+6
+    damage?: string // 如 d10+3
     range?: string // 近战, 邻近, 近距离, 远距离, 极远
-    burden?: string // 单手, 双手
+    burden?: string // 单手, 双手, 副手
     damageType?: string // 物理, 魔法, 能量
   }
   armorStats?: {
-    armorScore?: number
-    majorThreshold?: number
-    severeThreshold?: number
+    armorScore?: number // 基础护甲值
+    majorThreshold?: number // 护甲阈值加成 (轻伤)
+    severeThreshold?: number // 护甲阈值加成 (重伤)
+    thresholdBonusText?: string // 如 "+1/+2"
+  }
+  // 激活转置模板 (激活时覆盖基础作战属性)
+  activeTransposition?: {
+    weaponStats?: {
+      trait?: string
+      damage?: string // 激活后转置伤害，如 d10+1
+      range?: string
+      burden?: string
+      damageType?: string
+    }
+    armorStats?: {
+      armorScore?: number // 激活后转置护甲值
+      majorThreshold?: number
+      severeThreshold?: number
+      thresholdBonusText?: string // 如 "+2/+3"
+    }
   }
   sourceCardId?: string
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardData, CardType, WeaponData, ArmorData, NpcData, ClassData, DomainData, SubclassData, AncestryData, CommunityData, StoryData, LootData, ConsumableData, CalamityData, IngredientData, MealData, TransformationData, MaterialData, VehicleData, MadnessData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, LandmarkData, RumorData, PriceListData, CyberwareData } from '../types';
+import { CardData, CardType, WeaponData, ArmorData, NpcData, ClassData, DomainData, SubclassData, AncestryData, CommunityData, StoryData, LootData, ConsumableData, CalamityData, IngredientData, MealData, TransformationData, MaterialData, VehicleData, MadnessData, ClueData, ProphecyData, QuestionData, QuestData, SubWeaponData, WheelchairData, AnomalyData, StrongholdData, EnvironmentData, LandmarkData, RumorData, PriceListData, CyberwareData, ExternalGearData } from '../types';
 import { Markdown, parseInline } from './Markdown';
 
 interface Props {
@@ -1244,8 +1244,163 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
     );
   };
 
+  const renderExternalGearContent = () => {
+    const d = data as ExternalGearData;
+    const slotsVal = (d.activeSlots || '').trim();
+    const isFreeSlot = !slotsVal || slotsVal === '0' || slotsVal === '-' || slotsVal === '——' || slotsVal === '无' || slotsVal === '0槽';
+
+    return (
+      <div 
+        id={elementId || "card-preview"}
+        className="relative w-[380px] min-h-[540px] flex flex-col justify-between overflow-hidden bg-[#0A0D14] text-[#E5E7EB] border-2 border-[#F59E0B]/70 shadow-2xl font-sans"
+        style={{
+          clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'
+        }}
+      >
+        {/* Header */}
+        <div className="bg-[#121622] border-b-2 border-[#F59E0B] p-3.5 flex flex-col gap-1.5 shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/50 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                {d.tier || '外置'}
+              </span>
+              <h2 className="text-base font-black tracking-wide text-white truncate">
+                {d.name || '外置装备'}
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isFreeSlot ? (
+                <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded">
+                  免激活槽
+                </span>
+              ) : (
+                <span className="bg-[#F59E0B] text-black text-[10px] font-black px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                  ⚡ 激活占用 {slotsVal} 槽
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-zinc-400">
+            <span className="font-semibold text-amber-400/90">{d.gearType || '主武器'}</span>
+            <span className="text-[10px] font-mono tracking-wider text-zinc-500">EXTERNAL RIG // ARMS</span>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-3.5 flex flex-col gap-2.5 flex-1 bg-[#0A0D14]">
+          {d.restriction && (
+            <div className="text-[11px] text-zinc-400 border-l-2 border-[#F59E0B] pl-2 leading-tight">
+              {d.restriction.startsWith('限制') ? d.restriction : `限制: ${d.restriction}`}
+            </div>
+          )}
+
+          {/* 基础作战 HUD 参数栏 */}
+          {(d.damage || d.trait || d.range || d.burden || (d.armorScore !== undefined && d.armorScore !== '') || d.thresholdBonus || d.majorThreshold) ? (
+            <div className="bg-[#141926] border border-[#2B354D] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
+              {d.trait && (
+                <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                  {d.trait}
+                </span>
+              )}
+              {d.range && (
+                <span className="bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded text-[11px]">
+                  {d.range}
+                </span>
+              )}
+              {d.damage && (
+                <span className="bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/50 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
+                  {d.damage}
+                </span>
+              )}
+              {d.burden && (
+                <span className="text-zinc-400 font-bold text-[11px] px-1">
+                  {d.burden}
+                </span>
+              )}
+              {d.armorScore !== undefined && d.armorScore !== '' && (
+                <span className="bg-amber-400/15 text-amber-300 border border-amber-400/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                  护甲: +{d.armorScore}
+                </span>
+              )}
+              {d.thresholdBonus && (
+                <span className="text-amber-300 font-mono text-[11px] bg-amber-400/10 px-1.5 py-0.5 rounded">
+                  阈值: {d.thresholdBonus}
+                </span>
+              )}
+            </div>
+          ) : null}
+
+          {/* 普通特性 (常驻生效) */}
+          {d.feature && (
+            <div className="bg-[#131722] border border-[#262E3F] p-2 rounded text-[12px] leading-relaxed text-[#D1D5DB]">
+              <div className="text-[10px] font-bold text-zinc-400 mb-0.5 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+                <span>普通特性 (无需激活常驻生效)</span>
+              </div>
+              <Markdown text={d.feature} />
+            </div>
+          )}
+
+          {/* 激活模态 (激活特性与转置数值) */}
+          {(d.activeFeature || d.hasTransposition) && (
+            <div className="bg-amber-500/10 border border-amber-500/40 p-2.5 rounded text-[12px] leading-relaxed text-[#FEF3C7] shadow-sm">
+              <div className="text-[10px] font-bold text-amber-400 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">⚡ 激活特性</span>
+                <span className="text-[9px] font-mono text-amber-400/80">
+                  {isFreeSlot ? '常驻激活' : `需消耗 ${slotsVal} 槽位`}
+                </span>
+              </div>
+
+              {/* 激活转置数值条 */}
+              {d.hasTransposition && (d.transDamage || d.transRange || d.transArmorScore || d.transThresholdBonus) && (
+                <div className="bg-black/40 border border-amber-500/30 p-1.5 rounded mb-2 flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-amber-300">
+                  <span className="font-bold text-amber-400">⚡ 激活转置:</span>
+                  {d.transDamage && <span>伤害 {d.damage || '-'} → <strong className="text-white">{d.transDamage}</strong></span>}
+                  {d.transRange && <span>距离 {d.range || '-'} → <strong className="text-white">{d.transRange}</strong></span>}
+                  {d.transArmorScore && <span>护甲 {d.armorScore || '-'} → <strong className="text-white">{d.transArmorScore}</strong></span>}
+                  {d.transThresholdBonus && <span>阈值 {d.thresholdBonus || '-'} → <strong className="text-white">{d.transThresholdBonus}</strong></span>}
+                </div>
+              )}
+
+              {d.activeFeature && (
+                <div className="text-[12px] leading-relaxed">
+                  <Markdown text={d.activeFeature} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 补充背景描述 */}
+          {d.description && (
+            <div className="text-[11px] italic text-zinc-400 pt-1 border-t border-zinc-800">
+              <Markdown text={d.description} />
+            </div>
+          )}
+
+          {d.tag && (
+            <div className="bg-amber-500/15 border border-amber-500/60 text-amber-400 text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
+              {d.tag}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-[#0D1017] border-t border-zinc-800 p-2.5 px-3 flex justify-between items-center text-[11px] shrink-0">
+          <span className="text-zinc-400 text-[10px]">价格: <strong className="text-amber-400">{d.cost || '面议'}</strong></span>
+          <span className="text-zinc-400 text-[10px]">创作者: <strong className="text-zinc-200">{d.creator || 'GM'}</strong></span>
+        </div>
+      </div>
+    );
+  };
+
   if (data.type === CardType.CYBERWARE) {
     return renderCyberwareContent();
+  }
+
+  if (data.type === CardType.EXTERNAL_GEAR) {
+    return renderExternalGearContent();
   }
 
   return (
