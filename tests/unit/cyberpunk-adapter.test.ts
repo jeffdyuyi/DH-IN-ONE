@@ -5,13 +5,13 @@ import {
   mapZoneTextToKey,
   mapCyberType,
   extractThresholdBonusFromEffect,
-} from '@/lib/cyberpunk/workshop-v3-adapter'
+} from '../../lib/cyberpunk/workshop-v3-adapter'
 import {
   compileVaultToExternalGear,
   compileVaultToWeapon,
   compileVaultToArmor,
-} from '@/lib/vault/cross-flavor-equipper'
-import { VaultCard } from '@/lib/vault/vault-types'
+} from '../../lib/vault/cross-flavor-equipper'
+import type { VaultCard } from '../../lib/vault/vault-types'
 
 describe('卡牌工坊 V3 数据适配器', () => {
   it('正确映射部位文本至标准 Key', () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { calculateCyberpunkThresholds } from '@/lib/cyberpunk/threshold-calculator'
-import { defaultCyberpunkSheetData } from '@/lib/cyberpunk/tier-constants'
-import type { CyberpunkSheetExtension } from '@/types/cyberpunk'
+import { calculateCyberpunkThresholds } from '../../lib/cyberpunk/threshold-calculator'
+import { defaultCyberpunkSheetData } from '../../lib/cyberpunk/tier-constants'
+import type { CyberpunkSheetExtension } from '../../types/cyberpunk'
 
 describe('爽博朋克特化伤害阈值计算器', () => {
   it('T1 裸装初始角色阈值应为 6/12', () => {
