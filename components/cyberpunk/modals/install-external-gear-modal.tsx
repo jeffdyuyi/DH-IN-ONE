@@ -53,7 +53,7 @@ export function InstallExternalGearModal({
           setLoading(true)
           await vaultStorage.initialize()
           const categories = filterType === 'all' 
-            ? ['cyberware', 'weapon', 'armor'] as any
+            ? ['external_gear', 'weapon', 'armor', 'cyberware'] as any
             : [filterType] as any
           const result = await vaultStorage.queryCards({
             category: categories,
@@ -61,13 +61,12 @@ export function InstallExternalGearModal({
           })
           // 仅展示外置装备（主武器、副武器、护甲、外置设备），排除身体部位纯义体（植入体、仿生件、时尚件）
           const filtered = result.filter((card) => {
-            if (card.category === 'weapon' || card.category === 'armor') return true
+            if (card.category === 'external_gear' || card.category === 'weapon' || card.category === 'armor') return true
             const data = (card.data || {}) as Record<string, any>
             const type = (data.cyberType || '').toLowerCase()
-            const cardZone = (data.zone || '').toLowerCase()
-            // 如果明确是身体4大区义体（植入体/仿生件/时尚件且无武器/护甲属性），排除
-            if ((type.includes('植入') || type.includes('仿生') || type.includes('时尚')) && 
-                !cardZone.includes('武器') && !cardZone.includes('护甲') && !data.damage && !data.armorScore) {
+            // 如果是纯义体（植入体/仿生件/时尚件或安装在身体4大区），排除
+            if (type.includes('植入') || type.includes('仿生') || type.includes('时尚') ||
+                ['头部', '躯干', '上肢', '下肢', '全机体'].includes(data.zone)) {
               return false
             }
             return true

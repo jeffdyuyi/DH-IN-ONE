@@ -670,16 +670,12 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
       case CardType.CYBERWARE: {
         const cw = data as CyberwareData;
         const presetTypes = [
-          "外置装备 - 主武器",
-          "外置装备 - 副武器",
-          "外置装备 - 护甲",
-          "外置装备 - 通用",
           "植入体",
           "仿生件",
           "时尚件",
           "消耗品",
         ];
-        const presetZones = ["主武器", "副武器", "护甲", "通用挂载", "头部", "躯干", "上肢", "下肢", ""];
+        const presetZones = ["头部", "躯干", "上肢", "下肢", "全机体", ""];
 
         return (
           <>
@@ -700,7 +696,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
                 <div>
                   <label className="text-xs font-bold text-slate-800 dark:text-zinc-200 block">
-                    元件图标
+                    义体图标
                   </label>
                   <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block">
                     {cw.icon ? '已上传自定义图标' : '留空将自动提取名称前 4 字生成赛博汉字印章'}
@@ -769,7 +765,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               </div>
 
               <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">类型</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">义体类型</label>
                 <div className="flex gap-2">
                   <select
                     value={presetTypes.includes(cw.cyberType || '') ? cw.cyberType : '__custom__'}
@@ -778,22 +774,12 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                         handleChange('cyberType', e.target.value);
                       }
                     }}
-                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
+                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200 font-semibold"
                   >
-                    <optgroup label="外置战备装备">
-                      <option value="外置装备 - 主武器">外置装备 - 主武器</option>
-                      <option value="外置装备 - 副武器">外置装备 - 副武器</option>
-                      <option value="外置装备 - 护甲">外置装备 - 护甲</option>
-                      <option value="外置装备 - 通用">外置装备 - 通用</option>
-                    </optgroup>
-                    <optgroup label="身体义体改造">
-                      <option value="植入体">植入体</option>
-                      <option value="仿生件">仿生件</option>
-                      <option value="时尚件">时尚件</option>
-                    </optgroup>
-                    <optgroup label="消耗品">
-                      <option value="消耗品">消耗品</option>
-                    </optgroup>
+                    <option value="植入体">植入体 (Implant)</option>
+                    <option value="仿生件">仿生件 (Bionic)</option>
+                    <option value="时尚件">时尚件 (Fashion)</option>
+                    <option value="消耗品">消耗品 (Consumable)</option>
                     <option value="__custom__">自定义...</option>
                   </select>
                   <input
@@ -801,7 +787,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     value={cw.cyberType || ''}
                     onChange={e => handleChange('cyberType', e.target.value)}
                     className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                    placeholder="如: 外置装备 - 主武器"
+                    placeholder="如: 植入体"
                   />
                 </div>
               </div>
@@ -809,7 +795,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">部位 / 分类</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">植入身体部位</label>
                 <div className="flex gap-2">
                   <select
                     value={presetZones.includes(cw.zone || '') ? (cw.zone || '') : '__custom__'}
@@ -818,20 +804,13 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                         handleChange('zone', e.target.value);
                       }
                     }}
-                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
+                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200 font-semibold"
                   >
-                    <optgroup label="外置装备挂载">
-                      <option value="主武器">主武器</option>
-                      <option value="副武器">副武器</option>
-                      <option value="护甲">护甲</option>
-                      <option value="通用挂载">通用挂载</option>
-                    </optgroup>
-                    <optgroup label="身体义体插槽">
-                      <option value="头部">头部</option>
-                      <option value="躯干">躯干</option>
-                      <option value="上肢">上肢</option>
-                      <option value="下肢">下肢</option>
-                    </optgroup>
+                    <option value="头部">头部 (Head)</option>
+                    <option value="躯干">躯干 (Torso)</option>
+                    <option value="上肢">上肢 (Arms)</option>
+                    <option value="下肢">下肢 (Legs)</option>
+                    <option value="全机体">全机体 / 跨部位</option>
                     <option value="">无 (留空)</option>
                     <option value="__custom__">自定义...</option>
                   </select>
@@ -840,63 +819,26 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     value={cw.zone || ''}
                     onChange={e => handleChange('zone', e.target.value)}
                     className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                    placeholder="主武器 / 副武器 / 护甲 / 部位"
+                    placeholder="头部 / 躯干 / 上肢 / 下肢"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1 col-span-1">
-                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">占用槽位</label>
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">占用身体槽位</label>
                 <input
                   type="text"
                   value={cw.slots || ''}
                   onChange={e => handleChange('slots', e.target.value)}
                   className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-amber-500"
-                  placeholder="留空/0/- 表示不占槽"
+                  placeholder="留空/0 表示不占槽"
                 />
-              </div>
-            </div>
-
-            {/* 作战/外置武器护甲扩展属性 */}
-            <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 rounded border border-zinc-200 dark:border-zinc-700 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  作战参数 (主武器 / 副武器 / 护甲 - 可选)
-                </span>
-                <span className="text-[11px] text-zinc-500">填写或正文包含对应词条时自动识别</span>
-              </div>
-
-              {/* 武器属性 */}
-              <div className="grid grid-cols-4 gap-2">
-                <Input label="主属性要求" value={cw.trait || ''} onChange={v => handleChange('trait', v)} placeholder="如: 敏捷/力量" />
-                <Input label="伤害骰" value={cw.damage || ''} onChange={v => handleChange('damage', v)} placeholder="如: d10+6" />
-                <Input label="射程" value={cw.range || ''} onChange={v => handleChange('range', v)} placeholder="如: 近战/近距离" />
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">占用形式</label>
-                  <select
-                    value={cw.burden || ''}
-                    onChange={e => handleChange('burden', e.target.value)}
-                    className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2 py-2 text-xs text-slate-900 dark:text-zinc-200"
-                  >
-                    <option value="">自动识别</option>
-                    <option value="单手">单手</option>
-                    <option value="双手">双手</option>
-                    <option value="副手">副手</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* 护甲属性 */}
-              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-zinc-200 dark:border-zinc-700/60">
-                <Input label="护甲值 (Score)" value={cw.armorScore !== undefined ? String(cw.armorScore) : ''} onChange={v => handleChange('armorScore', v)} placeholder="如: 3" />
-                <Input label="重度阈值加成 (+Major)" value={cw.majorThreshold !== undefined ? String(cw.majorThreshold) : ''} onChange={v => handleChange('majorThreshold', v)} placeholder="如: 2" />
-                <Input label="严重阈值加成 (+Severe)" value={cw.severeThreshold !== undefined ? String(cw.severeThreshold) : ''} onChange={v => handleChange('severeThreshold', v)} placeholder="如: 4" />
               </div>
             </div>
 
             <Input label="限制与前置条件 (Restrictions)" value={cw.restriction || ''} onChange={v => handleChange('restriction', v)} placeholder="例如: 需要灵巧 +1 以上" full />
             
-            <TextArea label="机制效果说明 (Effect)" value={cw.effect || ''} onChange={v => handleChange('effect', v)} placeholder="卡牌的核心效果机制..." />
+            <TextArea label="机制效果说明 (Effect)" value={cw.effect || ''} onChange={v => handleChange('effect', v)} placeholder="义体的核心功能机制、属性加成或规则描述..." />
             
             <Input label="特殊标签 (可选，如【故障隐患】或【军规级】)" value={cw.tag || ''} onChange={v => handleChange('tag', v)} placeholder="例如: 【故障隐患】" full />
 

@@ -1163,46 +1163,6 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
             </div>
           )}
 
-          {/* 战术武器与作战 HUD 参数栏 */}
-          {(d.damage || d.trait || d.range || d.burden || (d.armorScore !== undefined && d.armorScore !== '') || d.majorThreshold || d.severeThreshold) ? (
-            <div className="bg-[#13161F] border border-[#2B313D] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
-              {d.trait && (
-                <span className="bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 px-1.5 py-0.5 rounded font-bold text-[11px]">
-                  {d.trait}
-                </span>
-              )}
-              {d.range && (
-                <span className="bg-[#1F2430] text-zinc-300 px-1.5 py-0.5 rounded text-[11px]">
-                  {d.range}
-                </span>
-              )}
-              {d.damage && (
-                <span className="bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/50 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
-                  {d.damage}
-                </span>
-              )}
-              {d.burden && (
-                <span className="text-zinc-400 font-bold text-[11px] px-1">
-                  {d.burden}
-                </span>
-              )}
-              {d.damageType && (
-                <span className="text-zinc-400 text-[11px]">
-                  {d.damageType}
-                </span>
-              )}
-              {d.armorScore !== undefined && d.armorScore !== '' && (
-                <span className="bg-[#FCEE0A]/15 text-[#FCEE0A] border border-[#FCEE0A]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
-                  护甲: +{d.armorScore}
-                </span>
-              )}
-              {(d.majorThreshold || d.severeThreshold) && (
-                <span className="text-[#00F0FF] font-mono text-[11px] bg-[#00F0FF]/10 px-1.5 py-0.5 rounded">
-                  阈值: +{d.majorThreshold || 0}/+{d.severeThreshold || 0}
-                </span>
-              )}
-            </div>
-          ) : null}
 
           {d.effect && (
             <div className="text-[13px] leading-relaxed text-[#E1E4EA]">

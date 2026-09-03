@@ -137,7 +137,7 @@ export function compileLootToCyberware(
 }
 
 export function compileVaultToWeapon(card: VaultCard): CompiledWeaponItem {
-  const isCyber = card.category === 'cyberware';
+  const isCyber = card.category === 'cyberware' || card.category === 'external_gear';
   const anyData = (card.data || {}) as Record<string, any>;
   const textToScan = `${card.description || ''} ${anyData.effect || ''} ${anyData.feature || ''}`;
 
@@ -212,7 +212,7 @@ export function compileVaultToWeapon(card: VaultCard): CompiledWeaponItem {
 }
 
 export function compileVaultToArmor(card: VaultCard): CompiledArmorItem {
-  const isCyber = card.category === 'cyberware';
+  const isCyber = card.category === 'cyberware' || card.category === 'external_gear';
   const anyData = (card.data || {}) as Record<string, any>;
   const textToScan = `${card.description || ''} ${anyData.effect || ''} ${anyData.feature || ''}`;
 
