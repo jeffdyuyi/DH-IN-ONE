@@ -324,6 +324,7 @@ export interface ExternalGearData extends BaseCardData {
   restriction: string;       // 限制与前置条件 (可选)
   tag: string;               // 特殊标签 (如【军规级】)
   cost: string;              // 费用/价格
+  icon?: string;             // 装备专属正方形图标数据/URL
   // 基础作战属性 (无需激活直接生效)
   trait?: string;            // 关联属性: 敏捷/力量/灵巧/本能/风度/知识
   range?: string;            // 攻击距离: 近战/邻近/近距离/远距离/极远

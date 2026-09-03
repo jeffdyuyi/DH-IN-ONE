@@ -856,6 +856,61 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
 
         return (
           <>
+            {/* 装备专属正方形图标 */}
+            <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 border border-slate-300 dark:border-zinc-700 rounded-lg flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                {/* 实时图标预览 */}
+                <div className="w-12 h-12 rounded-lg border-2 border-amber-500 bg-black flex items-center justify-center overflow-hidden shrink-0 shadow">
+                  {eg.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={eg.icon} alt="图标预览" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-[11px] font-black font-mono text-amber-500 text-center leading-tight">
+                      {(eg.name || '外置装备').slice(0, 4)}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-800 dark:text-zinc-200 block">
+                    装备图标
+                  </label>
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block">
+                    {eg.icon ? '已上传自定义图标' : '留空将自动提取名称前 4 字生成战术汉字印章'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="cursor-pointer px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold transition-colors">
+                  上传图标
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        handleChange('icon', reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {eg.icon && (
+                  <button
+                    type="button"
+                    onClick={() => handleChange('icon', '')}
+                    className="px-2.5 py-1.5 rounded bg-zinc-200 dark:bg-zinc-700 hover:bg-red-500 hover:text-white text-zinc-600 dark:text-zinc-300 text-xs font-bold transition-colors"
+                  >
+                    清除
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* 顶部：位阶与装备分类与激活槽位 */}
             <div className="grid grid-cols-3 gap-3 col-span-2">
               <div className="flex flex-col gap-1 col-span-1">
@@ -1022,6 +1077,11 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
             <div className="grid grid-cols-2 gap-3 col-span-2">
               <Input label="前置限制条件 (可选)" value={eg.restriction || ''} onChange={v => handleChange('restriction', v)} placeholder="例如: 需要敏捷 +1 以上" />
               <Input label="特殊标签 (可选)" value={eg.tag || ''} onChange={v => handleChange('tag', v)} placeholder="例如: 【军规级】" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 col-span-2">
+              <Input label="装备采购价格 (Cost)" value={eg.cost || ''} onChange={v => handleChange('cost', v)} placeholder="例如: 20,000 信用点" />
+              <Input label="战术规格备注" value={eg.burden || ''} onChange={v => handleChange('burden', v)} placeholder="例如: 双手 / 单手 / 副手" />
             </div>
           </>
         );
