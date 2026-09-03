@@ -16,6 +16,15 @@ const isDarkMode = () => {
  * to guarantee exported PNG matches live preview (including cyberpunk cut-corners and bottom text).
  */
 const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | null> => {
+  // 确保字体完全就绪，防止文字回退或字间距计算未完成导致的错位
+  if (typeof document !== 'undefined' && document.fonts) {
+    try {
+      await document.fonts.ready;
+    } catch (e) {
+      console.warn("Fonts ready wait failed:", e);
+    }
+  }
+
   const originalElement = document.getElementById(elementId);
   if (!originalElement) {
     console.error(`Element with id ${elementId} not found`);
@@ -27,7 +36,7 @@ const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | nu
 
   // 2. Set styles to ensure it renders correctly off-screen with full natural height
   const rect = originalElement.getBoundingClientRect();
-  const naturalWidth = rect.width || 380;
+  const naturalWidth = Math.ceil(rect.width) || 380;
   
   clone.style.position = 'fixed';
   clone.style.top = '-10000px';
@@ -42,7 +51,10 @@ const generateCanvas = async (elementId: string): Promise<HTMLCanvasElement | nu
   // 3. Append to body so it can compute full layout
   document.body.appendChild(clone);
   
-  const fullHeight = Math.max(clone.offsetHeight, rect.height);
+  // 强制触发 reflow 确保克隆节点的尺寸与文字完全测量完毕
+  void clone.offsetHeight;
+  
+  const fullHeight = Math.max(clone.offsetHeight, Math.ceil(rect.height));
   const scaleFactor = 3; // Ultra-crisp export
 
   try {
