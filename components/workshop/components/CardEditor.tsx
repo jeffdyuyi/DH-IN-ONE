@@ -860,12 +860,12 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
             <div className="col-span-2 p-3 bg-zinc-100 dark:bg-zinc-800/60 border border-slate-300 dark:border-zinc-700 rounded-lg flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 {/* 实时图标预览 */}
-                <div className="w-12 h-12 rounded-lg border-2 border-amber-500 bg-black flex items-center justify-center overflow-hidden shrink-0 shadow">
+                <div className="w-12 h-12 rounded-lg border-2 border-cyan-400 bg-black flex items-center justify-center overflow-hidden shrink-0 shadow">
                   {eg.icon ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={eg.icon} alt="图标预览" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-[11px] font-black font-mono text-amber-500 text-center leading-tight">
+                    <span className="text-[11px] font-black font-mono text-cyan-400 text-center leading-tight">
                       {(eg.name || '外置装备').slice(0, 4)}
                     </span>
                   )}
@@ -882,7 +882,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="cursor-pointer px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold transition-colors">
+                <label className="cursor-pointer px-3 py-1.5 rounded bg-cyan-500 hover:bg-cyan-600 text-black text-xs font-bold transition-colors">
                   上传图标
                   <input
                     type="file"
@@ -936,7 +936,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                     type="text"
                     value={eg.tier || ''}
                     onChange={e => handleChange('tier', e.target.value)}
-                    className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2.5 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-amber-500"
+                    className="flex-1 bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-2.5 py-2 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-cyan-500"
                     placeholder="如 T1"
                   />
                 </div>
@@ -947,7 +947,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                 <select
                   value={gearTypes.includes(eg.gearType || '') ? eg.gearType : '主武器'}
                   onChange={e => handleChange('gearType', e.target.value)}
-                  className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs font-bold focus:outline-none focus:border-amber-500"
+                  className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded px-3 py-2 text-slate-900 dark:text-zinc-200 text-xs font-bold focus:outline-none focus:border-cyan-500"
                 >
                   <option value="主武器">主武器</option>
                   <option value="副武器">副武器</option>
@@ -957,14 +957,14 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               </div>
 
               <div className="flex flex-col gap-1 col-span-1">
-                <label className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                <label className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
                   ⚡ 激活占用槽位
                 </label>
                 <input
                   type="text"
                   value={eg.activeSlots ?? '1'}
                   onChange={e => handleChange('activeSlots', e.target.value)}
-                  className="bg-white dark:bg-zinc-900 border border-amber-300 dark:border-amber-600/50 rounded px-3 py-2 text-slate-900 dark:text-zinc-100 text-xs font-bold font-mono focus:outline-none focus:border-amber-500"
+                  className="bg-white dark:bg-zinc-900 border border-cyan-300 dark:border-cyan-600/50 rounded px-3 py-2 text-slate-900 dark:text-zinc-100 text-xs font-bold font-mono focus:outline-none focus:border-cyan-500"
                   placeholder="如 1, 2 (填 0 或留空免槽)"
                 />
                 <span className="text-[10px] text-zinc-400">填 0、空白或 - 代表免占用激活槽</span>
@@ -1023,12 +1023,12 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
             />
 
             {/* 激活特性 (必须激活才生效) */}
-            <div className="col-span-2 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-lg border border-amber-500/30 space-y-3">
+            <div className="col-span-2 p-3 bg-cyan-500/5 dark:bg-cyan-500/10 rounded-lg border border-cyan-500/30 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
                   <span>⚡ 激活特性 (需占用激活槽生效)</span>
                 </span>
-                <span className="text-[11px] text-amber-600/70 dark:text-amber-400/70">
+                <span className="text-[11px] text-cyan-600/70 dark:text-cyan-400/70">
                   仅当在角色卡上开启激活且未超槽位上限时生效
                 </span>
               </div>
@@ -1041,14 +1041,14 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
               />
 
               {/* 激活转置模板 */}
-              <div className="pt-2 border-t border-amber-500/20">
+              <div className="pt-2 border-t border-cyan-500/20">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-700 dark:text-amber-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-cyan-700 dark:text-cyan-300">
                     <input
                       type="checkbox"
                       checked={Boolean(eg.hasTransposition)}
                       onChange={e => handleChange('hasTransposition', e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-amber-500"
+                      className="rounded text-cyan-500 focus:ring-cyan-500"
                     />
                     <span>配置激活转置数值 (激活后数值增强或变化)</span>
                   </label>
@@ -1056,7 +1056,7 @@ const CardEditor: React.FC<Props> = ({ data, onChange }) => {
                 </div>
 
                 {eg.hasTransposition && (
-                  <div className="grid grid-cols-3 gap-2 p-2 bg-black/20 rounded border border-amber-500/20 animate-in fade-in">
+                  <div className="grid grid-cols-3 gap-2 p-2 bg-black/20 rounded border border-cyan-500/20 animate-in fade-in">
                     {isArmor ? (
                       <>
                         <Input label="转置护甲值" value={eg.transArmorScore !== undefined ? String(eg.transArmorScore) : ''} onChange={v => handleChange('transArmorScore', v)} placeholder="如: 4" />

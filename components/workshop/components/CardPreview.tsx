@@ -1216,21 +1216,21 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
       <div 
         id={elementId || "card-preview"}
         data-card-type="external-gear"
-        className="relative w-[340px] min-h-[440px] bg-[#0D0D0D] text-white border-2 border-[#1F2229] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
+        className="relative w-[340px] min-h-[440px] bg-[#070B12] text-white border-2 border-[#1E293B] flex flex-col justify-between overflow-hidden shadow-2xl transition-colors duration-300"
         style={{
           clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif'
         }}
       >
-        {/* Header (含正方形 Icon 徽章与战术琥珀金 Banner) */}
-        <div className="bg-[#F59E0B] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3">
+        {/* Header (含正方形 Icon 徽章与钛空冰青 Banner) */}
+        <div className="bg-gradient-to-r from-[#00E5FF] to-[#38BDF8] text-[#050B14] p-3 px-4 relative shrink-0 flex items-center gap-3 shadow-md">
           {/* 左侧正方形 Icon 徽章 */}
-          <div className="w-11 h-11 rounded-lg border-2 border-[#0D0D0D] bg-[#0D0D0D] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
+          <div className="w-11 h-11 rounded-lg border-2 border-[#050B14] bg-[#050B14] flex items-center justify-center shrink-0 overflow-hidden shadow-inner font-sans select-none p-0.5">
             {d.icon ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={d.icon} alt={d.name || ''} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center justify-center text-[#F59E0B] font-black text-center leading-[1.1] tracking-wider select-none">
+              <div className="flex flex-col items-center justify-center text-[#00E5FF] font-black text-center leading-[1.1] tracking-wider select-none">
                 <span className="text-[11px] font-black">{(d.name || '外置').slice(0, 2)}</span>
                 <span className="text-[11px] font-black">{(d.name || '战备').slice(2, 4) || (d.name || '装备').slice(0, 2)}</span>
               </div>
@@ -1239,15 +1239,15 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           <div className="flex-1 min-w-0">
             {tierVal ? (
-              <div className="absolute top-0 right-6 bg-[#0D0D0D] text-[#F59E0B] text-[11px] font-black px-2 py-0.5 tracking-wider">
+              <div className="absolute top-0 right-6 bg-[#050B14] text-[#00E5FF] text-[11px] font-black px-2 py-0.5 tracking-wider">
                 {tierVal}
               </div>
             ) : null}
-            <div className={`text-[17px] font-black leading-tight tracking-wide text-[#0D0D0D] truncate ${tierVal ? 'pr-12' : ''}`}>
+            <div className={`text-[17px] font-black leading-tight tracking-wide text-[#050B14] truncate ${tierVal ? 'pr-12' : ''}`}>
               {d.name || '外置战备装备'}
             </div>
             {d.gearType && (
-              <div className="text-[10px] font-bold text-[#451A03] uppercase tracking-wider mt-0.5">
+              <div className="text-[10px] font-bold text-[#064E66] uppercase tracking-wider mt-0.5">
                 {d.gearType} (EXTERNAL RIG)
               </div>
             )}
@@ -1255,8 +1255,8 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
         </div>
 
         {/* Meta Bar */}
-        <div className="bg-[#15181E] border-t border-b border-[#2B313D] px-4 py-2 flex justify-between items-center shrink-0">
-          <div className="text-[11px] font-bold text-[#00F0FF] flex items-center gap-1">
+        <div className="bg-[#0B1320] border-t border-b border-[#1E2D44] px-4 py-2 flex justify-between items-center shrink-0">
+          <div className="text-[11px] font-bold text-[#38BDF8] flex items-center gap-1">
             类别: <span className="text-white font-normal">{d.gearType || '外置装备'}</span>
           </div>
           {isFreeSlot ? (
@@ -1264,55 +1264,55 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
               免激活槽
             </div>
           ) : (
-            <div className="bg-[#FF003C] text-white text-[10px] font-black px-1.5 py-0.5 tracking-wide">
+            <div className="bg-[#0284C7] text-white text-[10px] font-black px-1.5 py-0.5 tracking-wide">
               {slotsVal.includes('槽') ? slotsVal : `占用 ${slotsVal} 槽`}
             </div>
           )}
         </div>
 
         {/* Body */}
-        <div className="p-4 flex flex-col gap-3 flex-1 bg-[#0D0D0D]">
+        <div className="p-4 flex flex-col gap-3 flex-1 bg-[#070B12]">
           {restrictionVal && (
-            <div className="text-[11px] text-[#8F98A3] border-l-2 border-[#00F0FF] pl-2 leading-tight">
+            <div className="text-[11px] text-[#94A3B8] border-l-2 border-[#38BDF8] pl-2 leading-tight">
               {restrictionVal.startsWith('限制') ? restrictionVal : `限制: ${restrictionVal}`}
             </div>
           )}
 
           {/* 基础作战 HUD 参数栏 */}
           {(d.damage || d.trait || d.range || d.burden || (d.armorScore !== undefined && d.armorScore !== '') || d.thresholdBonus) ? (
-            <div className="bg-[#13161F] border border-[#2B313D] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
+            <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-wrap items-center gap-1.5 text-xs">
               {d.trait && (
-                <span className="bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                <span className="bg-[#0284C7]/20 text-[#38BDF8] border border-[#0284C7]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
                   {d.trait}
                 </span>
               )}
               {d.range && (
-                <span className="bg-[#1F2430] text-zinc-300 px-1.5 py-0.5 rounded text-[11px]">
+                <span className="bg-[#1E293B] text-slate-300 px-1.5 py-0.5 rounded text-[11px]">
                   {d.range}
                 </span>
               )}
               {d.damage && (
-                <span className="bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/50 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
+                <span className="bg-[#F43F5E]/20 text-[#FB7185] border border-[#F43F5E]/40 px-1.5 py-0.5 rounded font-black font-mono text-[12px]">
                   {d.damage}
                 </span>
               )}
               {d.burden && (
-                <span className="text-zinc-400 font-bold text-[11px] px-1">
+                <span className="text-slate-400 font-bold text-[11px] px-1">
                   {d.burden}
                 </span>
               )}
               {d.damageType && (
-                <span className="text-zinc-400 text-[11px]">
+                <span className="text-slate-400 text-[11px]">
                   {d.damageType}
                 </span>
               )}
               {d.armorScore !== undefined && d.armorScore !== '' && (
-                <span className="bg-[#FCEE0A]/15 text-[#FCEE0A] border border-[#FCEE0A]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
+                <span className="bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40 px-1.5 py-0.5 rounded font-bold text-[11px]">
                   护甲: +{d.armorScore}
                 </span>
               )}
               {d.thresholdBonus && (
-                <span className="text-[#00F0FF] font-mono text-[11px] bg-[#00F0FF]/10 px-1.5 py-0.5 rounded">
+                <span className="text-[#38BDF8] font-mono text-[11px] bg-[#38BDF8]/10 px-1.5 py-0.5 rounded">
                   阈值: {d.thresholdBonus}
                 </span>
               )}
@@ -1321,27 +1321,27 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           {/* 普通特性 (常驻生效) */}
           {d.feature && (
-            <div className="text-[13px] leading-relaxed text-[#E1E4EA]">
+            <div className="text-[13px] leading-relaxed text-[#E2E8F0]">
               <Markdown text={d.feature} />
             </div>
           )}
 
           {/* 激活模态 (激活特性与转置数值) */}
           {(d.activeFeature || d.hasTransposition) && (
-            <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/40 p-2.5 rounded space-y-1.5 shadow-sm">
-              <div className="flex items-center justify-between text-[11px] font-black text-[#F59E0B]">
+            <div className="bg-[#0284C7]/10 border border-[#0284C7]/40 p-2.5 rounded space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-between text-[11px] font-black text-[#38BDF8]">
                 <span className="flex items-center gap-1">
                   <span>⚡ 激活特性</span>
                 </span>
-                <span className="text-[9px] bg-[#F59E0B]/20 text-[#F59E0B] px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[9px] bg-[#0284C7]/20 text-[#38BDF8] px-1.5 py-0.5 rounded font-mono">
                   {isFreeSlot ? '常驻生效' : `需消耗 ${slotsVal} 槽`}
                 </span>
               </div>
 
               {/* 激活转置数值条 */}
               {d.hasTransposition && (d.transDamage || d.transRange || d.transArmorScore || d.transThresholdBonus) && (
-                <div className="bg-black/50 border border-[#F59E0B]/30 p-1.5 rounded flex flex-wrap items-center gap-2 text-[11px] font-mono text-[#F59E0B]">
-                  <span className="font-bold text-[#F59E0B]">⚡ 激活转置:</span>
+                <div className="bg-[#050B14] border border-[#0284C7]/30 p-1.5 rounded flex flex-wrap items-center gap-2 text-[11px] font-mono text-[#38BDF8]">
+                  <span className="font-bold text-[#38BDF8]">⚡ 激活转置:</span>
                   {d.transDamage && <span>伤害 {d.damage || '基础'} → <strong className="text-white">{d.transDamage}</strong></span>}
                   {d.transRange && <span>距离 {d.range || '基础'} → <strong className="text-white">{d.transRange}</strong></span>}
                   {d.transArmorScore && <span>护甲 +{d.armorScore || 0} → <strong className="text-white">+{d.transArmorScore}</strong></span>}
@@ -1350,7 +1350,7 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
               )}
 
               {d.activeFeature && (
-                <div className="text-[12px] text-[#FEF3C7] leading-relaxed">
+                <div className="text-[12px] text-[#E0F2FE] leading-relaxed">
                   <Markdown text={d.activeFeature} />
                 </div>
               )}
@@ -1359,33 +1359,33 @@ const CardPreview: React.FC<Props> = ({ data, elementId }) => {
 
           {/* 补充背景描述 */}
           {d.description && (
-            <div className="text-[12px] italic text-[#8F98A3] pt-1 border-t border-[#1F2229]">
+            <div className="text-[12px] italic text-[#94A3B8] pt-1 border-t border-[#1E293B]">
               <Markdown text={d.description} />
             </div>
           )}
 
           {tagVal && (
-            <div className="bg-[rgba(245,158,11,0.15)] border border-[#F59E0B] text-[#F59E0B] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
+            <div className="bg-[#0284C7]/15 border border-[#0284C7]/50 text-[#38BDF8] text-[11px] font-bold p-1.5 px-2 tracking-wide mt-auto">
               {tagVal.startsWith('//') ? tagVal : `// 战备: ${tagVal}`}
             </div>
           )}
         </div>
 
         {/* Footer (双栏展示装备采购价与战术规格) */}
-        <div className="bg-[#08090C] border-t border-[#1F2229] p-3 px-4 flex justify-between text-[11px] shrink-0">
+        <div className="bg-[#060911] border-t border-[#1E293B] p-3 px-4 flex justify-between text-[11px] shrink-0">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[#8F98A3] text-[9px] uppercase tracking-wider">装备采购价</span>
-            <span className="font-extrabold text-[#F59E0B]">{d.cost || '未设定'}</span>
+            <span className="text-[#94A3B8] text-[9px] uppercase tracking-wider">装备采购价</span>
+            <span className="font-extrabold text-[#38BDF8]">{d.cost || '未设定'}</span>
           </div>
           <div className="flex flex-col gap-0.5 text-right">
-            <span className="text-[#8F98A3] text-[9px] uppercase tracking-wider">战术规格</span>
-            <span className="font-extrabold text-[#F59E0B]">{d.burden ? `${d.burden}装备` : (d.gearType || '标准战备')}</span>
+            <span className="text-[#94A3B8] text-[9px] uppercase tracking-wider">战术规格</span>
+            <span className="font-extrabold text-[#38BDF8]">{d.burden ? `${d.burden}装备` : (d.gearType || '标准战备')}</span>
           </div>
         </div>
 
         {/* Sub-footer for Creator and Owner */}
-        <div className="bg-[#050608] border-t border-[#15181E] px-4 py-1.5 flex justify-between items-center text-[10px] text-[#8F98A3] uppercase tracking-wider shrink-0">
-          <span className="truncate max-w-[48%]">创作者: <span className="text-[#00F0FF] font-semibold">{d.creator || 'GM'}</span></span>
+        <div className="bg-[#04060C] border-t border-[#131B2B] px-4 py-1.5 flex justify-between items-center text-[10px] text-[#94A3B8] uppercase tracking-wider shrink-0">
+          <span className="truncate max-w-[48%]">创作者: <span className="text-[#38BDF8] font-semibold">{d.creator || 'GM'}</span></span>
           <span className="truncate max-w-[48%] text-right">所属: <span className="text-[#FCEE0A] font-semibold">{d.owner || '未指定'}</span></span>
         </div>
       </div>

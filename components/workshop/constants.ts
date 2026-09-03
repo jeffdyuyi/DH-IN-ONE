@@ -95,7 +95,7 @@ export const TOOL_CONFIG: Record<CardType, { label: string; color: string; descr
   [CardType.RUMOR]: { label: "传闻", color: "text-rose-400", description: "设计和记录世界中的传闻、流言与来源备注" },
   [CardType.PRICELIST]: { label: "价目表", color: "text-amber-500", description: "设计商店价目表，选择已有商品或完全自定义商品信息" },
   [CardType.CYBERWARE]: { label: "赛博义体", color: "text-yellow-400", description: "赛博朋克风格义体、仿生件与植入体卡片" },
-  [CardType.EXTERNAL_GEAR]: { label: "外置装备", color: "text-amber-500", description: "外置武器、护甲及战术外挂，支持普通特性与激活转置" },
+  [CardType.EXTERNAL_GEAR]: { label: "外置装备", color: "text-cyan-400", description: "外置武器、护甲及战术外挂，支持普通特性与激活转置" },
 };
 
 export const DEFAULT_VALUES: Record<CardType, Partial<CardData>> = {
