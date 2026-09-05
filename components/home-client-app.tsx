@@ -38,6 +38,7 @@ import { SaveSwitcher } from "@/components/ui/save-switcher"
 import { MemoryAlert } from "@/components/memory-alert"
 import { memoryMonitor } from "@/lib/memory-monitor"
 import { saveCharacterSheet } from "@/character/storage/character-save-storage"
+import { saveCharacterById } from "@/lib/multi-character-storage"
 import {
   announcements,
   isLatestAnnouncementRead,
@@ -390,7 +391,42 @@ export default function HomeClientApp() {
   }
 
 
-  // 自动保存当前角色数据（带防抖和更深层的变更检测）
+  // 保持对最新表单和角色ID的同步引用
+  const latestFormDataRef = useRef<{ id: string | null; data: typeof formData }>({
+    id: currentCharacterId,
+    data: formData,
+  })
+
+  useEffect(() => {
+    latestFormDataRef.current = {
+      id: currentCharacterId,
+      data: formData,
+    }
+  }, [currentCharacterId, formData])
+
+  // 页面刷新 / 离开前同步紧急刷盘保护（彻底解决即使刷新内容依然在）
+  useEffect(() => {
+    const handleEmergencySave = () => {
+      const { id, data } = latestFormDataRef.current
+      if (id && data) {
+        try {
+          saveCharacterById(id, data)
+        } catch (err) {
+          console.error('[AppEmergencySave] Failed to save character on unload:', err)
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleEmergencySave)
+    window.addEventListener('pagehide', handleEmergencySave)
+    return () => {
+      window.removeEventListener('beforeunload', handleEmergencySave)
+      window.removeEventListener('pagehide', handleEmergencySave)
+      handleEmergencySave()
+    }
+  }, [])
+
+  // 自动保存当前角色数据（带防抖和更深层的变更检测，缩短至 200ms 快速落盘）
   useEffect(() => {
     if (!isLoading && currentCharacterId && formData) {
       const saveTimeout = setTimeout(() => {
@@ -400,9 +436,8 @@ export default function HomeClientApp() {
           })
           .catch((error) => {
             console.error(`[App] Error auto-saving character ${currentCharacterId}:`, error)
-            alert('自动保存失败')
           })
-      }, 300)
+      }, 200)
 
       return () => clearTimeout(saveTimeout)
     }

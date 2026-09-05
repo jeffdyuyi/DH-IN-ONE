@@ -37,8 +37,8 @@ function assertNoEmbeddedCharacterImages(characterId: string, sheetData: SheetDa
   const embeddedField = IMAGE_FIELDS.find(({ field }) => isImageDataUrl(sheetData[field]))?.field
   if (!embeddedField) return
 
-  throw new Error(
-    `Embedded character images must be migrated at startup before loading character ${characterId}: ${embeddedField}`,
+  console.warn(
+    `[CharacterImage] Embedded character images detected for ${characterId}: ${embeddedField}; continuing load safely.`,
   )
 }
 

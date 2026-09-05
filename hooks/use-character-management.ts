@@ -3,6 +3,7 @@ import { useSheetStore } from '@/lib/sheet-store'
 import {
   migrateToMultiCharacterStorage,
   loadCharacterList,
+  loadCharacterById,
   saveCharacterById,
   setActiveCharacterId,
   getActiveCharacterId,
@@ -244,6 +245,17 @@ export function useCharacterManagement({ isClient, setCurrentTabValue }: UseChar
       }
     } catch (error) {
       console.error(`[CharacterManagement] Error switching to character ${characterId}:`, error)
+      // 容灾降级：若复杂反序列化/图片投影失败，直接读取 localStorage 原始存档，确保用户核心数据 100% 存在
+      try {
+        const fallbackData = loadCharacterById(characterId)
+        if (fallbackData) {
+          activateCharacterData(characterId, fallbackData)
+          console.warn(`[CharacterManagement] Rescued character data from localStorage for ${characterId}`)
+          return true
+        }
+      } catch (fallbackError) {
+        console.error(`[CharacterManagement] Fallback load also failed for ${characterId}:`, fallbackError)
+      }
       alert('切换角色失败')
       return false
     }

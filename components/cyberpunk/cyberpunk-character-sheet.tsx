@@ -39,6 +39,7 @@ import { useCharacterManagement } from '@/hooks/use-character-management'
 import { useExportHandlers } from '@/hooks/use-export-handlers'
 import { announcements, isLatestAnnouncementRead, markLatestAnnouncementRead } from '@/lib/announcements'
 import { saveCharacterSheet } from '@/character/storage/character-save-storage'
+import { saveCharacterById } from '@/lib/multi-character-storage'
 import { User, CheckCircle2, Shield, UserCheck, Cpu, BookOpen, Bot, ScrollText } from 'lucide-react'
 
 export function CyberpunkCharacterSheet() {
@@ -162,7 +163,48 @@ export function CyberpunkCharacterSheet() {
     setTimeout(() => setSaveToast(false), 2000)
   }
 
-  // 自动防抖保存：角色编辑变动时在后台静默保存
+  // 保持对最新数据的同步引用，供 beforeunload 快速刷盘
+  const latestSaveDataRef = React.useRef<{ id: string | null; data: typeof formData }>({
+    id: currentCharacterId,
+    data: formData,
+  })
+
+  useEffect(() => {
+    const effectiveCyberData = formData.cyberpunkData || formData.cyberpunk || cyberpunkData
+    latestSaveDataRef.current = {
+      id: currentCharacterId,
+      data: {
+        ...formData,
+        campaignMode: 'cyberpunk',
+        cyberpunkData: effectiveCyberData,
+        cyberpunk: effectiveCyberData,
+      },
+    }
+  }, [currentCharacterId, formData, cyberpunkData])
+
+  // 页面刷新 / 离开前同步紧急刷盘保护（彻底解决即使刷新内容依然在）
+  useEffect(() => {
+    const handleEmergencySave = () => {
+      const { id, data } = latestSaveDataRef.current
+      if (id && data) {
+        try {
+          saveCharacterById(id, data)
+        } catch (err) {
+          console.error('[CyberpunkEmergencySave] Failed to save on unload:', err)
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleEmergencySave)
+    window.addEventListener('pagehide', handleEmergencySave)
+    return () => {
+      window.removeEventListener('beforeunload', handleEmergencySave)
+      window.removeEventListener('pagehide', handleEmergencySave)
+      handleEmergencySave()
+    }
+  }, [])
+
+  // 自动防抖保存：角色编辑变动时在后台静默保存（缩短为 200ms 快速落盘）
   useEffect(() => {
     if (!currentCharacterId || !formData || isLoading) return
 
@@ -178,7 +220,7 @@ export function CyberpunkCharacterSheet() {
       } catch (err) {
         console.error('[CyberpunkAutoSave] Failed to autosave character:', err)
       }
-    }, 1200)
+    }, 200)
 
     return () => clearTimeout(timer)
   }, [currentCharacterId, formData, cyberpunkData, isLoading])
