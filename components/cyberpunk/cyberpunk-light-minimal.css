@@ -22,12 +22,12 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 3. 嵌套的次级子卡片、槽位条目（排除印章和空插槽） */
-.cyberpunk-light-mode .rounded-xl .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
-.cyberpunk-light-mode .rounded-2xl .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
-.cyberpunk-light-mode .rounded-lg .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
-.cyberpunk-light-mode [class*="bg-[#0B0320]/80"],
-.cyberpunk-light-mode [class*="bg-[#12072B]/80"] {
+/* 3. 嵌套的次级子卡片、槽位条目（排除按钮、印章、空插槽与保存按钮） */
+.cyberpunk-light-mode .rounded-xl .rounded-lg:not(button, .cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *),
+.cyberpunk-light-mode .rounded-2xl .rounded-lg:not(button, .cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *),
+.cyberpunk-light-mode .rounded-lg .rounded-lg:not(button, .cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *),
+.cyberpunk-light-mode [class*="bg-[#0B0320]/80"]:not(button, .cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *),
+.cyberpunk-light-mode [class*="bg-[#12072B]/80"]:not(button, .cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *) {
   background-color: #F8FAFC !important;
   border-color: #E2E8F0 !important;
 }
@@ -132,29 +132,78 @@
 }
 
 /* ==========================================================================
-   关键修复 1：顶部保存按钮（彻底杜绝黑底黑字隐形与灰图标）
+   关键修复 1：顶部保存按钮（彻底杜绝白底白字、黑底黑字隐形与灰图标）
    ========================================================================== */
 .cyberpunk-top-save-btn,
-.cyberpunk-light-mode .cyberpunk-top-save-btn {
+button.cyberpunk-top-save-btn {
   background-color: #FF007F !important;
   color: #FFFFFF !important;
   border: 1px solid #FF007F !important;
   box-shadow: 0 0 12px rgba(255, 0, 127, 0.45) !important;
   opacity: 1 !important;
 }
+
+.cyberpunk-light-mode .cyberpunk-top-save-btn,
+.cyberpunk-light-mode header .cyberpunk-top-save-btn,
+.cyberpunk-light-mode .rounded-2xl .cyberpunk-top-save-btn,
+.cyberpunk-light-mode button.cyberpunk-top-save-btn {
+  background-color: #E11D48 !important; /* 浅色模式下高对比深洋红宝石色 */
+  color: #FFFFFF !important;
+  border: 1px solid #BE123C !important;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.35) !important;
+  opacity: 1 !important;
+}
+
 .cyberpunk-top-save-btn:hover,
-.cyberpunk-light-mode .cyberpunk-top-save-btn:hover {
+button.cyberpunk-top-save-btn:hover {
   background-color: #E0006F !important;
   border-color: #E0006F !important;
 }
+
+.cyberpunk-light-mode .cyberpunk-top-save-btn:hover,
+.cyberpunk-light-mode header .cyberpunk-top-save-btn:hover,
+.cyberpunk-light-mode button.cyberpunk-top-save-btn:hover {
+  background-color: #BE123C !important;
+  border-color: #9F1239 !important;
+}
+
 .cyberpunk-top-save-btn span,
-.cyberpunk-light-mode .cyberpunk-top-save-btn span {
+.cyberpunk-light-mode .cyberpunk-top-save-btn span,
+.cyberpunk-light-mode header .cyberpunk-top-save-btn span,
+.cyberpunk-light-mode button.cyberpunk-top-save-btn span,
+button.cyberpunk-top-save-btn span {
   color: #FFFFFF !important;
   font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
 }
+
 .cyberpunk-top-save-btn svg,
-.cyberpunk-light-mode .cyberpunk-top-save-btn svg {
+.cyberpunk-light-mode .cyberpunk-top-save-btn svg,
+.cyberpunk-light-mode header .cyberpunk-top-save-btn svg,
+.cyberpunk-light-mode button.cyberpunk-top-save-btn svg,
+button.cyberpunk-top-save-btn svg {
   color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* 顶部 A4 打印按钮 */
+.cyberpunk-light-mode .cyberpunk-top-print-btn,
+.cyberpunk-light-mode header .cyberpunk-top-print-btn,
+.cyberpunk-light-mode button.cyberpunk-top-print-btn {
+  background-color: #ECFDF5 !important;
+  border-color: #10B981 !important;
+  color: #047857 !important;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2) !important;
+}
+.cyberpunk-light-mode .cyberpunk-top-print-btn span,
+.cyberpunk-light-mode button.cyberpunk-top-print-btn span {
+  color: #047857 !important;
+  font-weight: 700 !important;
+}
+.cyberpunk-light-mode .cyberpunk-top-print-btn svg,
+.cyberpunk-light-mode button.cyberpunk-top-print-btn svg {
+  color: #047857 !important;
+  stroke: #047857 !important;
 }
 
 /* ==========================================================================

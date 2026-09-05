@@ -75,29 +75,58 @@ export function CyberpunkTopBar({
 
           {/* 角色与存档 */}
           <div className="flex items-center gap-2">
-            <span className="rounded bg-[#6C00FF] px-2 py-0.5 text-xs font-bold text-white shadow-[0_0_8px_rgba(108,0,255,0.6)]">
+            <span
+              className="rounded px-2 py-0.5 text-xs font-bold text-white shadow-sm"
+              style={
+                isLightPreview
+                  ? { backgroundColor: '#6D28D9', color: '#FFFFFF' }
+                  : { backgroundColor: '#6C00FF', color: '#FFFFFF', boxShadow: '0 0 8px rgba(108,0,255,0.6)' }
+              }
+            >
               渊边行者
             </span>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm text-white">{characterName || '未命名角色'}</span>
-                <span className="text-xs text-[#F5F500] font-mono font-bold">({saveName} · LV.{level})</span>
+                <span
+                  className="font-extrabold text-sm"
+                  style={isLightPreview ? { color: '#0F172A' } : { color: '#FFFFFF' }}
+                >
+                  {characterName || '未命名角色'}
+                </span>
+                <span
+                  className="text-xs font-mono font-bold"
+                  style={isLightPreview ? { color: '#B45309' } : { color: '#F5F500' }}
+                >
+                  ({saveName} · LV.{level})
+                </span>
               </div>
             </div>
             {/* 存档管理按钮 */}
             <button
               type="button"
               onClick={onOpenCharacterManagement}
-              className="flex items-center gap-1 rounded border border-[#6C00FF]/40 bg-[#12072B] px-2 py-1 text-xs text-slate-300 hover:border-[#00FFA3] hover:text-[#00FFA3] transition-colors ml-1"
+              className="flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors ml-1"
+              style={
+                isLightPreview
+                  ? { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1', color: '#0F172A' }
+                  : { backgroundColor: '#12072B', borderColor: 'rgba(108,0,255,0.4)', color: '#CBD5E1' }
+              }
               title="切换/管理角色存档"
             >
-              <FolderOpen className="h-3.5 w-3.5 text-[#00FFA3]" />
-              <span>存档</span>
+              <FolderOpen className="h-3.5 w-3.5" style={isLightPreview ? { color: '#0F172A' } : { color: '#00FFA3' }} />
+              <span style={isLightPreview ? { color: '#0F172A', fontWeight: 600 } : undefined}>存档</span>
             </button>
           </div>
 
           {/* 位阶选择 (T1 ~ T4) */}
-          <div className="flex items-center rounded-lg border border-[#6C00FF]/40 bg-[#12072B] p-0.5 text-xs font-mono">
+          <div
+            className="flex items-center rounded-lg border p-0.5 text-xs font-mono"
+            style={
+              isLightPreview
+                ? { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }
+                : { backgroundColor: '#12072B', borderColor: 'rgba(108,0,255,0.4)' }
+            }
+          >
             {(['T1', 'T2', 'T3', 'T4'] as const).map((tierKey) => (
               <button
                 key={tierKey}
@@ -105,8 +134,12 @@ export function CyberpunkTopBar({
                 onClick={() => handleTierChange(tierKey)}
                 className={`rounded px-2.5 py-0.5 font-bold transition-all ${
                   currentTier === tierKey
-                    ? 'bg-[#F5F500] text-black shadow-[0_0_10px_#F5F500]'
-                    : 'text-slate-400 hover:text-white'
+                    ? isLightPreview
+                      ? 'bg-[#0F172A] text-white shadow-sm'
+                      : 'bg-[#F5F500] text-black shadow-[0_0_10px_#F5F500]'
+                    : isLightPreview
+                      ? 'text-slate-600 hover:text-black hover:bg-slate-200'
+                      : 'text-slate-400 hover:text-white'
                 }`}
                 title={`位阶 ${tierKey}: 各区容量 ${CYBERPUNK_TIER_SLOTS[tierKey]} 格`}
               >
@@ -119,27 +152,43 @@ export function CyberpunkTopBar({
         {/* 右侧：经济点数 (信用点 / 街头声望)、浅色打印切换与操作按钮 */}
         <div className="flex items-center gap-3">
           {/* 信用点 (Credits) */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#F5F500]/40 bg-[#12072B] px-2.5 py-1 text-xs shadow-[0_0_10px_rgba(245,245,0,0.1)]">
-            <Coins className="h-3.5 w-3.5 text-[#F5F500]" />
-            <span className="text-slate-400">信用点:</span>
+          <div
+            className="flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs shadow-sm"
+            style={
+              isLightPreview
+                ? { backgroundColor: '#FEFCE8', borderColor: '#FDE047' }
+                : { backgroundColor: '#12072B', borderColor: 'rgba(245,245,0,0.4)', boxShadow: '0 0 10px rgba(245,245,0,0.1)' }
+            }
+          >
+            <Coins className="h-3.5 w-3.5" style={isLightPreview ? { color: '#B45309' } : { color: '#F5F500' }} />
+            <span style={isLightPreview ? { color: '#78350F' } : { color: '#94A3B8' }}>信用点:</span>
             <input
               type="number"
               value={credits}
               onChange={(e) => handleCreditsChange(parseInt(e.target.value, 10) || 0)}
-              className="w-16 bg-transparent text-right font-mono font-bold text-[#F5F500] focus:outline-none"
+              className="w-16 bg-transparent text-right font-mono font-bold focus:outline-none"
+              style={isLightPreview ? { color: '#92400E' } : { color: '#F5F500' }}
             />
-            <span className="text-[10px] text-slate-400 font-mono">信用点</span>
+            <span className="text-[10px] font-mono" style={isLightPreview ? { color: '#92400E' } : { color: '#94A3B8' }}>信用点</span>
           </div>
 
           {/* 街头声望 (Street Cred) */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#00FFA3]/40 bg-[#12072B] px-2.5 py-1 text-xs shadow-[0_0_10px_rgba(0,255,163,0.1)]">
-            <Award className="h-3.5 w-3.5 text-[#00FFA3]" />
-            <span className="text-slate-400">声望:</span>
+          <div
+            className="flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs shadow-sm"
+            style={
+              isLightPreview
+                ? { backgroundColor: '#F0FDF4', borderColor: '#86EFAC' }
+                : { backgroundColor: '#12072B', borderColor: 'rgba(0,255,163,0.4)', boxShadow: '0 0 10px rgba(0,255,163,0.1)' }
+            }
+          >
+            <Award className="h-3.5 w-3.5" style={isLightPreview ? { color: '#047857' } : { color: '#00FFA3' }} />
+            <span style={isLightPreview ? { color: '#065F46' } : { color: '#94A3B8' }}>声望:</span>
             <input
               type="number"
               value={streetCred}
               onChange={(e) => handleStreetCredChange(parseInt(e.target.value, 10) || 0)}
-              className="w-10 bg-transparent text-right font-mono font-bold text-[#00FFA3] focus:outline-none"
+              className="w-10 bg-transparent text-right font-mono font-bold focus:outline-none"
+              style={isLightPreview ? { color: '#065F46' } : { color: '#00FFA3' }}
             />
           </div>
 
@@ -187,11 +236,26 @@ export function CyberpunkTopBar({
           <button
             type="button"
             onClick={onOpenPrintModal || (() => window.print())}
-            className="flex items-center gap-1 rounded-lg border border-[#00FFA3]/50 bg-[#00FFA3]/15 px-2.5 py-1 text-xs font-bold text-[#00FFA3] hover:bg-[#00FFA3] hover:text-black transition-all shadow-[0_0_10px_rgba(0,255,163,0.2)]"
+            className="cyberpunk-top-print-btn flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold transition-all"
+            style={
+              isLightPreview
+                ? {
+                    backgroundColor: '#ECFDF5',
+                    borderColor: '#10B981',
+                    color: '#047857',
+                    boxShadow: '0 1px 3px rgba(16, 185, 129, 0.2)',
+                  }
+                : {
+                    backgroundColor: 'rgba(0, 255, 163, 0.15)',
+                    borderColor: 'rgba(0, 255, 163, 0.5)',
+                    color: '#00FFA3',
+                    boxShadow: '0 0 10px rgba(0, 255, 163, 0.2)',
+                  }
+            }
             title="调用 A4 战术实体印刷与卡牌导出"
           >
-            <Printer className="h-3.5 w-3.5" />
-            <span>A4 打印</span>
+            <Printer className="h-3.5 w-3.5" style={isLightPreview ? { color: '#047857', stroke: '#047857' } : undefined} />
+            <span style={isLightPreview ? { color: '#047857', fontWeight: 700 } : undefined}>A4 打印</span>
           </button>
 
           {/* 保存按钮 */}
@@ -199,10 +263,16 @@ export function CyberpunkTopBar({
             <button
               type="button"
               onClick={onSave}
-              className="cyberpunk-top-save-btn flex items-center gap-1.5 rounded-lg bg-[#FF007F] px-3.5 py-1 text-xs font-bold text-white hover:bg-[#FF007F]/90 shadow-[0_0_12px_rgba(255,0,127,0.5)] transition-all"
+              className="cyberpunk-top-save-btn flex items-center gap-1.5 rounded-lg px-3.5 py-1 text-xs font-bold transition-all cursor-pointer"
+              style={{
+                backgroundColor: isLightPreview ? '#E11D48' : '#FF007F',
+                color: '#FFFFFF',
+                border: isLightPreview ? '1px solid #BE123C' : '1px solid #FF007F',
+                boxShadow: isLightPreview ? '0 2px 10px rgba(225, 29, 72, 0.45)' : '0 0 12px rgba(255, 0, 127, 0.5)',
+              }}
             >
-              <Save className="h-3.5 w-3.5 text-white" />
-              <span className="text-white font-bold">保存</span>
+              <Save className="h-3.5 w-3.5" style={{ color: '#FFFFFF', stroke: '#FFFFFF' }} />
+              <span className="font-bold" style={{ color: '#FFFFFF', fontWeight: 700 }}>保存</span>
             </button>
           )}
         </div>
