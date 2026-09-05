@@ -22,10 +22,10 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 3. 嵌套的次级子卡片、槽位条目 */
-.cyberpunk-light-mode .rounded-xl .rounded-lg,
-.cyberpunk-light-mode .rounded-2xl .rounded-lg,
-.cyberpunk-light-mode .rounded-lg .rounded-lg,
+/* 3. 嵌套的次级子卡片、槽位条目（排除印章和空插槽） */
+.cyberpunk-light-mode .rounded-xl .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
+.cyberpunk-light-mode .rounded-2xl .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
+.cyberpunk-light-mode .rounded-lg .rounded-lg:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot),
 .cyberpunk-light-mode [class*="bg-[#0B0320]/80"],
 .cyberpunk-light-mode [class*="bg-[#12072B]/80"] {
   background-color: #F8FAFC !important;
@@ -33,7 +33,7 @@
 }
 
 /* 4. 分隔线与边框 */
-.cyberpunk-light-mode div,
+.cyberpunk-light-mode div:not(.cyberpunk-square-stamp, .cyberpunk-empty-slot, .cyberpunk-card-isolated),
 .cyberpunk-light-mode section,
 .cyberpunk-light-mode header,
 .cyberpunk-light-mode nav {
@@ -50,9 +50,9 @@
   border-top-color: #E2E8F0 !important;
 }
 
-/* 5. 文字颜色规范（排除独立卡片） */
-.cyberpunk-light-mode div:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode span:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+/* 5. 通用文字颜色规范（全面排除保护组件） */
+.cyberpunk-light-mode div:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *, .cyberpunk-square-stamp, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *),
+.cyberpunk-light-mode span:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *, .cyberpunk-square-stamp, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *, .stamp-char),
 .cyberpunk-light-mode p:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode h1:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode h2:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
@@ -61,14 +61,14 @@
 .cyberpunk-light-mode h5:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode h6:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode strong:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode .text-white:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode .text-white:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *),
 .cyberpunk-light-mode [class*="text-slate-100"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode [class*="text-slate-200"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
 .cyberpunk-light-mode [class*="text-slate-300"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode [class*="text-[#00FFA3]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode [class*="text-[#F5F500]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode [class*="text-[#FF007F]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode [class*="text-[#6C00FF]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#00FFA3]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *),
+.cyberpunk-light-mode [class*="text-[#F5F500]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *),
+.cyberpunk-light-mode [class*="text-[#FF007F]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *),
+.cyberpunk-light-mode [class*="text-[#6C00FF]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *),
 .cyberpunk-light-mode [class*="text-[#00F0FF]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   color: #0F172A !important;
 }
@@ -79,9 +79,9 @@
   color: #475569 !important;
 }
 
-/* 6. 标签 Badge / 徽章（排除独立卡片内部） */
-.cyberpunk-light-mode span.rounded:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
-.cyberpunk-light-mode span[class*="rounded"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
+/* 6. 标签 Badge / 徽章（排除独立卡片与印章） */
+.cyberpunk-light-mode span.rounded:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot *),
+.cyberpunk-light-mode span[class*="rounded"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-square-stamp *, .cyberpunk-empty-slot *) {
   background-color: #F1F5F9 !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
@@ -117,31 +117,154 @@
   outline: none !important;
 }
 
-/* 8. 按钮与操作控件（排除熟练度圆点与独立卡片按钮） */
-.cyberpunk-light-mode button:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
+/* 8. 常规按钮与操作控件（排除保护组件） */
+.cyberpunk-light-mode button:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *, .cyberpunk-square-stamp, .cyberpunk-square-stamp *, .cyberpunk-empty-slot) {
   background-color: #F8FAFC !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   box-shadow: none !important;
 }
 
-.cyberpunk-light-mode button:hover:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
+.cyberpunk-light-mode button:hover:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *, .cyberpunk-square-stamp, .cyberpunk-square-stamp *, .cyberpunk-empty-slot) {
   background-color: #E2E8F0 !important;
   color: #000000 !important;
   border-color: #94A3B8 !important;
 }
 
-/* 虚线添加槽位按钮 */
-.cyberpunk-light-mode button[class*="border-dashed"] {
-  background-color: #F8FAFC !important;
-  border: 2px dashed #CBD5E1 !important;
-  color: #475569 !important;
+/* ==========================================================================
+   关键修复 1：顶部保存按钮（彻底杜绝黑底黑字隐形与灰图标）
+   ========================================================================== */
+.cyberpunk-top-save-btn,
+.cyberpunk-light-mode .cyberpunk-top-save-btn {
+  background-color: #FF007F !important;
+  color: #FFFFFF !important;
+  border: 1px solid #FF007F !important;
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.45) !important;
+  opacity: 1 !important;
+}
+.cyberpunk-top-save-btn:hover,
+.cyberpunk-light-mode .cyberpunk-top-save-btn:hover {
+  background-color: #E0006F !important;
+  border-color: #E0006F !important;
+}
+.cyberpunk-top-save-btn span,
+.cyberpunk-light-mode .cyberpunk-top-save-btn span {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+.cyberpunk-top-save-btn svg,
+.cyberpunk-light-mode .cyberpunk-top-save-btn svg {
+  color: #FFFFFF !important;
 }
 
-.cyberpunk-light-mode button[class*="border-dashed"]:hover {
-  background-color: #E2E8F0 !important;
-  border-color: #64748B !important;
-  color: #0F172A !important;
+/* ==========================================================================
+   关键修复 2：装备印章图标 CyberpunkSquareIcon（白底黑字变鲜活精致）
+   ========================================================================== */
+.cyberpunk-light-mode .cyberpunk-square-stamp {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+/* 外置装备印章（红丸等）：浅亮紫粉底 + 洋红边框 + 醒目洋红文字 */
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-external {
+  background-color: #FDF2F8 !important;
+  border-color: #FF007F !important;
+}
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-external .stamp-char {
+  color: #BE185D !important;
+  font-weight: 900 !important;
+}
+
+/* 武器印章：浅暖金底 + 琥珀金边框 + 琥珀文字 */
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-weapon {
+  background-color: #FEFCE8 !important;
+  border-color: #D97706 !important;
+}
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-weapon .stamp-char {
+  color: #B45309 !important;
+  font-weight: 900 !important;
+}
+
+/* 护甲印章：浅翠绿底 + 翠绿边框 + 翡翠文字 */
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-armor {
+  background-color: #F0FDF4 !important;
+  border-color: #059669 !important;
+}
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-armor .stamp-char {
+  color: #047857 !important;
+  font-weight: 900 !important;
+}
+
+/* 义体印章：浅晶紫底 + 赛博紫边框 + 深紫文字 */
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-cyberware {
+  background-color: #F5F3FF !important;
+  border-color: #7C3AED !important;
+}
+.cyberpunk-light-mode .cyberpunk-square-stamp.theme-cyberware .stamp-char {
+  color: #6D28D9 !important;
+  font-weight: 900 !important;
+}
+
+/* ==========================================================================
+   关键修复 3：装备 HUD 空插槽与虚线添加按钮（杜绝黑底死角，呈现清爽浅色）
+   ========================================================================== */
+.cyberpunk-light-mode .cyberpunk-empty-slot {
+  background-color: #F8FAFC !important;
+  border-style: dashed !important;
+  border-width: 2px !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* 外置挂载空槽位：粉红虚线 + 鲜艳粉红加号图标 */
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-external {
+  border-color: rgba(255, 0, 127, 0.45) !important;
+  color: #FF007F !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-external:hover {
+  border-color: #FF007F !important;
+  background-color: #FDF2F8 !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-external svg {
+  color: #FF007F !important;
+}
+
+/* 武器空槽位：金黄虚线 + 琥珀加号 */
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-weapon {
+  border-color: rgba(217, 119, 6, 0.45) !important;
+  color: #D97706 !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-weapon:hover {
+  border-color: #D97706 !important;
+  background-color: #FEFCE8 !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-weapon svg {
+  color: #D97706 !important;
+}
+
+/* 护甲空槽位：翡翠虚线 + 翠绿加号 */
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-armor {
+  border-color: rgba(5, 150, 105, 0.45) !important;
+  color: #059669 !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-armor:hover {
+  border-color: #059669 !important;
+  background-color: #F0FDF4 !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-armor svg {
+  color: #059669 !important;
+}
+
+/* 义体空槽位：蓝紫虚线 + 赛博紫加号 */
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-cyberware {
+  border-color: rgba(124, 58, 237, 0.45) !important;
+  color: #7C3AED !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-cyberware:hover {
+  border-color: #7C3AED !important;
+  background-color: #F5F3FF !important;
+}
+.cyberpunk-light-mode .cyberpunk-empty-slot.theme-cyberware svg {
+  color: #7C3AED !important;
 }
 
 /* 9. 生命点 (HP) 圆圈指示器（排除熟练度黑点） */
@@ -192,16 +315,10 @@
   background-color: rgba(15, 23, 42, 0.05) !important;
 }
 
-/* 10. 压力点 (Stress) 方块指示器 */
-.cyberpunk-light-mode button[class*="rounded-md"]:not(.cyberpunk-card-isolated *),
-.cyberpunk-light-mode button[class*="rounded"]:not(.cyberpunk-card-isolated *) {
+/* 10. 压力点 (Stress) 方块指示器（限定为精确属性，防止误杀按钮） */
+.cyberpunk-light-mode button.stress-box,
+.cyberpunk-light-mode div.stress-box {
   border-color: #CBD5E1 !important;
-}
-
-.cyberpunk-light-mode button[class*="bg-[#FF007F]"]:not(.cyberpunk-card-isolated *) {
-  background-color: #0F172A !important;
-  color: #FFFFFF !important;
-  box-shadow: none !important;
 }
 
 /* 11. 希望点 (Hope) 菱形指示器 */
@@ -222,8 +339,8 @@
   border-color: #CBD5E1 !important;
 }
 
-/* 12. 图标颜色 */
-.cyberpunk-light-mode svg:not(.cyberpunk-card-isolated *) {
+/* 12. 图标颜色（彻底排除保存按钮、印章、空插槽和独立卡片） */
+.cyberpunk-light-mode svg:not(.cyberpunk-card-isolated *, .cyberpunk-top-save-btn, .cyberpunk-top-save-btn *, .cyberpunk-empty-slot, .cyberpunk-empty-slot *) {
   color: #334155 !important;
 }
 
@@ -283,7 +400,7 @@
   box-shadow: none !important;
 }
 
-/* 14. 打印机出纸时的极致黑白线框排版优化 */
+/* 15. 打印机出纸时的极致黑白线框排版优化 */
 @media print {
   body,
   .cyberpunk-light-mode {

@@ -81,7 +81,7 @@ export function CyberpunkSquareIcon({
   if (imgSrc) {
     return (
       <div
-        className={`relative shrink-0 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all ${sizeClasses} ${themeClasses.border} ${themeClasses.bg} ${themeClasses.shadow} ${className}`}
+        className={`cyberpunk-square-stamp theme-${theme} relative shrink-0 rounded-lg border-2 overflow-hidden flex items-center justify-center transition-all ${sizeClasses} ${themeClasses.border} ${themeClasses.bg} ${themeClasses.shadow} ${className}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -96,13 +96,13 @@ export function CyberpunkSquareIcon({
   // 汉字印章渲染：按字数自适应排版
   const renderStampText = () => {
     if (chars.length === 1) {
-      return <span className="font-black text-lg leading-none tracking-tighter">{chars[0]}</span>
+      return <span className="stamp-char font-black text-lg leading-none tracking-tighter">{chars[0]}</span>
     }
     if (chars.length === 2) {
       return (
         <div className="flex flex-col items-center justify-center leading-none font-black tracking-tight scale-95">
-          <span>{chars[0]}</span>
-          <span className="mt-0.5">{chars[1]}</span>
+          <span className="stamp-char">{chars[0]}</span>
+          <span className="stamp-char mt-0.5">{chars[1]}</span>
         </div>
       )
     }
@@ -110,27 +110,27 @@ export function CyberpunkSquareIcon({
       return (
         <div className="flex flex-col items-center justify-center leading-none font-black scale-90">
           <div className="flex gap-0.5">
-            <span>{chars[0]}</span>
-            <span>{chars[1]}</span>
+            <span className="stamp-char">{chars[0]}</span>
+            <span className="stamp-char">{chars[1]}</span>
           </div>
-          <span className="mt-0.5">{chars[2]}</span>
+          <span className="stamp-char mt-0.5">{chars[2]}</span>
         </div>
       )
     }
     // 4 字: 2x2 网格印章
     return (
       <div className="grid grid-cols-2 gap-0.5 leading-none font-black text-center scale-90">
-        <span>{chars[0]}</span>
-        <span>{chars[1]}</span>
-        <span>{chars[2]}</span>
-        <span>{chars[3]}</span>
+        <span className="stamp-char">{chars[0]}</span>
+        <span className="stamp-char">{chars[1]}</span>
+        <span className="stamp-char">{chars[2]}</span>
+        <span className="stamp-char">{chars[3]}</span>
       </div>
     )
   }
 
   return (
     <div
-      className={`relative shrink-0 rounded-lg border-2 flex items-center justify-center transition-all select-none p-1 font-mono ${sizeClasses} ${themeClasses.border} ${themeClasses.bg} ${themeClasses.text} ${themeClasses.shadow} ${className}`}
+      className={`cyberpunk-square-stamp theme-${theme} relative shrink-0 rounded-lg border-2 flex items-center justify-center transition-all select-none p-1 font-mono ${sizeClasses} ${themeClasses.border} ${themeClasses.bg} ${themeClasses.text} ${themeClasses.shadow} ${className}`}
     >
       {/* 赛博网格微光背景纹理 */}
       <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px] pointer-events-none" />

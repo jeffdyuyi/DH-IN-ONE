@@ -199,10 +199,10 @@ export function CyberpunkTopBar({
             <button
               type="button"
               onClick={onSave}
-              className="flex items-center gap-1 rounded-lg bg-[#FF007F] px-3 py-1 text-xs font-bold text-white hover:bg-[#FF007F]/90 shadow-[0_0_12px_rgba(255,0,127,0.5)] transition-all"
+              className="cyberpunk-top-save-btn flex items-center gap-1.5 rounded-lg bg-[#FF007F] px-3.5 py-1 text-xs font-bold text-white hover:bg-[#FF007F]/90 shadow-[0_0_12px_rgba(255,0,127,0.5)] transition-all"
             >
-              <Save className="h-3.5 w-3.5" />
-              <span>保存</span>
+              <Save className="h-3.5 w-3.5 text-white" />
+              <span className="text-white font-bold">保存</span>
             </button>
           )}
         </div>

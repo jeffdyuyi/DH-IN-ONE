@@ -290,10 +290,10 @@ export function CyberpunkEquipmentHud({
             <button
               type="button"
               onClick={() => onOpenSelectModal('augmentation', zoneKey)}
-              className="w-12 h-12 rounded-lg border-2 border-dashed border-[#6C00FF]/40 bg-[#0B0320]/60 hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 text-slate-500 hover:text-[#00FFA3] flex flex-col items-center justify-center transition-all shadow-inner group"
+              className="cyberpunk-empty-slot theme-cyberware w-12 h-12 rounded-lg border-2 border-dashed border-[#6C00FF]/40 bg-[#0B0320]/60 hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 text-[#00FFA3] flex flex-col items-center justify-center transition-all shadow-inner group"
               title={`安装新义体到${zoneTitle}`}
             >
-              <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
+              <Plus className="w-4 h-4 transition-transform group-hover:scale-110 text-current" />
               <span className="text-[8px] font-mono mt-0.5">安装</span>
             </button>
           )}
@@ -356,9 +356,9 @@ export function CyberpunkEquipmentHud({
                   <button
                     type="button"
                     onClick={() => onOpenSelectModal('weapon', undefined, 0)}
-                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                    className="cyberpunk-empty-slot theme-weapon w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-current" />
                   </button>
                 )}
 
@@ -427,9 +427,9 @@ export function CyberpunkEquipmentHud({
                   <button
                     type="button"
                     onClick={() => onOpenSelectModal('weapon', undefined, 1)}
-                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
+                    className="cyberpunk-empty-slot theme-weapon w-12 h-12 rounded-lg border-2 border-dashed border-[#F5F500]/40 bg-[#0B0320] text-[#F5F500] hover:border-[#F5F500] hover:bg-[#F5F500]/10 flex flex-col items-center justify-center transition-all"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-current" />
                   </button>
                 )}
 
@@ -581,9 +581,9 @@ export function CyberpunkEquipmentHud({
                   <button
                     type="button"
                     onClick={() => onOpenSelectModal('armor')}
-                    className="w-12 h-12 rounded-lg border-2 border-dashed border-[#00FFA3]/40 bg-[#0B0320] text-[#00FFA3] hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 flex flex-col items-center justify-center transition-all"
+                    className="cyberpunk-empty-slot theme-armor w-12 h-12 rounded-lg border-2 border-dashed border-[#00FFA3]/40 bg-[#0B0320] text-[#00FFA3] hover:border-[#00FFA3] hover:bg-[#00FFA3]/10 flex flex-col items-center justify-center transition-all"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-current" />
                   </button>
                 )}
 
@@ -677,10 +677,10 @@ export function CyberpunkEquipmentHud({
                 <button
                   type="button"
                   onClick={() => onOpenSelectModal('external')}
-                  className="w-9 h-9 rounded-lg border-2 border-dashed border-[#FF007F]/40 bg-[#0B0320] text-[#FF007F] hover:border-[#FF007F] hover:bg-[#FF007F]/10 flex items-center justify-center transition-all"
+                  className="cyberpunk-empty-slot theme-external w-9 h-9 rounded-lg border-2 border-dashed border-[#FF007F]/40 bg-[#0B0320] text-[#FF007F] hover:border-[#FF007F] hover:bg-[#FF007F]/10 flex items-center justify-center transition-all"
                   title="添加外置挂载"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-current" />
                 </button>
               )}
             </div>
