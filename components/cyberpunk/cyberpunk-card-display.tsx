@@ -73,7 +73,7 @@ export function CyberpunkCardDisplay({
     >
       {/* 1. Header (黄色顶栏 + Icon 徽章 + 名称与类型) */}
       <div
-        className="bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3"
+        className="cyberpunk-card-header bg-[#FCEE0A] text-[#0D0D0D] p-3 px-4 relative shrink-0 flex items-center gap-3"
         style={{ backgroundColor: '#FCEE0A', color: '#0D0D0D' }}
       >
         {/* 左侧正方形 Icon 徽章 */}
@@ -90,8 +90,8 @@ export function CyberpunkCardDisplay({
             />
           ) : (
             <span
-              className="text-[11px] font-black text-[#FCEE0A] text-center leading-none tracking-tight"
-              style={{ color: '#FCEE0A' }}
+              className="text-[11px] font-black !text-[#FCEE0A] text-center leading-none tracking-tight"
+              style={{ color: '#FCEE0A !important' }}
             >
               {(data.name || '元件').slice(0, 4)}
             </span>
@@ -101,14 +101,14 @@ export function CyberpunkCardDisplay({
         <div className="flex-1 min-w-0 pr-6">
           <div className="flex items-center gap-1.5">
             <div
-              className="text-[17px] font-black leading-tight tracking-wide text-[#0D0D0D] truncate"
+              className="text-[17px] font-black leading-tight tracking-wide !text-[#0D0D0D] truncate"
               style={{ color: '#0D0D0D' }}
             >
               {data.name || '未命名装备'}
             </div>
           </div>
           <div
-            className="text-[11px] font-bold text-[#4A4600] uppercase tracking-wider mt-0.5 truncate"
+            className="text-[11px] font-bold !text-[#4A4600] uppercase tracking-wider mt-0.5 truncate"
             style={{ color: '#4A4600' }}
           >
             {cleanType}
@@ -212,16 +212,16 @@ export function CyberpunkCardDisplay({
             )}
             {data.burden && (
               <span
-                className="text-zinc-400 font-bold text-[11px] px-0.5"
-                style={{ color: '#A1A1AA' }}
+                className="cyberpunk-card-tag font-bold text-[11px] px-1.5 py-0.5 rounded border"
+                style={{ color: '#D4D4D8', backgroundColor: '#1F2430', borderColor: '#2B313D' }}
               >
                 {data.burden}
               </span>
             )}
             {data.damageType && (
               <span
-                className="text-zinc-400 text-[11px]"
-                style={{ color: '#A1A1AA' }}
+                className="cyberpunk-card-tag text-[11px] px-1.5 py-0.5 rounded border"
+                style={{ color: '#D4D4D8', backgroundColor: '#1F2430', borderColor: '#2B313D' }}
               >
                 {data.damageType}
               </span>
@@ -248,7 +248,7 @@ export function CyberpunkCardDisplay({
         {/* 核心特性与规则文本 (全量 Markdown 粗体加粗与样式支持) */}
         {data.effect && (
           <div
-            className="text-[12px] leading-relaxed text-[#E1E4EA] max-h-48 overflow-y-auto custom-scrollbar pr-1"
+            className="cyberpunk-card-text-main text-[12px] leading-relaxed !text-[#E1E4EA] max-h-48 overflow-y-auto custom-scrollbar pr-1"
             style={{ color: '#E1E4EA' }}
           >
             <CardMarkdown className="text-[#E1E4EA]">{data.effect}</CardMarkdown>
@@ -258,7 +258,7 @@ export function CyberpunkCardDisplay({
         {/* 背景风味描述 */}
         {data.description && (
           <div
-            className="text-[11px] italic text-[#8F98A3] pt-1.5 border-t border-[#1F2229] leading-relaxed"
+            className="cyberpunk-card-text-muted text-[11px] italic !text-[#8F98A3] pt-1.5 border-t border-[#1F2229] leading-relaxed"
             style={{ color: '#8F98A3', borderTopColor: '#1F2229' }}
           >
             <CardMarkdown className="text-[#8F98A3]">{data.description}</CardMarkdown>

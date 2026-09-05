@@ -149,6 +149,13 @@ export interface CyberpunkSheetExtension {
   portrait?: string
   portraitScale?: number
   portraitPosition?: { x: number; y: number }
+  // 自定义伤害阈值（用户可开启手动调整开关，覆盖自动化计算）
+  customThresholds?: {
+    enabled: boolean
+    major?: number
+    severe?: number
+    massive?: number
+  }
   // 角色故事精细档案
   story?: {
     gender?: string           // 性别

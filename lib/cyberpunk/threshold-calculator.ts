@@ -11,6 +11,29 @@ export interface ArmorThresholdBonus {
   severeBonus?: number
 }
 
+/**
+ * 标准化护甲阈值加成
+ * 匕首心核心规则中，官方护甲卡面印制的阈值包含 5/11 基础基准。
+ * 当作为加成累加到爽博朋克的原生 5/10 基准时，需隐性按 -5 / -11 进行换算：
+ * 例如卡面数值为 6/13 时，实际提供的净加成为：
+ *   重度加成 = 6 - 5 = +1
+ *   严重加成 = 13 - 11 = +2
+ */
+export function normalizeArmorThresholdBonus(
+  rawMinor?: number,
+  rawMajor?: number
+): { majorBonus: number; severeBonus: number; rawMinor: number; rawMajor: number; isImplicitConverted: boolean } {
+  const numMinor = Number(rawMinor) || 0
+  const numMajor = Number(rawMajor) || 0
+
+  // 若数值达到核心护甲基线（minor >= 5 或 major >= 11），进行 -5/-11 隐性换算
+  const isImplicitConverted = numMinor >= 5 || numMajor >= 11
+  const majorBonus = isImplicitConverted ? Math.max(0, numMinor - 5) : numMinor
+  const severeBonus = isImplicitConverted ? Math.max(0, numMajor - 11) : numMajor
+
+  return { majorBonus, severeBonus, rawMinor: numMinor, rawMajor: numMajor, isImplicitConverted }
+}
+
 export interface ThresholdCalculationResult {
   nativeBase: { major: number; severe: number }
   torsoTierBonus: { major: number; severe: number }
@@ -19,12 +42,14 @@ export interface ThresholdCalculationResult {
   totalMajor: number
   totalSevere: number
   massiveThreshold: number // 严重阈值 * 2
+  rawArmorThresholds?: { minor: number; major: number }
+  isImplicitArmorConverted?: boolean
 }
 
 /**
  * 计算爽博朋克角色的伤害阈值
  * @param cyberpunkData 爽博朋克扩展数据
- * @param armorBonus 护甲提供的阈值加值（默认为 0/0）
+ * @param armorBonus 护甲提供的阈值加值（支持直接加值或核心卡面绝对阈值）
  */
 export function calculateCyberpunkThresholds(
   cyberpunkData?: Partial<CyberpunkSheetExtension>,
@@ -73,10 +98,11 @@ export function calculateCyberpunkThresholds(
     severe: augSevereBonus,
   }
 
-  // 4. 护甲加值（支持正负值与0）
+  // 4. 护甲加值隐性换算（核心护甲卡面 -5/-11 处理）
+  const normalizedArmor = normalizeArmorThresholdBonus(armorBonus.majorBonus, armorBonus.severeBonus)
   const validatedArmorBonus = {
-    major: Number(armorBonus.majorBonus) || 0,
-    severe: Number(armorBonus.severeBonus) || 0,
+    major: normalizedArmor.majorBonus,
+    severe: normalizedArmor.severeBonus,
   }
 
   // 5. 累加总阈值
@@ -97,5 +123,7 @@ export function calculateCyberpunkThresholds(
     totalMajor,
     totalSevere,
     massiveThreshold: totalSevere * 2,
+    rawArmorThresholds: { minor: normalizedArmor.rawMinor, major: normalizedArmor.rawMajor },
+    isImplicitArmorConverted: normalizedArmor.isImplicitConverted,
   }
 }

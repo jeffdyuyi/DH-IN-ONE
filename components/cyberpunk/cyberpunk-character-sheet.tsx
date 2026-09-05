@@ -131,14 +131,15 @@ export function CyberpunkCharacterSheet() {
     setAnnouncementsModalOpen(true)
   }
 
-  // 爽博朋克特化数据
-  const cyberpunkData: CyberpunkSheetExtension = formData?.cyberpunkData || DEFAULT_CYBERPUNK_EXTENSION
+  // 爽博朋克特化数据 (兼容 cyberpunkData 与 cyberpunk 命名)
+  const cyberpunkData: CyberpunkSheetExtension = formData?.cyberpunkData || formData?.cyberpunk || DEFAULT_CYBERPUNK_EXTENSION
 
   const handleCyberpunkChange = (updated: CyberpunkSheetExtension) => {
     setFormData((prev) => ({
       ...prev,
       campaignMode: 'cyberpunk',
       cyberpunkData: updated,
+      cyberpunk: updated,
     }))
   }
 
@@ -146,10 +147,12 @@ export function CyberpunkCharacterSheet() {
   const handleQuickSave = async () => {
     if (currentCharacterId && formData) {
       try {
+        const effectiveCyberData = formData.cyberpunkData || formData.cyberpunk || cyberpunkData
         await saveCharacterSheet(currentCharacterId, {
           ...formData,
           campaignMode: 'cyberpunk',
-          cyberpunkData: formData.cyberpunkData || cyberpunkData,
+          cyberpunkData: effectiveCyberData,
+          cyberpunk: effectiveCyberData,
         })
       } catch (err) {
         console.error('[CyberpunkSave] Failed to save character:', err)
@@ -165,10 +168,12 @@ export function CyberpunkCharacterSheet() {
 
     const timer = setTimeout(async () => {
       try {
+        const effectiveCyberData = formData.cyberpunkData || formData.cyberpunk || cyberpunkData
         await saveCharacterSheet(currentCharacterId, {
           ...formData,
           campaignMode: 'cyberpunk',
-          cyberpunkData: formData.cyberpunkData || cyberpunkData,
+          cyberpunkData: effectiveCyberData,
+          cyberpunk: effectiveCyberData,
         })
       } catch (err) {
         console.error('[CyberpunkAutoSave] Failed to autosave character:', err)

@@ -670,9 +670,12 @@ function replaceImagesWithBase64(html: string, imageMap: Map<string, string>): s
 function extractPrintPreviewHTML(onProgress?: ProgressCallback): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
-      const printContainer = document.querySelector('.print-all-pages')
+      const printContainer =
+        document.querySelector('.print-all-pages') ||
+        document.querySelector('.cyberpunk-print-root') ||
+        document.querySelector('main')
       if (!printContainer) {
-        throw new Error('未找到打印预览容器，请先进入打印预览模式')
+        throw new Error('未找到打印预览或车卡内容容器，请先打开打印预览或确保页面已加载')
       }
 
       // 等待所有图片加载完成

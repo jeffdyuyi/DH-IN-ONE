@@ -161,6 +161,9 @@ export function applyAutoCalculationForTargets(sheetData: SheetData): SheetData 
 
     if (!isTargetAutoCalculationEnabled(next.modifierState?.targetStates?.[target])) return
     if (!isBlankTargetValue(currentValue) && tryParseNumberExpression(currentValue) === undefined) return
+    // 核心保护：若没有 Base/规则计算出的确定数值（calculatedFinalTotal 为 undefined），
+    // 绝对不能将用户手填或已有属性、闪避等数值抹除重置为空字符串 ""！
+    if (summary.calculatedFinalTotal === undefined) return
 
     const desiredValue = summary.calculatedFinalTotal ?? ""
     const valueMatches = isSameTargetValue(currentValue, desiredValue)

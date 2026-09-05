@@ -51,22 +51,24 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
   }
 
   const handleAttrChange = (key: AttributeKey, val: number) => {
+    const targetKey = `${key}.value`
     setSheetData((prev) => {
       const current = prev[key]
-      if (typeof current === 'object' && current !== null) {
-        return {
-          ...prev,
-          [key]: {
-            ...current,
-            value: String(val),
-          },
-        }
-      }
       return {
         ...prev,
-        [key]: {
-          checked: false,
-          value: String(val),
+        [key]: typeof current === 'object' && current !== null
+          ? { ...current, value: String(val) }
+          : { checked: false, value: String(val) },
+        modifierState: {
+          ...prev.modifierState,
+          targetStates: {
+            ...prev.modifierState?.targetStates,
+            [targetKey]: {
+              ...prev.modifierState?.targetStates?.[targetKey as any],
+              autoCalculation: false,
+            },
+          },
+          entryStates: prev.modifierState?.entryStates ?? {},
         },
       }
     })
@@ -395,7 +397,23 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
             <input
               type="text"
               value={evasionValue}
-              onChange={(e) => setSheetData((prev) => ({ ...prev, evasion: e.target.value }))}
+              onChange={(e) =>
+                setSheetData((prev) => ({
+                  ...prev,
+                  evasion: e.target.value,
+                  modifierState: {
+                    ...prev.modifierState,
+                    targetStates: {
+                      ...prev.modifierState?.targetStates,
+                      evasion: {
+                        ...prev.modifierState?.targetStates?.evasion,
+                        autoCalculation: false,
+                      },
+                    },
+                    entryStates: prev.modifierState?.entryStates ?? {},
+                  },
+                }))
+              }
               className="w-16 text-center text-2xl font-black text-[#00FFA3] font-mono bg-transparent border-b border-[#6C00FF]/40 focus:border-[#00FFA3] focus:outline-none"
             />
           </div>
@@ -431,7 +449,7 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
             </div>
           </div>
 
-          <div className="my-2 flex justify-center items-center gap-1.5">
+          <div className="my-2 flex justify-center items-center gap-2">
             {Array.from({ length: 6 }).map((_, i) => {
               const isFilled = i < proficiencyCount
               return (
@@ -439,13 +457,20 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
                   key={`prof_dot_${i}`}
                   type="button"
                   onClick={() => handleProficiencyChange(isFilled && i === proficiencyCount - 1 ? i : i + 1)}
-                  className={`h-4 w-4 rounded-full border transition-all ${
-                    isFilled
-                      ? 'bg-[#F5F500] border-[#F5F500] shadow-[0_0_8px_#F5F500]'
-                      : 'bg-black/60 border-slate-700 hover:border-[#F5F500]'
-                  }`}
-                  title={`熟练度 ${i + 1}/6`}
-                />
+                  className={`proficiency-dot ${isFilled ? 'filled' : 'empty'} flex items-center justify-center`}
+                  style={{
+                    backgroundColor: isFilled ? '#0F172A' : 'transparent',
+                    borderColor: isFilled ? '#0F172A' : '#64748B',
+                  }}
+                  title={`熟练度 ${i + 1}/6（点击切换）`}
+                >
+                  {isFilled && (
+                    <span
+                      className="w-2 h-2 rounded-full bg-[#F5F500] inline-block shadow-sm"
+                      style={{ backgroundColor: '#F5F500' }}
+                    />
+                  )}
+                </button>
               )
             })}
           </div>
@@ -463,6 +488,15 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
           armorMinor={armorSlot?.baseThresholds?.minor || 0}
           armorMajor={armorSlot?.baseThresholds?.major || 0}
           equippedArmorName={equippedArmorName}
+          onUpdateCyberpunkData={(patch) => {
+            setSheetData((prev) => ({
+              ...prev,
+              cyberpunk: {
+                ...(prev.cyberpunk || {}),
+                ...patch,
+              },
+            }))
+          }}
         />
       </div>
 

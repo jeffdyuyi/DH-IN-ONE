@@ -50,38 +50,38 @@
   border-top-color: #E2E8F0 !important;
 }
 
-/* 5. 文字颜色规范（彻底杜绝看不清与反光） */
-.cyberpunk-light-mode div,
-.cyberpunk-light-mode span,
-.cyberpunk-light-mode p,
-.cyberpunk-light-mode h1,
-.cyberpunk-light-mode h2,
-.cyberpunk-light-mode h3,
-.cyberpunk-light-mode h4,
-.cyberpunk-light-mode h5,
-.cyberpunk-light-mode h6,
-.cyberpunk-light-mode strong,
-.cyberpunk-light-mode .text-white,
-.cyberpunk-light-mode [class*="text-slate-100"],
-.cyberpunk-light-mode [class*="text-slate-200"],
-.cyberpunk-light-mode [class*="text-slate-300"],
-.cyberpunk-light-mode [class*="text-[#00FFA3]"],
-.cyberpunk-light-mode [class*="text-[#F5F500]"],
-.cyberpunk-light-mode [class*="text-[#FF007F]"],
-.cyberpunk-light-mode [class*="text-[#6C00FF]"],
-.cyberpunk-light-mode [class*="text-[#00F0FF]"] {
+/* 5. 文字颜色规范（排除独立卡片） */
+.cyberpunk-light-mode div:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode span:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode p:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h1:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h2:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h3:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h4:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h5:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode h6:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode strong:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode .text-white:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-slate-100"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-slate-200"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-slate-300"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#00FFA3]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#F5F500]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#FF007F]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#6C00FF]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-[#00F0FF]"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   color: #0F172A !important;
 }
 
-.cyberpunk-light-mode label,
-.cyberpunk-light-mode [class*="text-slate-400"],
-.cyberpunk-light-mode [class*="text-slate-500"] {
+.cyberpunk-light-mode label:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-slate-400"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode [class*="text-slate-500"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   color: #475569 !important;
 }
 
-/* 6. 标签 Badge / 徽章 */
-.cyberpunk-light-mode span.rounded,
-.cyberpunk-light-mode span[class*="rounded"] {
+/* 6. 标签 Badge / 徽章（排除独立卡片内部） */
+.cyberpunk-light-mode span.rounded:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *),
+.cyberpunk-light-mode span[class*="rounded"]:not(.cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   background-color: #F1F5F9 !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
@@ -89,19 +89,19 @@
 }
 
 /* 7. 输入框（文本框、数字框）：白底、深灰字、细边框 */
-.cyberpunk-light-mode input[type="text"],
-.cyberpunk-light-mode input[type="number"],
-.cyberpunk-light-mode textarea,
-.cyberpunk-light-mode select {
+.cyberpunk-light-mode input[type="text"]:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode input[type="number"]:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode textarea:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode select:not(.cyberpunk-card-isolated *) {
   background-color: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   box-shadow: none !important;
 }
 
-.cyberpunk-light-mode input.bg-transparent,
-.cyberpunk-light-mode input[type="number"].bg-transparent,
-.cyberpunk-light-mode input[type="text"].bg-transparent {
+.cyberpunk-light-mode input.bg-transparent:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode input[type="number"].bg-transparent:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode input[type="text"].bg-transparent:not(.cyberpunk-card-isolated *) {
   background-color: transparent !important;
   border-top: none !important;
   border-left: none !important;
@@ -117,15 +117,15 @@
   outline: none !important;
 }
 
-/* 8. 按钮与操作控件（彻底解决大黑块问题：浅灰底白边，深色文字） */
-.cyberpunk-light-mode button {
+/* 8. 按钮与操作控件（排除熟练度圆点与独立卡片按钮） */
+.cyberpunk-light-mode button:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   background-color: #F8FAFC !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   box-shadow: none !important;
 }
 
-.cyberpunk-light-mode button:hover {
+.cyberpunk-light-mode button:hover:not(.proficiency-dot, .cyberpunk-card-isolated, .cyberpunk-card-isolated *) {
   background-color: #E2E8F0 !important;
   color: #000000 !important;
   border-color: #94A3B8 !important;
@@ -144,28 +144,61 @@
   color: #0F172A !important;
 }
 
-/* 9. 生命点 (HP) 圆圈指示器 */
-.cyberpunk-light-mode button[class*="rounded-full"] {
+/* 9. 生命点 (HP) 圆圈指示器（排除熟练度黑点） */
+.cyberpunk-light-mode button[class*="rounded-full"]:not(.proficiency-dot, .cyberpunk-card-isolated *) {
   border: 1.5px solid #0F172A !important;
 }
 
-.cyberpunk-light-mode button[class*="rounded-full"][class*="bg-[#00FFA3]"] {
+.cyberpunk-light-mode button[class*="rounded-full"][class*="bg-[#00FFA3]"]:not(.proficiency-dot, .cyberpunk-card-isolated *) {
   background-color: #0F172A !important;
   box-shadow: none !important;
 }
 
-.cyberpunk-light-mode button[class*="rounded-full"]:not([class*="bg-[#00FFA3]"]) {
+.cyberpunk-light-mode button[class*="rounded-full"]:not([class*="bg-[#00FFA3]"], .proficiency-dot, .cyberpunk-card-isolated *) {
   background-color: #FFFFFF !important;
   border-color: #CBD5E1 !important;
 }
 
+/* 9.1 熟练度黑点专用排版（无论浅色还是深色模式，黑点绝对清晰显示） */
+.proficiency-dot {
+  width: 1rem !important;
+  height: 1rem !important;
+  border-radius: 9999px !important;
+  transition: all 0.15s ease-in-out !important;
+  position: relative !important;
+}
+.proficiency-dot.filled {
+  background-color: #0F172A !important;
+  border: 2px solid #0F172A !important;
+  box-shadow: 0 0 4px rgba(15, 23, 42, 0.4) !important;
+}
+.proficiency-dot.filled::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 9999px !important;
+  background-color: #F5F500 !important;
+}
+.proficiency-dot.empty {
+  background-color: transparent !important;
+  border: 1.5px solid #64748B !important;
+}
+.proficiency-dot.empty:hover {
+  border-color: #0F172A !important;
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
 /* 10. 压力点 (Stress) 方块指示器 */
-.cyberpunk-light-mode button[class*="rounded-md"],
-.cyberpunk-light-mode button[class*="rounded"] {
+.cyberpunk-light-mode button[class*="rounded-md"]:not(.cyberpunk-card-isolated *),
+.cyberpunk-light-mode button[class*="rounded"]:not(.cyberpunk-card-isolated *) {
   border-color: #CBD5E1 !important;
 }
 
-.cyberpunk-light-mode button[class*="bg-[#FF007F]"] {
+.cyberpunk-light-mode button[class*="bg-[#FF007F]"]:not(.cyberpunk-card-isolated *) {
   background-color: #0F172A !important;
   color: #FFFFFF !important;
   box-shadow: none !important;
@@ -190,7 +223,7 @@
 }
 
 /* 12. 图标颜色 */
-.cyberpunk-light-mode svg {
+.cyberpunk-light-mode svg:not(.cyberpunk-card-isolated *) {
   color: #334155 !important;
 }
 
@@ -206,78 +239,48 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 14. 赛博工坊原生全量卡片样式隔离（彻底免除浅色反色与按钮破坏） */
-.cyberpunk-light-mode .cyberpunk-card-isolated,
-.cyberpunk-card-isolated {
+/* 14. 赛博元件全量卡片专属独立保护（彻底排除外部任何覆盖） */
+.cyberpunk-card-isolated,
+.cyberpunk-light-mode .cyberpunk-card-isolated {
   background-color: #0D0D0D !important;
   color: #FFFFFF !important;
-  border-color: #1F2229 !important;
+  border: 2px solid #1F2229 !important;
   box-shadow: 0 0 35px rgba(0, 255, 163, 0.3) !important;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated div,
-.cyberpunk-light-mode .cyberpunk-card-isolated section {
-  border-color: #1F2229 !important;
+.cyberpunk-card-isolated *,
+.cyberpunk-light-mode .cyberpunk-card-isolated * {
+  box-sizing: border-box;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#FCEE0A\],
-.cyberpunk-card-isolated div.bg-\[\#FCEE0A\] {
+/* 顶栏保持黄底黑字 */
+.cyberpunk-card-isolated .cyberpunk-card-header,
+.cyberpunk-light-mode .cyberpunk-card-isolated .cyberpunk-card-header {
   background-color: #FCEE0A !important;
   color: #0D0D0D !important;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#15181E\],
-.cyberpunk-card-isolated div.bg-\[\#15181E\] {
-  background-color: #15181E !important;
-  border-color: #2B313D !important;
+/* 保证独立卡片内部文本高对比度显色 */
+.cyberpunk-card-isolated .cyberpunk-card-text-main,
+.cyberpunk-light-mode .cyberpunk-card-isolated .cyberpunk-card-text-main {
+  color: #E1E4EA !important;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#13161F\],
-.cyberpunk-card-isolated div.bg-\[\#13161F\] {
-  background-color: #13161F !important;
-  border-color: #2B313D !important;
+.cyberpunk-card-isolated .cyberpunk-card-text-muted,
+.cyberpunk-light-mode .cyberpunk-card-isolated .cyberpunk-card-text-muted {
+  color: #8F98A3 !important;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated div.bg-\[\#0A0A0A\],
-.cyberpunk-card-isolated div.bg-\[\#0A0A0A\] {
-  background-color: #0A0A0A !important;
-  border-color: #1F2229 !important;
+.cyberpunk-card-isolated .cyberpunk-card-tag,
+.cyberpunk-light-mode .cyberpunk-card-isolated .cyberpunk-card-tag {
+  background-color: #1F2430 !important;
+  color: #D4D4D8 !important;
+  border: 1px solid #2B313D !important;
 }
 
-.cyberpunk-light-mode .cyberpunk-card-isolated button,
-.cyberpunk-card-isolated button {
+.cyberpunk-card-isolated button,
+.cyberpunk-light-mode .cyberpunk-card-isolated button {
   box-shadow: none !important;
-}
-
-.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-red-950"],
-.cyberpunk-card-isolated button[class*="bg-red-950"] {
-  background-color: rgba(69, 10, 10, 0.5) !important;
-  color: #F87171 !important;
-  border: 1px solid rgba(239, 68, 68, 0.4) !important;
-}
-
-.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-red-950"]:hover,
-.cyberpunk-card-isolated button[class*="bg-red-950"]:hover {
-  background-color: rgba(127, 29, 29, 0.8) !important;
-  color: #FFFFFF !important;
-}
-
-.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"],
-.cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"] {
-  background-color: rgba(0, 255, 163, 0.15) !important;
-  color: #00FFA3 !important;
-  border: 1px solid rgba(0, 255, 163, 0.4) !important;
-}
-
-.cyberpunk-light-mode .cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"]:hover,
-.cyberpunk-card-isolated button[class*="bg-\[\#00FFA3\]"]:hover {
-  background-color: rgba(0, 255, 163, 0.3) !important;
-  color: #00FFA3 !important;
-}
-
-.cyberpunk-light-mode .cyberpunk-card-isolated button svg,
-.cyberpunk-card-isolated button svg {
-  color: inherit !important;
 }
 
 /* 14. 打印机出纸时的极致黑白线框排版优化 */
