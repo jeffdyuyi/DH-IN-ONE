@@ -25,7 +25,13 @@ import {
 
 interface CyberpunkEquipmentHudProps {
   cyberpunkData: CyberpunkSheetExtension
+  characterImage?: string
   onChangeCyberpunk: (updated: CyberpunkSheetExtension) => void
+  onPortraitChange?: (patch: {
+    portrait?: string
+    portraitScale?: number
+    portraitPosition?: { x: number; y: number }
+  }) => void
   onOpenSelectModal: (
     type: 'weapon' | 'armor' | 'augmentation' | 'external',
     zoneKey?: CyberpunkBodyZoneKey | string,
@@ -59,7 +65,9 @@ interface ActiveItemDetail {
 
 export function CyberpunkEquipmentHud({
   cyberpunkData,
+  characterImage,
   onChangeCyberpunk,
+  onPortraitChange,
   onOpenSelectModal,
 }: CyberpunkEquipmentHudProps) {
   const formData = useSheetStore((state) => state.sheetData)
@@ -522,10 +530,16 @@ export function CyberpunkEquipmentHud({
           {/* 窄版竖向紧凑立绘容器 */}
           <div className="w-full max-w-[270px] h-full flex flex-col items-center justify-center relative z-20">
             <CyberpunkPortraitFrame
-              portraitUrl={cyberpunkData.portrait}
+              portraitUrl={cyberpunkData.portrait || characterImage || formData?.characterImage}
               scale={cyberpunkData.portraitScale ?? 1}
               position={cyberpunkData.portraitPosition ?? { x: 0, y: 0 }}
-              onChange={(patch) => onChangeCyberpunk({ ...cyberpunkData, ...patch })}
+              onChange={(patch) => {
+                if (onPortraitChange) {
+                  onPortraitChange(patch)
+                } else {
+                  onChangeCyberpunk({ ...cyberpunkData, ...patch })
+                }
+              }}
             />
           </div>
         </div>

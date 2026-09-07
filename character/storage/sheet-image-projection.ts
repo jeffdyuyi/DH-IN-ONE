@@ -55,6 +55,13 @@ export async function projectSheetForStorage(
   const writtenImageKeys: string[] = []
   const clearEmptyImageFields = new Set(options.clearEmptyImageFields ?? [])
 
+  // 跨模式兼容：若 cyberpunkData 或 cyberpunk 中包含 portrait DataURL，而 characterImage 为空，同步提升为 characterImage 以便进行 IndexedDB 安全存储
+  const rawCyberPortrait = storedSheet.cyberpunkData?.portrait || (storedSheet as any).cyberpunk?.portrait
+  if (!storedSheet.characterImage && isImageDataUrl(rawCyberPortrait)) {
+    storedSheet.characterImage = rawCyberPortrait
+    runtimeSheet.characterImage = rawCyberPortrait
+  }
+
   for (const { field, role } of IMAGE_FIELDS) {
     const value = storedSheet[field]
     if (value === '' && clearEmptyImageFields.has(field)) {
@@ -78,6 +85,14 @@ export async function projectSheetForStorage(
     }
     storedSheet[field] = ''
     writtenImageKeys.push(record.key)
+  }
+
+  // 确保 storedSheet 中不再遗留大体积 Base64，防止撑爆 localStorage 5MB 配额
+  if (storedSheet.cyberpunkData && isImageDataUrl(storedSheet.cyberpunkData.portrait)) {
+    storedSheet.cyberpunkData.portrait = ''
+  }
+  if ((storedSheet as any).cyberpunk && isImageDataUrl((storedSheet as any).cyberpunk.portrait)) {
+    (storedSheet as any).cyberpunk.portrait = ''
   }
 
   storedSheet.imageAssets = imageAssets
@@ -118,6 +133,16 @@ export async function hydrateSheetForRuntimeWithDiagnostics(
   if (missingImages.length > 0) {
     cleanedStoredSheet.imageAssets = storedImageAssets
     runtimeSheet.imageAssets = runtimeImageAssets
+  }
+
+  // 恢复爽博朋克立绘：从已恢复的 characterImage 镜像回填，保证跨模式双向兼容
+  if (runtimeSheet.characterImage) {
+    if (runtimeSheet.cyberpunkData && !runtimeSheet.cyberpunkData.portrait) {
+      runtimeSheet.cyberpunkData.portrait = runtimeSheet.characterImage
+    }
+    if ((runtimeSheet as any).cyberpunk && !(runtimeSheet as any).cyberpunk.portrait) {
+      (runtimeSheet as any).cyberpunk.portrait = runtimeSheet.characterImage
+    }
   }
 
   return {

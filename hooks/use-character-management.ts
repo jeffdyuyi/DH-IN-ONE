@@ -119,6 +119,17 @@ export function useCharacterManagement({ isClient, setCurrentTabValue }: UseChar
   const activateCharacterData = useCallback((characterId: string, characterData: SheetData) => {
     setCurrentCharacterId(characterId)
     setActiveCharacterId(characterId)
+    if (typeof window !== 'undefined' && window.location) {
+      try {
+        const url = new URL(window.location.href)
+        if (url.searchParams.has('id') || window.location.pathname.startsWith('/character/')) {
+          url.searchParams.set('id', characterId)
+          window.history.replaceState({}, '', url.toString())
+        }
+      } catch (e) {
+        // ignore in environments where URL constructor might fail
+      }
+    }
     replaceSheetData(characterData)
   }, [replaceSheetData])
 
@@ -179,7 +190,17 @@ export function useCharacterManagement({ isClient, setCurrentTabValue }: UseChar
           console.log('[CharacterManagement] No characters found, creating first character')
           await createFirstCharacter()
         } else {
-          const activeId = getActiveCharacterId() || list[0].id
+          let preferredId: string | null = null
+          if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search)
+            const paramId = urlParams.get('id')
+            if (paramId && list.some(character => character.id === paramId)) {
+              preferredId = paramId
+              setActiveCharacterId(paramId)
+            }
+          }
+
+          const activeId = preferredId || getActiveCharacterId() || list[0].id
           console.log(`[CharacterManagement] Loading active character: ${activeId}`)
           const activeCharacter = list.find(character => character.id === activeId)
           const fallbackCharacters = list.filter(character => character.id !== activeId)
@@ -264,6 +285,17 @@ export function useCharacterManagement({ isClient, setCurrentTabValue }: UseChar
   const clearActiveCharacterToDefault = useCallback(() => {
     setCurrentCharacterId(null)
     setActiveCharacterId(null)
+    if (typeof window !== 'undefined' && window.location) {
+      try {
+        const url = new URL(window.location.href)
+        if (url.searchParams.has('id')) {
+          url.searchParams.delete('id')
+          window.history.replaceState({}, '', url.toString())
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
     replaceSheetData({ ...defaultSheetData })
   }, [replaceSheetData])
 

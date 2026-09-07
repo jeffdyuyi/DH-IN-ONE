@@ -11,6 +11,8 @@ interface CyberpunkExternalGearPanelProps {
   onChange: (updated: CyberpunkSheetExtension) => void
   onEquipToCombatWeapon?: (slot: 'primary' | 'secondary', gear: CyberpunkExternalGear) => void
   onEquipToCombatArmor?: (gear: CyberpunkExternalGear) => void
+  equippedWeaponNames?: { primary?: string; secondary?: string }
+  equippedArmorName?: string
 }
 
 export function CyberpunkExternalGearPanel({
@@ -18,6 +20,8 @@ export function CyberpunkExternalGearPanel({
   onChange,
   onEquipToCombatWeapon,
   onEquipToCombatArmor,
+  equippedWeaponNames,
+  equippedArmorName,
 }: CyberpunkExternalGearPanelProps) {
   const currentTier = cyberpunkData.tier || 'T1'
   const maxEquipSlots = CYBERPUNK_TIER_EQUIP_SLOTS[currentTier] || 2
@@ -254,6 +258,21 @@ export function CyberpunkExternalGearPanel({
                       )}
                     </button>
                     <span className="font-bold text-xs text-white truncate">{gear.name}</span>
+                    {Boolean(equippedWeaponNames?.primary && gear.name === equippedWeaponNames.primary) && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#F5F500]/20 text-[#F5F500] border border-[#F5F500]/40 shrink-0 shadow-[0_0_8px_rgba(245,245,0,0.25)]">
+                        已挂载主武器
+                      </span>
+                    )}
+                    {Boolean(equippedWeaponNames?.secondary && gear.name === equippedWeaponNames.secondary) && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/40 shrink-0 shadow-[0_0_8px_rgba(0,255,163,0.25)]">
+                        已挂载副手
+                      </span>
+                    )}
+                    {Boolean(equippedArmorName && gear.name === equippedArmorName) && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/40 shrink-0 shadow-[0_0_8px_rgba(0,255,163,0.25)]">
+                        已挂载护甲
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -350,19 +369,27 @@ export function CyberpunkExternalGearPanel({
                         <button
                           type="button"
                           onClick={() => onEquipToCombatWeapon?.('primary', gear)}
-                          title={gear.active ? '以激活数值设为主手' : '以基础数值设为主手'}
-                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 transition-colors"
+                          title={Boolean(equippedWeaponNames?.primary && gear.name === equippedWeaponNames.primary) ? '重新同步最新主手数据' : gear.active ? '以激活数值设为主手' : '以基础数值设为主手'}
+                          className={`px-2 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                            Boolean(equippedWeaponNames?.primary && gear.name === equippedWeaponNames.primary)
+                              ? 'bg-[#F5F500]/20 text-[#F5F500] border border-[#F5F500]/50 font-bold shadow-[0_0_8px_rgba(245,245,0,0.2)]'
+                              : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                          }`}
                         >
                           <Crosshair className="w-3 h-3" />
-                          <span>设为主手</span>
+                          <span>{Boolean(equippedWeaponNames?.primary && gear.name === equippedWeaponNames.primary) ? '同步主手 ✓' : '设为主手'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => onEquipToCombatWeapon?.('secondary', gear)}
-                          title={gear.active ? '以激活数值设为副手' : '以基础数值设为副手'}
-                          className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 transition-colors"
+                          title={Boolean(equippedWeaponNames?.secondary && gear.name === equippedWeaponNames.secondary) ? '重新同步最新副手数据' : gear.active ? '以激活数值设为副手' : '以基础数值设为副手'}
+                          className={`px-2 py-0.5 rounded transition-colors ${
+                            Boolean(equippedWeaponNames?.secondary && gear.name === equippedWeaponNames.secondary)
+                              ? 'bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/50 font-bold shadow-[0_0_8px_rgba(0,255,163,0.2)]'
+                              : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                          }`}
                         >
-                          设为副手
+                          {Boolean(equippedWeaponNames?.secondary && gear.name === equippedWeaponNames.secondary) ? '同步副手 ✓' : '设为副手'}
                         </button>
                       </>
                     )}
@@ -371,11 +398,15 @@ export function CyberpunkExternalGearPanel({
                       <button
                         type="button"
                         onClick={() => onEquipToCombatArmor?.(gear)}
-                        title={gear.active ? '以激活数值设为护甲' : '以基础数值设为护甲'}
-                        className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 transition-colors"
+                        title={Boolean(equippedArmorName && gear.name === equippedArmorName) ? '重新同步最新护甲数据' : gear.active ? '以激活数值设为护甲' : '以基础数值设为护甲'}
+                        className={`px-2 py-0.5 rounded flex items-center gap-1 transition-colors ${
+                          Boolean(equippedArmorName && gear.name === equippedArmorName)
+                            ? 'bg-[#00FFA3]/20 text-[#00FFA3] border border-[#00FFA3]/50 font-bold shadow-[0_0_8px_rgba(0,255,163,0.2)]'
+                            : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                        }`}
                       >
                         <Shield className="w-3 h-3" />
-                        <span>设为护甲</span>
+                        <span>{Boolean(equippedArmorName && gear.name === equippedArmorName) ? '同步护甲 ✓' : '设为护甲'}</span>
                       </button>
                     )}
                   </div>

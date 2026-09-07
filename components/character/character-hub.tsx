@@ -17,6 +17,7 @@ import {
   loadCharacterList, 
   saveCharacterList, 
   generateCharacterId,
+  setActiveCharacterId,
   MAX_CHARACTERS,
   CHARACTER_DATA_PREFIX
 } from '@/lib/multi-character-storage'
@@ -96,11 +97,13 @@ export function CharacterHub() {
     }
 
     saveCharacterList(updatedList)
+    setActiveCharacterId(newId)
     router.push(`/character/cyberpunk?id=${newId}`)
   }
 
   // 打开角色卡（统一进入爽博朋克车卡器）
   const handleOpenCharacter = (charId: string) => {
+    setActiveCharacterId(charId)
     const updatedList: CharacterList = {
       ...characterList,
       activeCharacterId: charId,

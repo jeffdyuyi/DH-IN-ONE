@@ -31,6 +31,7 @@ export function CyberpunkTopBar({
   onSave,
   onOpenPrintModal,
 }: CyberpunkTopBarProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const currentTier = cyberpunkData?.tier || 'T1'
   const credits = typeof cyberpunkData?.credits === 'number' ? cyberpunkData.credits : 0
   const streetCred = typeof cyberpunkData?.streetCred === 'number' ? cyberpunkData.streetCred : 0
@@ -192,7 +193,7 @@ export function CyberpunkTopBar({
             />
           </div>
 
-          {/* 快捷工具入口 */}
+          {/* 快捷工具入口 (桌面端) */}
           <div className="hidden sm:flex items-center gap-1 border-r border-[#6C00FF]/30 pr-2 mr-1">
             <Link
               href="/workshop"
@@ -215,6 +216,72 @@ export function CyberpunkTopBar({
             >
               卡牌库
             </Link>
+          </div>
+
+          {/* 快捷工具入口 (移动端下拉展开) */}
+          <div className="relative sm:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors"
+              style={
+                isLightPreview
+                  ? { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1', color: '#0F172A' }
+                  : { backgroundColor: '#12072B', borderColor: 'rgba(108,0,255,0.4)', color: '#CBD5E1' }
+              }
+              title="展开快捷工具菜单"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" style={isLightPreview ? { color: '#0F172A' } : { color: '#00FFA3' }} />
+              <span style={isLightPreview ? { color: '#0F172A', fontWeight: 600 } : undefined}>工具</span>
+            </button>
+
+            {mobileMenuOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 w-40 rounded-xl border p-1.5 shadow-2xl z-50 flex flex-col gap-1 backdrop-blur-lg"
+                style={
+                  isLightPreview
+                    ? { backgroundColor: 'rgba(255, 255, 255, 0.98)', borderColor: '#CBD5E1', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }
+                    : { backgroundColor: 'rgba(11, 3, 32, 0.98)', borderColor: 'rgba(108,0,255,0.6)', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }
+                }
+              >
+                <Link
+                  href="/workshop"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-[#6C00FF]/20"
+                  style={isLightPreview ? { color: '#0F172A' } : { color: '#F1F5F9' }}
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#F5F500]" />
+                  <span>卡牌工坊 V3</span>
+                </Link>
+                <Link
+                  href="/campaign"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-[#6C00FF]/20"
+                  style={isLightPreview ? { color: '#0F172A' } : { color: '#F1F5F9' }}
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#FF007F]" />
+                  <span>战役编辑器</span>
+                </Link>
+                <Link
+                  href="/vault"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-[#6C00FF]/20"
+                  style={isLightPreview ? { color: '#0F172A' } : { color: '#F1F5F9' }}
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#00FFA3]" />
+                  <span>规则卡牌库</span>
+                </Link>
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-left transition-colors hover:bg-slate-100 dark:hover:bg-[#6C00FF]/20"
+                  style={isLightPreview ? { color: '#0F172A' } : { color: '#F1F5F9' }}
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#6C00FF]" />
+                  <span>核心车卡器</span>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* 浅色/深色主题切换 (极简黑白灰默认) */}

@@ -39,13 +39,15 @@ import { useCharacterManagement } from '@/hooks/use-character-management'
 import { useExportHandlers } from '@/hooks/use-export-handlers'
 import { announcements, isLatestAnnouncementRead, markLatestAnnouncementRead } from '@/lib/announcements'
 import { saveCharacterSheet } from '@/character/storage/character-save-storage'
-import { saveCharacterById } from '@/lib/multi-character-storage'
+import { saveCharacterById, getActiveCharacterId } from '@/lib/multi-character-storage'
+import { applyCharacterImageAssetAction } from '@/character/storage/character-image-actions'
 import { User, CheckCircle2, Shield, UserCheck, Cpu, BookOpen, Bot, ScrollText } from 'lucide-react'
 
 export function CyberpunkCharacterSheet() {
   // Store 状态与动作
   const formData = useSheetStore((state) => state.sheetData)
   const setFormData = useSheetStore((state) => state.setSheetData)
+  const replaceSheetData = useSheetStore((state) => state.replaceSheetData)
   const selectCardForSlot = useSheetStore((state) => state.selectCardForSlot)
   const deleteCard = useSheetStore((state) => state.deleteCard)
   const selectCharacterChoiceCard = useSheetStore((state) => state.selectCharacterChoiceCard)
@@ -82,10 +84,24 @@ export function CyberpunkCharacterSheet() {
     return () => window.removeEventListener('resize', checkIsMobile)
   }, [])
 
-  // 1. 多角色存档管理
-  const [characterManagementModalOpen, setCharacterManagementModalOpen] = useState(false)
-  const openCharacterManagementModal = () => setCharacterManagementModalOpen(true)
-  const closeCharacterManagementModal = () => setCharacterManagementModalOpen(false)
+  // 1. 模态框集中状态管理
+  const [modalsState, setModalsState] = useState<CyberpunkSheetModalsState>({
+    genericModal: { isOpen: false, type: 'profession' },
+    domainModal: { isOpen: false, slotIndex: 5, isVault: false },
+    weaponModalOpen: false,
+    activeWeaponSlot: 'primary',
+    armorModalOpen: false,
+    installAugModalOpen: false,
+    activeZoneKey: 'head',
+    installExternalGearModalOpen: false,
+    characterManagementModalOpen: false,
+    printModalOpen: false,
+  })
+
+  const openCharacterManagementModal = () =>
+    setModalsState((prev) => ({ ...prev, characterManagementModalOpen: true }))
+  const closeCharacterManagementModal = () =>
+    setModalsState((prev) => ({ ...prev, characterManagementModalOpen: false }))
 
   const {
     characterList,
@@ -102,6 +118,19 @@ export function CyberpunkCharacterSheet() {
     isClient: true,
     setCurrentTabValue: () => {},
   })
+
+  // 切换角色时立即强制同步刷盘当前正在编辑的数据，确保绝不丢失
+  const handleSwitchCharacter = (id: string) => {
+    const { id: prevId, data } = latestSaveDataRef.current
+    if (prevId && data) {
+      try {
+        saveCharacterById(prevId, data)
+      } catch (err) {
+        console.error('[CyberpunkSwitchSave] Failed to save character before switch:', err)
+      }
+    }
+    switchToCharacter(id)
+  }
 
   // 2. 导出功能 Hook
   const {
@@ -141,6 +170,49 @@ export function CyberpunkCharacterSheet() {
       campaignMode: 'cyberpunk',
       cyberpunkData: updated,
       cyberpunk: updated,
+    }))
+  }
+
+  // 头像立绘变更（双向兼容匕首心标准格式与IndexedDB异步转存，绝不阻塞localStorage）
+  const handlePortraitChange = async (patch: {
+    portrait?: string
+    portraitScale?: number
+    portraitPosition?: { x: number; y: number }
+  }) => {
+    if ('portrait' in patch) {
+      const newImg = patch.portrait || ''
+      if (currentCharacterId) {
+        try {
+          const currentSheet = useSheetStore.getState().sheetData
+          await applyCharacterImageAssetAction({
+            characterId: currentCharacterId,
+            role: 'portrait',
+            imageDataUrl: newImg,
+            sheetData: currentSheet,
+            getCurrentCharacterId: getActiveCharacterId,
+            getCurrentSheetData: () => useSheetStore.getState().sheetData,
+            replaceSheetData,
+          })
+        } catch (error) {
+          console.error(`[CyberpunkPortrait] Failed to update portrait for ${currentCharacterId}:`, error)
+        }
+      }
+    }
+
+    const effectiveCyberData = formData.cyberpunkData || formData.cyberpunk || cyberpunkData
+    const updatedCyber: CyberpunkSheetExtension = {
+      ...effectiveCyberData,
+      ...(patch.portrait !== undefined ? { portrait: patch.portrait } : {}),
+      ...(patch.portraitScale !== undefined ? { portraitScale: patch.portraitScale } : {}),
+      ...(patch.portraitPosition !== undefined ? { portraitPosition: patch.portraitPosition } : {}),
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      characterImage: patch.portrait !== undefined ? (patch.portrait || '') : prev.characterImage,
+      campaignMode: 'cyberpunk',
+      cyberpunkData: updatedCyber,
+      cyberpunk: updatedCyber,
     }))
   }
 
@@ -225,21 +297,7 @@ export function CyberpunkCharacterSheet() {
     return () => clearTimeout(timer)
   }, [currentCharacterId, formData, cyberpunkData, isLoading])
 
-  // 4. 模态框集中状态管理
-  const [modalsState, setModalsState] = useState<CyberpunkSheetModalsState>({
-    genericModal: { isOpen: false, type: 'profession' },
-    domainModal: { isOpen: false, slotIndex: 5, isVault: false },
-    weaponModalOpen: false,
-    activeWeaponSlot: 'primary',
-    armorModalOpen: false,
-    installAugModalOpen: false,
-    activeZoneKey: 'head',
-    installExternalGearModalOpen: false,
-    characterManagementModalOpen: false,
-    printModalOpen: false,
-  })
-
-  // 5. A4 实体印刷与战术卡牌导出状态
+  // 4. A4 实体印刷与战术卡牌导出状态
   const [printOptions, setPrintOptions] = useState<CyberpunkPrintOptions>({
     includeDossier: true,
     includeGearCards: true,
@@ -712,7 +770,9 @@ export function CyberpunkCharacterSheet() {
           <div className="space-y-6">
             <CyberpunkEquipmentHud
               cyberpunkData={cyberpunkData}
+              characterImage={formData?.characterImage}
               onChangeCyberpunk={handleCyberpunkChange}
+              onPortraitChange={handlePortraitChange}
               onOpenSelectModal={(type, zoneKey, slotIndex) => {
                 if (type === 'weapon') {
                   setModalsState((prev) => ({
@@ -740,6 +800,11 @@ export function CyberpunkCharacterSheet() {
               onChange={handleCyberpunkChange}
               onEquipToCombatWeapon={handleEquipExternalToCombatWeapon}
               onEquipToCombatArmor={handleEquipExternalToCombatArmor}
+              equippedWeaponNames={{
+                primary: formData?.equipment?.weaponSlots?.primary?.name,
+                secondary: formData?.equipment?.weaponSlots?.secondary?.name,
+              }}
+              equippedArmorName={formData?.equipment?.armorSlot?.name}
             />
           </div>
         )}
@@ -827,7 +892,7 @@ export function CyberpunkCharacterSheet() {
         onTriggerPrint={handleTriggerPrint}
         characterList={characterList}
         currentCharacterId={currentCharacterId}
-        onSwitchCharacter={switchToCharacter}
+        onSwitchCharacter={handleSwitchCharacter}
         onCreateCharacter={createNewCharacterHandler}
         onCreateImportedCharacter={createImportedCharacterHandler}
         onDeleteCharacter={deleteCharacterHandler}

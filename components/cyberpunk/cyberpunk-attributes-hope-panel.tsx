@@ -489,13 +489,16 @@ export function CyberpunkAttributesHopePanel({ cyberpunkData: propCyberpunkData 
           armorMajor={armorSlot?.baseThresholds?.major || 0}
           equippedArmorName={equippedArmorName}
           onUpdateCyberpunkData={(patch) => {
-            setSheetData((prev) => ({
-              ...prev,
-              cyberpunk: {
-                ...(prev.cyberpunk || {}),
-                ...patch,
-              },
-            }))
+            setSheetData((prev) => {
+              const baseCyber = prev.cyberpunkData || prev.cyberpunk || {}
+              const updatedCyber = { ...baseCyber, ...patch }
+              return {
+                ...prev,
+                campaignMode: 'cyberpunk',
+                cyberpunk: updatedCyber,
+                cyberpunkData: updatedCyber,
+              }
+            })
           }}
         />
       </div>

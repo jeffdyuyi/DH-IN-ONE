@@ -30,7 +30,7 @@ export function InstallAugmentationModal({
   const [activeTab, setActiveTab] = useState<'vault' | 'json'>('vault')
   const [vaultCards, setVaultCards] = useState<VaultCard[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [filterType, setFilterType] = useState<'all' | 'cyberware' | 'loot'>('all')
+  const [filterType, setFilterType] = useState<'all' | 'cyberware' | 'loot' | 'workshop'>('all')
   const [searchKeyword, setSearchKeyword] = useState<string>('')
   
   const [jsonInput, setJsonInput] = useState('')
@@ -42,7 +42,7 @@ export function InstallAugmentationModal({
         try {
           setLoading(true)
           await vaultStorage.initialize()
-          const categories = filterType === 'all' 
+          const categories = (filterType === 'all' || filterType === 'workshop')
             ? ['cyberware', 'loot'] as any
             : [filterType] as any
           const result = await vaultStorage.queryCards({
@@ -51,6 +51,7 @@ export function InstallAugmentationModal({
           })
           // 仅展示身体义体（植入体、仿生件、时尚件及通用战利品），排除外置装备与作战武器/护甲
           const filtered = result.filter((card) => {
+            if (filterType === 'workshop' && card.sourceApp !== 'workshop') return false
             if (card.category === 'weapon' || card.category === 'armor' || card.category === 'external_gear') return false
             const data = (card.data || {}) as Record<string, any>
             const type = (data.cyberType || '').toLowerCase()
@@ -213,6 +214,14 @@ export function InstallAugmentationModal({
                   }`}
                 >
                   赛博装备
+                </button>
+                <button
+                  onClick={() => setFilterType('workshop')}
+                  className={`px-2.5 py-1.5 text-xs rounded-lg ${
+                    filterType === 'workshop' ? 'bg-[#FF007F]/20 text-[#FF007F] border border-[#FF007F]/30 font-bold' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  工坊自制
                 </button>
               </div>
             </div>
