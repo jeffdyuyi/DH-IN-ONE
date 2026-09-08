@@ -833,6 +833,7 @@ export function CyberpunkCharacterSheet() {
         isMobile={isMobile}
         isCardDrawerOpen={false}
         characterCount={characterList.length}
+        hideGuide={true}
         onToggleCardDrawer={() => {}}
         onToggleGuide={() => setIsGuideOpen(!isGuideOpen)}
         onToggleNotebook={() => {

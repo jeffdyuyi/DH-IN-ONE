@@ -51,6 +51,7 @@ interface MainModeProps extends BottomDockBaseProps {
   mode: 'main'
   isCardDrawerOpen: boolean
   characterCount: number
+  hideGuide?: boolean // 支持屏蔽建卡指引按键（如爽博朋克车卡器暂未接入专属指引时使用）
 
   // 卡牌相关
   onToggleCardDrawer: () => void
@@ -125,27 +126,29 @@ function MainModeContent(props: MainModeProps) {
           </TooltipContent>
         </Tooltip>
 
-        {/* 建卡指引按钮 */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={props.onToggleGuide}
-              className={cn(
-                "bg-gray-800 hover:bg-gray-700 text-white gap-1.5 text-sm",
-                isMobile ? "px-4 py-2.5" : "px-3 py-1.5"
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              建卡指引
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>新手建卡指引</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              跟随步骤快速创建你的第一个角色
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        {/* 建卡指引按钮 (支持通过 hideGuide 屏蔽，未来可替换为专属指引) */}
+        {!props.hideGuide && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={props.onToggleGuide}
+                className={cn(
+                  "bg-gray-800 hover:bg-gray-700 text-white gap-1.5 text-sm",
+                  isMobile ? "px-4 py-2.5" : "px-3 py-1.5"
+                )}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                建卡指引
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>新手建卡指引</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                跟随步骤快速创建你的第一个角色
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         {/* 笔记按钮 */}
         <Tooltip>
