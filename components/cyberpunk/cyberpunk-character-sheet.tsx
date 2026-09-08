@@ -634,6 +634,22 @@ export function CyberpunkCharacterSheet() {
                       className="mt-0.5 w-full rounded border border-[#6C00FF]/40 bg-[#0B0320] px-2.5 py-1 text-xs font-bold text-[#F5F500] focus:border-[#00FFA3] focus:outline-none font-mono"
                     />
                   </div>
+                  <div className="w-20">
+                    <label className="text-[10px] text-slate-400 font-bold block">等级 (LV)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={Number(formData?.level) || 1}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const lvl = Math.max(1, Math.min(10, Number(e.target.value) || 1))
+                        const autoTier = lvl >= 8 ? 'T4' : lvl >= 5 ? 'T3' : lvl >= 2 ? 'T2' : 'T1'
+                        setFormData((prev) => ({ ...prev, level: String(lvl) }))
+                        handleCyberpunkChange({ ...cyberpunkData, tier: autoTier })
+                      }}
+                      className="mt-0.5 w-full rounded border border-[#6C00FF]/40 bg-[#0B0320] px-2 py-1 text-xs font-bold text-[#00FFA3] text-center focus:border-[#00FFA3] focus:outline-none font-mono"
+                    />
+                  </div>
                 </div>
 
                 {/* 核心指标组 (位阶选择器 + 信用点 + 声望) */}
@@ -674,7 +690,7 @@ export function CyberpunkCharacterSheet() {
                       }
                       className="w-16 bg-transparent text-xs font-bold font-mono text-[#F5F500] focus:outline-none text-right"
                     />
-                    <span className="text-[10px] text-slate-400 font-mono">点</span>
+                    <span className="text-[10px] text-[#F5F500]/70 font-mono">信用点</span>
                   </div>
 
                   {/* 街头声望 (参考图1: 青绿色胶囊徽章) */}
