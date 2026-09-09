@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { 
-  Columns, Eye, Code, ZoomIn, ZoomOut, RotateCcw, 
+  Columns, Eye, ZoomIn, ZoomOut, RotateCcw, 
   BookOpen, Layers, CheckCircle2, Copy,
   ListTree, Plus, Database, ChevronLeft, ChevronRight,
   Sparkles, FileText, SplitSquareVertical, FilePlus,
   SlidersHorizontal, ToggleLeft, ToggleRight, Settings,
-  LayoutGrid, Type
+  Type
 } from 'lucide-react';
-import { SmartTextarea } from './SmartTextarea';
-import { MarkdownRenderer } from './MarkdownRenderer';
 import { MarkdownToolbar } from './MarkdownToolbar';
 import { CampaignPreviewEngine } from './CampaignPreviewEngine';
 import { VisualBlockStream, createDefaultContentBlock } from './VisualBlockStream';
@@ -46,7 +44,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
   onCloseSplitView,
 }) => {
   const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
-  const [editStyle, setEditStyle] = useState<'visual' | 'code'>('visual'); // 'visual' (积木流) by default
   const [splitRatio, setSplitRatio] = useState<'50:50' | '60:40' | '40:60'>('50:50');
   const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -85,9 +82,9 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
     }
   }, [onUpdateProject]);
 
-  // Extract Heading Outline from sections or Markdown Text
+  // Extract Heading Outline from sections
   const outlineItems = useMemo(() => {
-    if (editStyle === 'visual' && projectData.sections && projectData.sections.length > 0) {
+    if (projectData.sections && projectData.sections.length > 0) {
       return projectData.sections.map((sec, idx) => ({
         id: sec.id,
         level: sec.level || 2,
@@ -95,19 +92,8 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
         lineIndex: idx,
       }));
     }
-
-    const lines = fullMarkdownText.split('\n');
-    const items: { id?: string; level: number; title: string; lineIndex: number }[] = [];
-    lines.forEach((line, idx) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('# ') || trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
-        const level = trimmed.startsWith('# ') ? 1 : trimmed.startsWith('## ') ? 2 : 3;
-        const title = trimmed.replace(/^#{1,3}\s+/, '');
-        items.push({ level, title, lineIndex: idx });
-      }
-    });
-    return items;
-  }, [editStyle, projectData.sections, fullMarkdownText]);
+    return [];
+  }, [projectData.sections]);
 
   const handleFocusItem = useCallback((secId?: string, blockId?: string) => {
     if (!previewContainerRef.current) return;
@@ -139,26 +125,11 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
 
   // Jump to specific outline heading in editor & auto-align preview
   const handleJumpToSection = (item: { id?: string; lineIndex: number }) => {
-    if (editStyle === 'visual' && item.id) {
+    if (item.id) {
       const el = document.getElementById(`editor-section-${item.id}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      handleFocusItem(item.id);
-      return;
-    }
-
-    const lines = fullMarkdownText.split('\n');
-    const charIndex = lines.slice(0, item.lineIndex).join('\n').length;
-    
-    const textarea = document.querySelector('.dh-split-editor textarea') as HTMLTextAreaElement;
-    if (textarea) {
-      textarea.focus();
-      textarea.setSelectionRange(charIndex, charIndex + (lines[item.lineIndex]?.length || 0));
-      const linePct = item.lineIndex / Math.max(1, lines.length);
-      textarea.scrollTop = linePct * textarea.scrollHeight;
-    }
-    if (item.id) {
       handleFocusItem(item.id);
     }
   };
@@ -172,22 +143,16 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
   };
 
   const handleAddChapter = () => {
-    if (editStyle === 'visual') {
-      const newSec: DynamicSection = {
-        id: 'sec_' + Math.random().toString(36).substring(2, 9),
-        title: `第 ${(projectData.sections || []).length + 1} 章：新征程`,
-        level: 2,
-        blocks: [createDefaultContentBlock('text')]
-      };
-      handleUpdateProject(prev => ({
-        ...prev,
-        sections: [...(prev.sections || []), newSec]
-      }));
-    } else {
-      const chapterNum = outlineItems.filter(i => i.level === 1).length + 1;
-      const newChapterText = `\n\n\\page\n{{Ch${Math.min(5, chapterNum)},tab}}\n# 第 ${chapterNum} 章：新的征程\n*在这里开始描述新的章节故事与场景...*\n\n`;
-      onChangeMarkdown(fullMarkdownText + newChapterText);
-    }
+    const newSec: DynamicSection = {
+      id: 'sec_' + Math.random().toString(36).substring(2, 9),
+      title: `第 ${(projectData.sections || []).length + 1} 章：新征程`,
+      level: 2,
+      blocks: [createDefaultContentBlock('text')]
+    };
+    handleUpdateProject(prev => ({
+      ...prev,
+      sections: [...(prev.sections || []), newSec]
+    }));
   };
 
   const toggleSetting = (key: string) => {
@@ -318,33 +283,6 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             </button>
           )}
 
-          <div className="h-4 w-px bg-stone-800 mx-1 hidden sm:block" />
-
-          {/* Edit Mode Toggle: [ 🧩 可视化积木 (默认) | 📝 纯代码 (Markdown) ] */}
-          <div className="flex items-center bg-stone-900 border border-stone-800 rounded-lg p-0.5 text-[11px]">
-            <button
-              type="button"
-              onClick={() => setEditStyle('visual')}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded cursor-pointer transition-colors ${
-                editStyle === 'visual' ? 'bg-amber-600 text-white font-bold shadow-2xs' : 'text-stone-400 hover:text-stone-200'
-              }`}
-              title="可视化积木流编辑模式 (小白傻瓜引导、聚焦唤醒降噪)"
-            >
-              <LayoutGrid size={12} />
-              <span>可视化积木</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditStyle('code')}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                editStyle === 'code' ? 'bg-amber-600 text-white font-bold shadow-2xs' : 'text-stone-400 hover:text-stone-200'
-              }`}
-              title="纯 Markdown 代码编辑模式"
-            >
-              <Code size={12} />
-              <span>纯代码</span>
-            </button>
-          </div>
         </div>
 
         {/* Center: View Switcher & Split Ratio */}
@@ -452,7 +390,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
             onChange={(newVal) => {
               onChangeMarkdown(newVal);
             }}
-            onInsertBlock={editStyle === 'visual' ? handleInsertBlockFromToolbar : undefined}
+            onInsertBlock={handleInsertBlockFromToolbar}
             onGenerateToc={onGenerateToc}
           />
         </div>
@@ -669,42 +607,18 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           </button>
         )}
 
-        {/* Center: Visual Block Stream OR Smart Textarea Code Editor */}
+        {/* Center: Visual Block Stream */}
         {(viewMode === 'split' || viewMode === 'editor') && (
           <div
             ref={editorContainerRef}
-            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col ${
-              editStyle === 'visual' ? 'bg-stone-100 text-stone-900' : 'bg-stone-950 text-stone-100'
-            } border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
+            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col bg-stone-100 text-stone-900 border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
           >
-            {editStyle === 'visual' ? (
-              <VisualBlockStream
-                projectData={projectData}
-                onUpdateProject={handleUpdateProject}
-                onRegisterFocus={handleRegisterFocus}
-                onFocusItem={handleFocusItem}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col bg-stone-950 rounded-xl border border-stone-800 overflow-hidden shadow-inner">
-                <div className="flex items-center justify-between px-3 py-1.5 bg-stone-900/90 border-b border-stone-800 text-[11px] text-stone-400">
-                  <span className="font-mono flex items-center gap-1.5 text-stone-300">
-                    <Code size={12} className="text-amber-400" /> Markdown 源码模式
-                  </span>
-                  <span className="text-[10px] text-stone-500 font-mono">
-                    {fullMarkdownText.length} 字符 · {fullMarkdownText.split('\n').length} 行
-                  </span>
-                </div>
-                <SmartTextarea
-                  value={fullMarkdownText}
-                  onChangeValue={onChangeMarkdown}
-                  showToolbar={false}
-                  minRows={30}
-                  onGenerateToc={onGenerateToc}
-                  className="flex-1 min-h-[calc(100vh-250px)] font-mono text-sm leading-relaxed !bg-stone-950 !text-stone-100 selection:bg-amber-600 selection:text-white caret-amber-400 placeholder:text-stone-600 border-0 focus:ring-0 p-4"
-                  placeholder="在这里畅快书写你的长篇战役... 支持标准 Markdown 语法，输入 '/' 唤出快捷选单..."
-                />
-              </div>
-            )}
+            <VisualBlockStream
+              projectData={projectData}
+              onUpdateProject={handleUpdateProject}
+              onRegisterFocus={handleRegisterFocus}
+              onFocusItem={handleFocusItem}
+            />
           </div>
         )}
 

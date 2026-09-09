@@ -68,13 +68,17 @@ export const SavedLibraryModal: React.FC<SavedLibraryModalProps> = ({
   const handleSaveAsNew = () => {
     onSaveCurrentAsNew(newTitle.trim() || undefined);
     showToast(`已成功保存战役《${newTitle.trim() || currentData.title}》为新作品！`);
-    loadLibrary();
+    setTimeout(() => {
+      loadLibrary();
+    }, 60);
   };
 
   const handleOverwrite = () => {
     onOverwriteCurrent();
     showToast('已更新当前存档！');
-    loadLibrary();
+    setTimeout(() => {
+      loadLibrary();
+    }, 60);
   };
 
   const handleDuplicate = (id: string, e: React.MouseEvent) => {
@@ -83,17 +87,19 @@ export const SavedLibraryModal: React.FC<SavedLibraryModalProps> = ({
     if (!target) return;
 
     const newId = 'doc_' + Math.random().toString(36).substring(2, 10);
+    const now = Date.now();
     const dupData: ProjectData = {
       ...JSON.parse(JSON.stringify(target.data)),
       id: newId,
       title: `${target.title} (副本)`,
+      lastUpdated: now,
     };
 
     const dupEntry: SavedProject = {
       id: newId,
       title: dupData.title,
       author: dupData.author,
-      updatedAt: Date.now(),
+      updatedAt: now,
       sectionCount: dupData.sections?.length || 0,
       concept: dupData.concept,
       data: dupData,
@@ -116,7 +122,13 @@ export const SavedLibraryModal: React.FC<SavedLibraryModalProps> = ({
   };
 
   const handleLoad = (project: SavedProject) => {
-    onLoadProject(project.data);
+    const dataToLoad: ProjectData = {
+      ...project.data,
+      id: project.id,
+      title: project.title || project.data?.title || '未命名战役',
+      lastUpdated: project.updatedAt || project.data?.lastUpdated || Date.now(),
+    };
+    onLoadProject(dataToLoad);
     showToast(`已成功加载《${project.title}》`);
     onClose();
   };
@@ -146,12 +158,13 @@ export const SavedLibraryModal: React.FC<SavedLibraryModalProps> = ({
         const json = JSON.parse(event.target?.result as string);
         if (json && json.sections) {
           const docId = json.id || ('doc_' + Math.random().toString(36).substring(2, 10));
-          const projectWithId = { ...json, id: docId };
+          const now = Date.now();
+          const projectWithId: ProjectData = { ...json, id: docId, lastUpdated: now };
           const entry: SavedProject = {
             id: docId,
             title: json.title || '导入的战役',
             author: json.author || '未知',
-            updatedAt: Date.now(),
+            updatedAt: now,
             sectionCount: json.sections.length,
             concept: json.concept,
             data: projectWithId,

@@ -612,7 +612,7 @@ export const CopyrightPageCard: React.FC<{
 }> = ({ projectData, onUpdateProject, onFocusPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const copyright = projectData.creditsPage?.copyright || {
+  const copyright = projectData.copyrightPage || projectData.creditsPage?.copyright || {
     enabled: true,
     template: 'dh_bilingual' as DPCGLTemplateType,
     workTitle: projectData.title,
@@ -630,11 +630,18 @@ export const CopyrightPageCard: React.FC<{
   const updateCopyright = (updates: Partial<CopyrightSettings>) => {
     onUpdateProject(prev => {
       const currentCredits = prev.creditsPage || { enabled: false };
+      const currentCopyright = prev.copyrightPage || currentCredits.copyright || copyright;
+      const mergedCopyright: CopyrightSettings = {
+        ...currentCopyright,
+        ...updates,
+      };
+
       return {
         ...prev,
+        copyrightPage: mergedCopyright,
         creditsPage: {
           ...currentCredits,
-          copyright: { ...copyright, ...updates }
+          copyright: mergedCopyright,
         }
       };
     });

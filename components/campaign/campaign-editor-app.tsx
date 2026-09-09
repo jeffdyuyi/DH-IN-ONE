@@ -834,10 +834,16 @@ const MainContent = () => {
       const raw = localStorage.getItem(LIBRARY_STORAGE_KEY);
       let library: SavedProject[] = raw ? JSON.parse(raw) : [];
 
+      const normalizedCopyright = data.copyrightPage || data.creditsPage?.copyright;
       const updatedProjectData: ProjectData = {
         ...data,
         id: targetId,
         title: title,
+        copyrightPage: normalizedCopyright || data.copyrightPage,
+        creditsPage: data.creditsPage ? {
+          ...data.creditsPage,
+          copyright: normalizedCopyright || data.creditsPage.copyright
+        } : (normalizedCopyright ? { enabled: false, copyright: normalizedCopyright } : undefined)
       };
 
       const now = Date.now();
@@ -949,6 +955,60 @@ const MainContent = () => {
     });
   }, [setProjectData]);
 
+  const handleGenerateToc = useCallback(() => {
+    const currentSections = projectData.sections || [];
+    const nonToc = currentSections.filter(s => s.id !== 'sec_toc' && s.title !== '全书目录 (Contents)' && s.title !== '全书目录');
+
+    let tocContent = `*本战役模组章节架构与内容导引：*\n\n`;
+
+    if (projectData.concept || projectData.introduction || projectData.summary) {
+      tocContent += `✦ **战役框架与概述**\n\n`;
+    }
+
+    nonToc.forEach((sec, idx) => {
+      const bullet = sec.level === 1 ? '✦' : '•';
+      const indent = sec.level > 1 ? '  ' : '';
+      tocContent += `${indent}${bullet} **${sec.title || `第 ${idx + 1} 节`}**\n`;
+      if (sec.italicNote) {
+        tocContent += `${indent}  *${sec.italicNote}*\n`;
+      }
+      tocContent += `\n`;
+    });
+
+    if (projectData.creditsPage?.enabled || projectData.copyrightPage?.enabled || projectData.settings?.showCopyright) {
+      tocContent += `✦ **附录：DPCGL 官方版权与致谢名单**\n\n`;
+    }
+
+    const tocSection: DynamicSection = {
+      id: 'sec_toc',
+      title: '全书目录 (Contents)',
+      level: 2,
+      columnMode: 'cols',
+      italicNote: '点击导航或通读全书各章节概要',
+      blocks: [
+        {
+          id: 'b_toc_text',
+          type: 'text',
+          content: tocContent.trim(),
+        }
+      ]
+    };
+
+    handleUpdateProject((prev: ProjectData) => {
+      const sections = [...(prev.sections || [])];
+      const existingIdx = sections.findIndex(s => s.id === 'sec_toc' || s.title === '全书目录' || s.title === '全书目录 (Contents)');
+      if (existingIdx >= 0) {
+        sections[existingIdx] = tocSection;
+        return { ...prev, sections };
+      } else {
+        return { ...prev, sections: [tocSection, ...sections] };
+      }
+    });
+
+    setAutoSaveToast('已为您生成并更新【全书目录】章节');
+    setTimeout(() => setAutoSaveToast(null), 3000);
+  }, [handleUpdateProject, projectData]);
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fdfcf8] text-stone-800 font-sans flex flex-col print:h-auto print:w-auto print:bg-white print:overflow-visible">
       <Navbar 
@@ -1008,10 +1068,7 @@ const MainContent = () => {
                 setSplitMarkdownText(serializeProjectDataToV3Markdown(updatedData));
               }}
               onOpenVault={() => setIsVaultModalOpen(true)}
-              onGenerateToc={() => {
-                const toc = generateTocSnippet(projectData);
-                setSplitMarkdownText((prev) => `${toc}\n\n${prev || serializeProjectDataToV3Markdown(projectData)}`);
-              }}
+              onGenerateToc={handleGenerateToc}
             />
           </div>
         ) : (
@@ -1199,7 +1256,6 @@ const Navbar = React.memo(({
   };
 
   const handleExportHTML = () => {
-    if (viewMode !== 'preview') { alert("请先切换到预览模式 (Preview) 以导出 HTML。"); return; }
     const contentElement = document.getElementById('preview-content');
     if (!contentElement) { alert("无法找到预览内容，请稍后重试。"); return; }
     const coverElement = document.getElementById('preview-cover-page');
@@ -1338,14 +1394,11 @@ const Navbar = React.memo(({
                 </button>
                 <button 
                   onClick={() => { handleExportHTML(); setIsMenuOpen(false); }} 
-                  disabled={viewMode !== 'preview'}
-                  className={`${Styles.toolBtn} ${viewMode !== 'preview' ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-stone-600' : ''}`}
+                  className={Styles.toolBtn}
+                  title="导出单文件离线 HTML 手册"
                 >
                   <FileCode className="w-4 h-4 text-stone-400" />
-                  <div className="flex flex-col text-left leading-tight">
-                    <span>导出 HTML</span>
-                    {viewMode !== 'preview' && <span className="text-[9px] text-stone-400 font-normal">需在预览模式下使用</span>}
-                  </div>
+                  <span>导出 HTML</span>
                 </button>
 
                 <div className="my-1 border-t border-stone-100"></div>

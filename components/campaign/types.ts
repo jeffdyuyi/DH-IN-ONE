@@ -302,6 +302,7 @@ export interface ProjectData {
   id?: string;
   title: string;
   author: string;
+  lastUpdated?: number;
   
   // Content Fields
   concept: string;
