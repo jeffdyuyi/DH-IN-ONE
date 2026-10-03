@@ -1052,7 +1052,7 @@ const MainContent = () => {
 
       <div className="flex-1 flex overflow-hidden relative print:block print:h-auto print:overflow-visible">
         {viewMode === 'edit' ? (
-          <div className="flex-1 overflow-hidden h-full flex flex-col">
+          <div className="flex-1 overflow-hidden h-full flex flex-col print:h-auto print:overflow-visible print:block">
             <CampaignSplitEditor
               projectData={projectData}
               fullMarkdownText={splitMarkdownText || serializeProjectDataToV3Markdown(projectData)}

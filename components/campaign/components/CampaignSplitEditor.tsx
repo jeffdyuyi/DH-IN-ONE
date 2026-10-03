@@ -195,10 +195,10 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
   }, [handleUpdateProject]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-stone-900 text-stone-100 overflow-hidden select-none border border-stone-800 rounded-xl shadow-2xl">
+    <div className="flex flex-col h-full w-full bg-stone-900 text-stone-100 overflow-hidden select-none border border-stone-800 rounded-xl shadow-2xl print:bg-white print:text-stone-900 print:overflow-visible print:h-auto print:border-none print:shadow-none print:rounded-none">
       
       {/* Top Studio Control Bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-stone-950/95 border-b border-stone-800 shrink-0 text-xs flex-wrap gap-2">
+      <div className="flex items-center justify-between px-3 py-2 bg-stone-950/95 border-b border-stone-800 shrink-0 text-xs flex-wrap gap-2 print:hidden">
         
         {/* Left: Layout Switches & Insert Tools */}
         <div className="flex items-center gap-2">
@@ -384,7 +384,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
 
       {/* Full-Width Sticky Top Toolbar spanning across workspace (100% width) */}
       {(viewMode === 'split' || viewMode === 'editor') && (
-        <div className="w-full shrink-0 sticky top-0 z-30">
+        <div className="w-full shrink-0 sticky top-0 z-30 print:hidden">
           <MarkdownToolbar
             value={fullMarkdownText}
             onChange={(newVal) => {
@@ -397,11 +397,11 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
       )}
 
       {/* Main Studio Body */}
-      <div className="flex flex-1 w-full overflow-hidden relative">
+      <div className="flex flex-1 w-full overflow-hidden relative print:overflow-visible print:h-auto print:block">
         
         {/* Leftmost: Collapsible Pinned Chapter Outline Drawer */}
         {isOutlineOpen ? (
-          <aside className="w-64 shrink-0 h-full bg-stone-900 border-r border-stone-800 flex flex-col text-xs z-20 shadow-xl transition-all duration-300">
+          <aside className="w-64 shrink-0 h-full bg-stone-900 border-r border-stone-800 flex flex-col text-xs z-20 shadow-xl transition-all duration-300 print:hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-stone-800/80 bg-stone-950/70 shrink-0">
               <div className="flex items-center gap-2">
@@ -591,7 +591,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
           <button
             type="button"
             onClick={() => setIsOutlineOpen(true)}
-            className="w-8 shrink-0 h-full bg-stone-900/90 hover:bg-stone-800/90 border-r border-stone-800 flex flex-col items-center py-4 gap-2 text-stone-400 hover:text-amber-300 transition-all cursor-pointer group z-20"
+            className="w-8 shrink-0 h-full bg-stone-900/90 hover:bg-stone-800/90 border-r border-stone-800 flex flex-col items-center py-4 gap-2 text-stone-400 hover:text-amber-300 transition-all cursor-pointer group z-20 print:hidden"
             title="展开章节大纲 (目录树)"
           >
             <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform text-amber-400" />
@@ -611,7 +611,7 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
         {(viewMode === 'split' || viewMode === 'editor') && (
           <div
             ref={editorContainerRef}
-            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col bg-stone-100 text-stone-900 border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass}`}
+            className={`h-full overflow-y-auto p-3 md:p-5 flex flex-col bg-stone-100 text-stone-900 border-r border-stone-800 transition-all dh-split-editor ${editorWidthClass} print:hidden`}
           >
             <VisualBlockStream
               projectData={projectData}
@@ -623,26 +623,24 @@ export const CampaignSplitEditor: React.FC<CampaignSplitEditorProps> = ({
         )}
 
         {/* Right: Live Publication Preview Pane (100% unified with PreviewView & Export) */}
-        {viewMode === 'split' && (
+        <div
+          ref={previewContainerRef}
+          className={`${viewMode === 'editor' ? 'hidden print:block' : ''} h-full overflow-y-auto p-4 md:p-8 bg-stone-950/90 transition-all ${previewWidthClass} print:p-0 print:m-0 print:bg-white print:overflow-visible print:h-auto print:w-full print:max-w-none print:block print:flex-1`}
+        >
           <div
-            ref={previewContainerRef}
-            className={`h-full overflow-y-auto p-4 md:p-8 bg-stone-950/90 transition-all ${previewWidthClass}`}
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'top center',
+              transition: 'transform 0.15s ease-out',
+            }}
+            className="w-full flex flex-col items-center print:!transform-none print:w-full print:block"
           >
-            <div
-              style={{
-                transform: `scale(${zoomLevel / 100})`,
-                transformOrigin: 'top center',
-                transition: 'transform 0.15s ease-out',
-              }}
-              className="w-full flex flex-col items-center"
-            >
-              <CampaignPreviewEngine
-                data={projectData}
-                activeSectionId={activeSectionId}
-              />
-            </div>
+            <CampaignPreviewEngine
+              data={projectData}
+              activeSectionId={activeSectionId}
+            />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

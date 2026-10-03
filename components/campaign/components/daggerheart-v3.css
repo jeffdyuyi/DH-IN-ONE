@@ -579,10 +579,65 @@
 
 /* Print Rules */
 @media print {
-  body {
-    background: transparent !important;
-    padding: 0 !important;
+  @page {
+    margin: 10mm;
+    size: auto;
   }
+  html, body {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force hide all editor navigation, sidebars and edit chrome */
+  nav,
+  aside,
+  .dh-split-editor,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Ensure the printed publication container spans full width with no clipping */
+  #preview-content,
+  #preview-cover-page,
+  #preview-copyright-page,
+  #preview-credits-page,
+  .dh-preview-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    zoom: 1 !important;
+  }
+
+  /* Avoid breaking inside cards, blocks, and tables */
+  .dh-enemy-card,
+  .dh-env-card,
+  .dh-callout,
+  .dh-outcome-card,
+  .dh-read-aloud,
+  .dh-table-container,
+  .break-inside-avoid,
+  table,
+  tr,
+  figure {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Avoid orphan headings at bottom of pages */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
   .dh-book-viewport .dh-page {
     margin: 0 !important;
     border: none !important;
